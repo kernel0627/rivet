@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rivet-agent"
+version = "0.1.0"
+description = "A terminal-native coding agent built from first principles."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Rivet contributors" }]
+dependencies = [
+    "httpx>=0.27,<1",
+    "openai>=2,<3",
+    "prompt-toolkit>=3.0,<4",
+    "python-dotenv>=1,<2",
+    "pydantic>=2.10,<3",
+    "rich>=13,<15",
+    "tomli>=2; python_version < '3.11'",
+]
+
+[project.optional-dependencies]
+retrieval = ["qdrant-client>=1.12"]
+dev = [
+    "pytest>=8,<10",
+    "ruff>=0.9,<1",
+]
+
+[project.scripts]
+rivet = "rivet.interfaces.cli:main"
+rivet-headless = "rivet.interfaces.headless:main"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
