@@ -8,7 +8,7 @@ Checkpoint/Rewind、验证、代码智能、Trace 和终端交互。
 工具适配与可选 Reviewer 基线。2026-07-26 的本地离线验收结果为：
 
 ```text
-171 passed, 10 subtests passed
+161 passed, 10 subtests passed
 Ruff: all checks passed
 ```
 
@@ -289,6 +289,5 @@ src/rivet/
 └── interfaces/        CLI、Headless 和 TUI
 ```
 
-原始只读原型仍保留在 `rivet.models`、`rivet.runtime.harness` 等模块中，供旧测试和
-迁移参考；正式入口使用 `rivet.application`、`rivet.runtime.RuntimeEngine` 和
-`rivet.interfaces`。
+项目只保留正式 V1 实现。公共入口统一使用 `rivet.application`、
+`rivet.runtime.RuntimeEngine` 和 `rivet.interfaces`，不会同时维护另一套原型 API。

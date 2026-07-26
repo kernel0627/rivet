@@ -4,7 +4,6 @@ from rivet.context.budget import (
     HeuristicTokenEstimator,
     TokenEstimate,
 )
-from rivet.context.builder import ContextBuilder
 from rivet.context.compaction import (
     CompactionReport,
     SourceDisposition,
@@ -34,7 +33,6 @@ __all__ = [
     "CompactionReport",
     "ContextBudget",
     "ContextBudgetExceeded",
-    "ContextBuilder",
     "ContextEngine",
     "ContextEnvelope",
     "ContextPolicy",

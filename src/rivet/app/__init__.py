@@ -1,2 +1,0 @@
-"""Rivet application entry points."""
-

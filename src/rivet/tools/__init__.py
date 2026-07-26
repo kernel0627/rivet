@@ -11,12 +11,10 @@ from rivet.tools.executor import (
     PreparationOutcome,
     ToolExecutor,
 )
-from rivet.tools.registry import ToolRegistry as LegacyToolRegistry
 from rivet.tools.results import ToolResult
 
 __all__ = [
     "EffectClass",
-    "LegacyToolRegistry",
     "PermissionClass",
     "PreparationOutcome",
     "PreparedTool",
