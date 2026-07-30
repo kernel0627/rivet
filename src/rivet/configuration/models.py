@@ -21,6 +21,16 @@ class ModelConfig(StrictModel):
     max_retries: int = Field(default=2, ge=0, le=10)
     stream: bool = True
 
+    @field_validator("provider")
+    @classmethod
+    def normalize_provider(cls, value: str) -> str:
+        from rivet.model.providers import normalize_provider_name
+
+        normalized = normalize_provider_name(value)
+        if not normalized:
+            raise ValueError("provider must not be empty")
+        return normalized
+
 
 class RuntimeConfig(StrictModel):
     max_turns: int = Field(default=30, ge=1, le=1000)

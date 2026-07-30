@@ -3,6 +3,11 @@
 from rivet.model.errors import ModelErrorKind, ModelGatewayError
 from rivet.model.fake import ConditionalResponse, FakeModel, RequestCondition
 from rivet.model.gateway import ModelGateway
+from rivet.model.providers import (
+    ProviderProfile,
+    normalize_provider_name,
+    resolve_provider,
+)
 from rivet.model.types import (
     CancellationToken,
     Message,
@@ -29,8 +34,11 @@ __all__ = [
     "ModelGatewayError",
     "ModelRequest",
     "ModelResult",
+    "ProviderProfile",
     "RequestCondition",
     "ToolProposal",
     "ToolSchema",
     "Usage",
+    "normalize_provider_name",
+    "resolve_provider",
 ]

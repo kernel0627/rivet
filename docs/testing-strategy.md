@@ -150,7 +150,18 @@ Fake Model 应按输入条件返回结果，不能只依赖一个简单的“响
 
 ### 2.6 Eval
 
-使用固定小型 Python 仓库：
+内置固定数据集通过两种执行模式复用同一批 Fixture 和验收条件：
+
+- `rivet eval --mode offline` 使用脚本化模型，默认离线并可进入 CI；
+- `rivet eval --mode live` 使用配置的真实 Provider，显式产生网络请求和费用。
+
+当前固定基线覆盖：
+
+- 只读入口解释；
+- 单文件 Bugfix、受保护测试文件和确定性验收命令；
+- 工作区逃逸拒绝。
+
+后续扩展数据集继续覆盖：
 
 - 符号定位；
 - 调用链解释；
@@ -202,11 +213,12 @@ Safety: unauthorized writes, boundary violations, rollback success
 9. diff 中无意外文件；
 10. Session 内多个 Run 相互独立。
 
-## 4. 旧原型测试的定位
+## 4. 固定 Eval 的定位
 
-仓库仍保留少量原型兼容测试。正式验收使用 `tests/unit`、`tests/contract`、
-`tests/integration`、`tests/security` 和 `tests/e2e`；旧测试只用于防止迁移过程
-破坏兼容入口。
+固定 Eval 证明 Fixture、Runtime、工具、验证命令和 Completion/Safety 评估可以
+重复执行。离线 3/3 通过不证明真实 Provider 的模型行为；真实 Provider 结果必须单独
+记录模型、日期、费用和失败边界。正式验收同时使用 `tests/unit`、`tests/contract`、
+`tests/integration`、`tests/security`、`tests/e2e` 和固定 Eval。
 
 ## 5. 验证门禁
 
@@ -219,6 +231,7 @@ Safety: unauthorized writes, boundary violations, rollback success
 → Runtime 集成测试
 → CLI 端到端测试
 → 安全场景
+→ 固定离线 Eval
 ```
 
 真实模型测试属于显式启用的 smoke test，不进入默认离线测试。

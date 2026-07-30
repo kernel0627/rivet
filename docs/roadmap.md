@@ -137,6 +137,7 @@ RAG 只负责候选代码检索，不接管 Runtime。
 - Retrieval Eval；
 - Trajectory Eval；
 - Task Completion Eval；
+- 固定离线 Fixture、真实 Provider Eval 模式与结构化报告；
 - 安全回归测试；
 - 安装、文档和示例。
 

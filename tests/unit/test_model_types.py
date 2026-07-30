@@ -26,6 +26,7 @@ class ModelTypesTests(unittest.TestCase):
         )
         result = ModelResult(
             text="I will inspect the file.",
+            reasoning_content="I should inspect before answering.",
             tool_proposals=(proposal,),
             finish_reason="tool_calls",
             usage=Usage(input_tokens=10, output_tokens=4),
@@ -35,6 +36,7 @@ class ModelTypesTests(unittest.TestCase):
                     type=ModelEventType.RESPONSE_COMPLETED,
                     sequence=0,
                     text="I will inspect the file.",
+                    reasoning_content="I should inspect before answering.",
                     tool_proposals=(proposal,),
                 ),
             ),
@@ -44,6 +46,10 @@ class ModelTypesTests(unittest.TestCase):
 
         self.assertEqual(restored, result)
         self.assertEqual(restored.assistant_message.role, MessageRole.ASSISTANT)
+        self.assertEqual(
+            restored.assistant_message.reasoning_content,
+            "I should inspect before answering.",
+        )
         self.assertEqual(restored.tool_proposals[0].arguments["line"], 3)
 
     def test_tool_proposal_requires_json_object_arguments(self) -> None:
@@ -104,6 +110,12 @@ class ModelTypesTests(unittest.TestCase):
                 role=MessageRole.USER,
                 content="wrong",
                 tool_proposals=(proposal,),
+            )
+        with self.assertRaisesRegex(ValueError, "assistant"):
+            Message(
+                role=MessageRole.USER,
+                content="wrong",
+                reasoning_content="private state",
             )
 
 

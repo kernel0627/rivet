@@ -9,14 +9,22 @@ import sys
 from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 from rich.console import Console
 
 from rivet.application import build_application
 from rivet.code_intelligence.lsp import discover_python_server
 from rivet.configuration import load_config
+from rivet.evaluation import (
+    EvaluationRunner,
+    RivetEvalExecutor,
+    load_baseline,
+    load_jsonl,
+)
 from rivet.interfaces.headless import outcome_payload
 from rivet.interfaces.tui import run_interactive
+from rivet.model.providers import resolve_provider
 from rivet.observability import Redactor
 from rivet.state.layout import StateLayout
 from rivet.tools.builtins import (
@@ -116,11 +124,27 @@ def _parser() -> argparse.ArgumentParser:
 
     tools = commands.add_parser("tools", help="List built-in tools.")
     tools.add_argument("--json", action="store_true")
+
+    eval_parser = commands.add_parser(
+        "eval",
+        help="Run the fixed Rivet evaluation suite.",
+    )
+    eval_parser.add_argument("--dataset", type=Path)
+    eval_parser.add_argument(
+        "--mode",
+        choices=("offline", "live"),
+        default="offline",
+    )
+    eval_parser.add_argument("--config-workspace", default=".")
+    eval_parser.add_argument("--case", action="append", default=[])
+    eval_parser.add_argument("--timeout", type=float, default=120.0)
+    eval_parser.add_argument("--json", action="store_true")
     return parser
 
 
 def _common_runtime_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--workspace", default=".")
+    parser.add_argument("--provider")
     parser.add_argument("--model")
     parser.add_argument("--base-url")
     parser.add_argument("--max-turns", type=int)
@@ -131,6 +155,8 @@ async def _dispatch(args: argparse.Namespace) -> int:
         return _doctor(args)
     if args.command == "tools":
         return _tools(args)
+    if args.command == "eval":
+        return await _eval(args)
     overrides = _overrides(args)
     application = build_application(
         Path(args.workspace),
@@ -253,11 +279,18 @@ def _doctor(args: argparse.Namespace) -> int:
     loaded = load_config(root)
     layout = StateLayout.for_workspace(root, state_root=loaded.config.state.root)
     server = discover_python_server()
+    provider = resolve_provider(
+        loaded.config.model.provider,
+        base_url=loaded.config.model.base_url,
+    )
     payload = {
         "workspace": str(root),
         "workspace_exists": root.is_dir(),
         "state_root": str(layout.workspace_state_root),
         "state_outside_workspace": not layout.workspace_state_root.is_relative_to(root),
+        "provider": provider.name,
+        "provider_adapter": provider.adapter,
+        "provider_base_url_host": urlparse(provider.base_url).hostname,
         "model": loaded.config.model.model,
         "api_key_configured": bool(
             os.environ.get(loaded.config.model.api_key_env)
@@ -265,6 +298,11 @@ def _doctor(args: argparse.Namespace) -> int:
         "git": shutil.which("git"),
         "ripgrep": shutil.which("rg"),
         "python_lsp": list(server.command) if server else None,
+        "python_lsp_install_hint": (
+            None
+            if server
+            else 'python -m pip install -e ".[lsp]"'
+        ),
         "config_sources": [str(source) for source in loaded.sources],
     }
     if args.json:
@@ -307,6 +345,43 @@ def _tools(args: argparse.Namespace) -> int:
     return 0
 
 
+async def _eval(args: argparse.Namespace) -> int:
+    cases = (
+        load_jsonl(args.dataset.expanduser().resolve())
+        if args.dataset is not None
+        else load_baseline()
+    )
+    if args.case:
+        requested = set(args.case)
+        available = {case.id for case in cases}
+        missing = requested - available
+        if missing:
+            raise ValueError(
+                "unknown eval case(s): " + ", ".join(sorted(missing))
+            )
+        cases = [case for case in cases if case.id in requested]
+    executor = RivetEvalExecutor(
+        mode=args.mode,
+        config_workspace=Path(args.config_workspace),
+        timeout_seconds=args.timeout,
+    )
+    result = await EvaluationRunner(executor).run(cases)
+    payload = result.to_dict()
+    if args.json:
+        print(json.dumps(payload, ensure_ascii=False))
+    else:
+        for case in result.cases:
+            status = "PASS" if case.passed else "FAIL"
+            blockers = ", ".join(case.completion.blockers)
+            suffix = f" ({blockers})" if blockers else ""
+            print(f"{status} {case.case_id}{suffix}")
+        print(
+            f"pass_rate: {result.pass_rate:.1%} "
+            f"({sum(case.passed for case in result.cases)}/{len(result.cases)})"
+        )
+    return 0 if result.passed else 1
+
+
 def _print_outcome(run: Any, *, as_json: bool) -> None:
     if as_json:
         print(json.dumps(outcome_payload(run), ensure_ascii=False))
@@ -335,6 +410,8 @@ def _permission_map(values: Sequence[str]) -> dict[str, str]:
 def _overrides(args: argparse.Namespace) -> dict[str, Any]:
     result: dict[str, Any] = {}
     model: dict[str, Any] = {}
+    if getattr(args, "provider", None):
+        model["provider"] = args.provider
     if getattr(args, "model", None):
         model["model"] = args.model
     if getattr(args, "base_url", None):

@@ -383,6 +383,56 @@ class RuntimeEngineTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(event_types[-1], "run.completed")
         store.close()
 
+    async def test_reasoning_content_survives_tool_round_trip(self) -> None:
+        model = FakeModel.scripted(
+            [
+                ModelResult(
+                    reasoning_content="I need a workspace listing.",
+                    tool_proposals=(
+                        ToolProposal.from_arguments(
+                            tool_call_id="list-1",
+                            ordinal=0,
+                            name="list_files",
+                            arguments={"path": "."},
+                        ),
+                    ),
+                ),
+                ModelResult(text="The workspace is empty."),
+            ]
+        )
+        engine, store, budget = self.engine(model)
+        started = await engine.start_run(
+            StartRun(
+                workspace=self.workspace,
+                session=self.session,
+                objective="inspect the workspace",
+                budget=budget,
+            )
+        )
+
+        outcome = await engine.drive(started.run.run_id)
+
+        self.assertEqual(outcome.run.status, RunStatus.COMPLETED)
+        assistant = next(
+            message
+            for message in model.requests[1].messages
+            if message.tool_proposals
+        )
+        self.assertEqual(
+            assistant.reasoning_content,
+            "I need a workspace listing.",
+        )
+        completed_event = next(
+            event
+            for event in store.list_events(outcome.run.run_id)
+            if event.event_type == "model_call.completed"
+        )
+        self.assertEqual(
+            completed_event.payload["message"]["reasoning_content"],
+            "I need a workspace listing.",
+        )
+        store.close()
+
     async def test_tool_result_is_projected_into_next_model_call(self) -> None:
         (self.workspace_root / "main.py").write_text("print('hello')\n", encoding="utf-8")
         model = FakeModel.scripted(

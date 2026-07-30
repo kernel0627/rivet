@@ -5,7 +5,15 @@ from rivet.evaluation.assessments import (
     TaskCompletionAssessment,
     trajectory_from_events,
 )
-from rivet.evaluation.dataset import EvalCase, iter_by_tag, load_jsonl
+from rivet.evaluation.dataset import (
+    EvalCase,
+    EvalModelStep,
+    EvalToolCall,
+    iter_by_tag,
+    load_baseline,
+    load_jsonl,
+)
+from rivet.evaluation.executor import EvalMode, RivetEvalExecutor
 from rivet.evaluation.metrics import (
     RetrievalMetrics,
     TrajectoryMetrics,
@@ -27,7 +35,10 @@ __all__ = [
     "EvalCaseResult",
     "EvalExecution",
     "EvalExecutor",
+    "EvalMode",
+    "EvalModelStep",
     "EvalSuiteResult",
+    "EvalToolCall",
     "EvaluationRunner",
     "RetrievalMetrics",
     "SafetyAssessment",
@@ -35,9 +46,11 @@ __all__ = [
     "TaskCompletionAssessment",
     "TrajectoryMetrics",
     "iter_by_tag",
+    "load_baseline",
     "load_jsonl",
     "ndcg_at_k",
     "recall_at_k",
     "reciprocal_rank",
+    "RivetEvalExecutor",
     "trajectory_from_events",
 ]

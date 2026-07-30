@@ -1,14 +1,16 @@
 # Rivet
 
+[![CI](https://github.com/kernel0627/rivet/actions/workflows/ci.yml/badge.svg)](https://github.com/kernel0627/rivet/actions/workflows/ci.yml)
+
 Rivet 是一个 terminal-native、可扩展、可恢复、可评估的 Python Coding Agent
 Runtime。它负责模型之外的完整运行边界：Context、工具、权限、工作区安全、状态持久化、
 Checkpoint/Rewind、验证、代码智能、Trace 和终端交互。
 
 当前仓库已经实现 `PROJECT_DESIGN.md` 定义的单 Agent 正式 V1 主链，并提供 MCP
-工具适配与可选 Reviewer 基线。2026-07-26 的本地离线验收结果为：
+工具适配与可选 Reviewer 基线。2026-07-31 的本地离线验收结果为：
 
 ```text
-161 passed, 10 subtests passed
+176 passed, 10 subtests passed
 Ruff: all checks passed
 ```
 
@@ -52,21 +54,35 @@ cp .env.example .env
 打开 `.env`，至少填写：
 
 ```dotenv
-RIVET_MODEL=your-model
+RIVET_PROVIDER=deepseek
+RIVET_MODEL=deepseek-v4-flash
 RIVET_API_KEY=your-api-key
 ```
 
 Rivet 会自动读取所选工作区根目录的 `.env`；已经存在的系统环境变量优先于文件中的
 同名变量。
 
-OpenAI-compatible Provider 还可以设置：
+已知 Provider 会自动选择官方 API 地址：
+
+| `RIVET_PROVIDER` | 协议 Adapter | 默认地址 |
+|---|---|---|
+| `deepseek` | OpenAI Chat Completions | `https://api.deepseek.com` |
+| `openai` | OpenAI Chat Completions | `https://api.openai.com/v1` |
+| 其他名称 | OpenAI Chat Completions | 必须设置 `RIVET_BASE_URL` |
+
+`RIVET_BASE_URL` 只用于代理、自建服务、Beta 地址或其他 OpenAI-compatible API，
+并覆盖 Provider 的默认地址：
 
 ```dotenv
-RIVET_BASE_URL=https://api.openai.com/v1
+RIVET_BASE_URL=https://gateway.example.com/v1
 ```
 
 API Key 的环境变量名可通过 `RIVET_API_KEY_ENV` 修改。密钥不会进入配置快照、
 Event 或 Trace。
+
+Provider Profile 还会处理协议差异。DeepSeek 使用 `max_tokens`，OpenAI 使用
+`max_completion_tokens`；DeepSeek V4 thinking 工具调用返回的
+`reasoning_content` 会随 Assistant Tool Call 持久化，并在后续请求中完整回传。
 
 ### 运行
 
@@ -78,6 +94,10 @@ rivet run --workspace /path/to/project "修复失败测试并验证"
 
 成功启动后，CLI 会输出 Run 状态、模型回答、工具调用和验证结果；需要授权或人工处理
 时会输出 `run_id`、`pause_token` 与恢复条件。
+
+希望先观察完整流程时，可以运行
+[折扣计算 Bugfix 示例](examples/bugfix_task/README.md)。示例会引导你在临时目录中
+完成问题复现、Agent 修改、权限恢复和最终验收。
 
 ## 2. 使用方式
 
@@ -126,6 +146,7 @@ rivet checkpoints   列出 Run 的 Checkpoint
 rivet rewind        在无外部修改冲突时恢复 Checkpoint
 rivet doctor        检查配置、状态位置、Git、ripgrep 和 Python LSP
 rivet tools         列出模型可用的内置工具
+rivet eval          运行固定离线 Eval，或显式使用真实 Provider
 ```
 
 回退示例：
@@ -150,8 +171,8 @@ CLI overrides → environment → project config → user config → defaults
 
 ```toml
 [model]
-provider = "openai"
-model = "your-model"
+provider = "deepseek"
+model = "deepseek-v4-flash"
 stream = true
 
 [runtime]
@@ -181,6 +202,13 @@ blocking_severities = ["error", "warning"]
 
 ```bash
 python -m pip install -e ".[retrieval]"
+```
+
+启用 Python LSP definition、references、hover 和 diagnostics：
+
+```bash
+python -m pip install -e ".[lsp]"
+rivet doctor --workspace .
 ```
 
 未配置 Qdrant 时，Dense Retrieval 使用进程内确定性向量索引；Sparse 索引使用
@@ -261,12 +289,27 @@ diff 和证据；阻塞级问题会回到下一轮 Agent Context。
 ```bash
 python -m pip install -e ".[dev]"
 python -m pytest -q
-ruff check src tests
+rivet eval --mode offline
+ruff check src tests examples
 python -m pip wheel --no-build-isolation --no-deps . -w /tmp/rivet-wheel
 ```
 
 默认测试完全离线，不访问真实 Provider、Qdrant Server 或收费 API。OpenAI 和
 Qdrant 使用本地 fake/contract adapter 测试；真实服务连通性属于部署环境验收。
+
+仓库内置三个固定 Eval 场景，覆盖只读代码解释、带测试的单文件 Bugfix 和工作区逃逸
+拒绝。默认离线模式使用脚本化模型，适合 CI 和确定性回归：
+
+```bash
+rivet eval --mode offline --json
+```
+
+真实 Provider 模式复用同一批 Fixture 和验收条件，会产生网络请求和模型费用，需显式
+执行：
+
+```bash
+rivet eval --mode live --config-workspace . --json
+```
 
 ## 9. 目录
 
@@ -291,3 +334,25 @@ src/rivet/
 
 项目只保留正式 V1 实现。公共入口统一使用 `rivet.application`、
 `rivet.runtime.RuntimeEngine` 和 `rivet.interfaces`，不会同时维护另一套原型 API。
+
+## 10. 当前限制
+
+- 正式 V1 重点支持 Python 仓库；更多语言和 Tree-sitter 仍属于后续扩展；
+- 真实 Provider 的凭据、配额、网络和模型行为需要在部署环境单独验证；
+- Qdrant Adapter 已通过离线契约测试，TLS、认证和大规模容量仍需真实服务验收；
+- LSP 能力取决于本机已安装且兼容的 Python Language Server；
+- 大型仓库的索引时间、检索延迟、Token 和任务成功率尚未形成公开性能基线；
+- 当前 Runtime 是单 Agent 架构，Multi-Agent 与 A2A 不在 V1 范围内。
+
+这些限制的当前状态与后续路线见
+[实现状态与验收矩阵](docs/implementation-status.md) 和
+[开发路线](docs/roadmap.md)。
+
+## 11. 参与开发
+
+开发环境、架构约束和提交检查表见 [CONTRIBUTING.md](CONTRIBUTING.md)。
+Pull Request 至少需要通过 Python 测试矩阵、固定离线 Eval、Ruff 和 wheel 构建。
+
+## 12. License
+
+Rivet 使用 [MIT License](LICENSE)。

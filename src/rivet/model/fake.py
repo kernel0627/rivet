@@ -112,6 +112,14 @@ class FakeModel:
             provider_request_id=result.provider_request_id,
         )
         sequence += 1
+        if result.reasoning_content:
+            yield ModelEvent(
+                type=ModelEventType.REASONING_DELTA,
+                sequence=sequence,
+                provider_request_id=result.provider_request_id,
+                reasoning_delta=result.reasoning_content,
+            )
+            sequence += 1
         if result.text:
             yield ModelEvent(
                 type=ModelEventType.TEXT_DELTA,
@@ -143,6 +151,7 @@ class FakeModel:
             type=ModelEventType.RESPONSE_COMPLETED,
             sequence=sequence,
             provider_request_id=result.provider_request_id,
+            reasoning_content=result.reasoning_content,
             text=result.text,
             tool_proposals=result.tool_proposals,
             usage=result.usage,

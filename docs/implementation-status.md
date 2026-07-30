@@ -2,7 +2,7 @@
 
 状态：正式 V1 主链已实现  
 基线：`PROJECT_DESIGN.md`  
-最近验证：2026-07-26
+最近验证：2026-07-31
 
 ## 1. 当前结论
 
@@ -24,7 +24,8 @@ Rivet 已形成可运行的单 Agent Coding Runtime。正式入口具备：
 默认测试完全离线。本次验收：
 
 ```text
-pytest: 161 passed, 10 subtests passed
+pytest: 176 passed, 10 subtests passed
+offline eval: 3/3 passed
 ruff: all checks passed
 ```
 
@@ -37,7 +38,7 @@ ruff: all checks passed
 | M1 | 完成 | Permission、Patch、Command/Test、Git、Checkpoint/Rewind、Verifier、AST、取消与崩溃协调 |
 | M2 | 完成 | LSP、Context Budget、Compaction、Artifact、TUI、流式 Event |
 | M3 | 完成 | AST Chunk、SQLite Sparse、Dense、Qdrant、RRF、Reranker、增量索引、Retrieval Eval |
-| M4 | 完成 | Session 多 Run、Chat、Trace 查询、Eval、安装说明、安全回归 |
+| M4 | 完成 | Session 多 Run、Chat、Trace 查询、固定离线/真实 Provider Eval 入口、GitHub Actions、可运行示例、安装与贡献说明、安全回归 |
 | M5 基线 | 部分完成 | MCP Tool Adapter、Code Intelligence Service Core、Reviewer；具体 MCP transport、更多语言、Tree-sitter、Multi-Agent、A2A 保持扩展项 |
 
 M5 在设计中属于后续扩展，不是正式 V1 的发布阻塞项。
@@ -63,7 +64,8 @@ M5 在设计中属于后续扩展，不是正式 V1 的发布阻塞项。
 
 ### 已实现
 
-- OpenAI Chat Completions 完整响应与流式 Adapter；
+- DeepSeek/OpenAI Provider Profile 与 OpenAI Chat Completions 完整响应、流式 Adapter；
+- DeepSeek V4 thinking `reasoning_content` 多轮回传与 Provider token 参数差异；
 - Fake Model 条件驱动和脚本驱动；
 - SQLite State 与内容寻址 Artifact；
 - Qdrant `upsert/query_points/delete/count` Adapter；
@@ -104,14 +106,17 @@ integration
 ├── provider and budget pause
 ├── crash reconciliation
 ├── Session multi-Run context
-└── Checkpoint conflict and Rewind
+├── Checkpoint conflict and Rewind
+└── 固定 Eval Fixture → Runtime → 测试 → Completion/Safety
 
 security
 ├── workspace escape / symlink
 └── search option injection
 
 e2e
-├── CLI doctor / tools
+├── CLI doctor / tools / packaged offline Eval
+├── `python -m rivet` 子进程入口
+├── TUI 权限暂停 / 确认 / 恢复 / 修改 / 验证
 └── Headless schema and configuration failure
 ```
 

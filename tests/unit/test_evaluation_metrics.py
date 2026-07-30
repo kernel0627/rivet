@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from rivet.evaluation.dataset import load_jsonl
+from rivet.evaluation.dataset import EvalCase, load_baseline, load_jsonl
 from rivet.evaluation.metrics import (
     RetrievalMetrics,
     ndcg_at_k,
@@ -45,6 +45,25 @@ class EvaluationMetricsTests(unittest.TestCase):
 
             with self.assertRaisesRegex(ValueError, "duplicate"):
                 load_jsonl(path)
+
+    def test_packaged_baseline_is_non_empty_and_has_offline_scripts(self) -> None:
+        cases = load_baseline()
+
+        self.assertEqual(
+            {case.id for case in cases},
+            {"explain_entrypoint", "fix_discount", "reject_workspace_escape"},
+        )
+        self.assertTrue(all(case.fixture_files for case in cases))
+        self.assertTrue(all(case.offline_model for case in cases))
+
+    def test_eval_case_rejects_fixture_escape(self) -> None:
+        with self.assertRaisesRegex(ValueError, "workspace-relative"):
+            EvalCase(
+                id="escape",
+                objective="invalid fixture",
+                fixture="inline",
+                fixture_files={"../outside.py": "pass\n"},
+            )
 
 
 if __name__ == "__main__":

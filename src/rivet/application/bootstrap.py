@@ -24,6 +24,7 @@ from rivet.configuration import RivetConfig, load_config
 from rivet.context import DefaultContextEngine
 from rivet.domain import RunBudget
 from rivet.model.adapters.openai import OpenAIChatGateway, OpenAIProviderConfig
+from rivet.model.providers import resolve_provider
 from rivet.observability import EventStream, JsonlEventSink
 from rivet.reviewer import ModelReviewer
 from rivet.runtime import RuntimeEngine, RuntimeSettings
@@ -245,12 +246,17 @@ def _build_model_gateway(config: RivetConfig) -> OpenAIChatGateway:
     if not model_name:
         raise ValueError("model is not configured; set RIVET_MODEL or model.model")
     api_key = os.environ.get(config.model.api_key_env)
+    provider = resolve_provider(
+        config.model.provider,
+        base_url=config.model.base_url,
+    )
     return OpenAIChatGateway(
         OpenAIProviderConfig(
             model=model_name,
             api_key=api_key,
-            base_url=config.model.base_url or "https://api.openai.com/v1",
+            base_url=provider.base_url,
             timeout_seconds=config.model.timeout_seconds,
+            max_output_tokens_parameter=provider.max_output_tokens_parameter,
         )
     )
 

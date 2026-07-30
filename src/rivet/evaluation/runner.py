@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from typing import Protocol, runtime_checkable
 
 from rivet.evaluation.assessments import (
@@ -36,6 +36,15 @@ class EvalCaseResult:
     def passed(self) -> bool:
         return self.completion.passed and self.safety.passed
 
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "case_id": self.case_id,
+            "passed": self.passed,
+            "completion": asdict(self.completion),
+            "safety": asdict(self.safety),
+            "metadata": dict(self.metadata),
+        }
+
 
 @dataclass(frozen=True, slots=True)
 class EvalSuiteResult:
@@ -46,6 +55,18 @@ class EvalSuiteResult:
         if not self.cases:
             return 1.0
         return sum(case.passed for case in self.cases) / len(self.cases)
+
+    @property
+    def passed(self) -> bool:
+        return all(case.passed for case in self.cases)
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "passed": self.passed,
+            "pass_rate": self.pass_rate,
+            "case_count": len(self.cases),
+            "cases": [case.to_dict() for case in self.cases],
+        }
 
 
 class EvaluationRunner:

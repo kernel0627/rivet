@@ -924,6 +924,7 @@ class RuntimeEngine:
         try:
             return current, ModelResult(
                 text=completed.text,
+                reasoning_content=completed.reasoning_content,
                 tool_proposals=completed.tool_proposals,
                 finish_reason=completed.finish_reason,
                 usage=completed.usage or _last_stream_usage(events),
@@ -1739,6 +1740,7 @@ class RuntimeEngine:
         result: ToolResult,
         lease_token: str,
     ) -> tuple[Run, ToolResult]:
+        now = self.clock.now()
         execution = ToolExecutionRecord(
             execution_id=self.ids.new("tool_execution"),
             turn_id=turn.turn_id,
@@ -1755,7 +1757,8 @@ class RuntimeEngine:
             status=ToolExecutionStatus.FAILED,
             error=_tool_error_info(result),
             side_effect_state=DomainSideEffectState.NOT_STARTED,
-            ended_at=self.clock.now(),
+            started_at=now,
+            ended_at=now,
         )
         message = Message(
             role=MessageRole.TOOL,

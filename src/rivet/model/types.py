@@ -119,6 +119,7 @@ class Message:
 
     role: MessageRole
     content: str | None = None
+    reasoning_content: str | None = None
     name: str | None = None
     tool_call_id: str | None = None
     tool_proposals: tuple[ToolProposal, ...] = ()
@@ -138,11 +139,14 @@ class Message:
             raise ValueError("tool messages require tool_call_id")
         if self.tool_proposals and self.role is not MessageRole.ASSISTANT:
             raise ValueError("only assistant messages may contain tool proposals")
+        if self.reasoning_content is not None and self.role is not MessageRole.ASSISTANT:
+            raise ValueError("only assistant messages may contain reasoning content")
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "role": self.role.value,
             "content": self.content,
+            "reasoning_content": self.reasoning_content,
             "name": self.name,
             "tool_call_id": self.tool_call_id,
             "tool_proposals": [proposal.to_dict() for proposal in self.tool_proposals],
@@ -155,6 +159,7 @@ class Message:
         return cls(
             role=MessageRole(str(value["role"])),
             content=value.get("content"),
+            reasoning_content=value.get("reasoning_content"),
             name=value.get("name"),
             tool_call_id=value.get("tool_call_id"),
             tool_proposals=tuple(
@@ -260,6 +265,7 @@ class Usage:
 
 class ModelEventType(str, Enum):
     RESPONSE_STARTED = "response.started"
+    REASONING_DELTA = "reasoning.delta"
     TEXT_DELTA = "text.delta"
     TOOL_CALL_DELTA = "tool_call.delta"
     USAGE_UPDATED = "usage.updated"
@@ -272,6 +278,8 @@ class ModelEvent:
     type: ModelEventType
     sequence: int
     provider_request_id: str | None = None
+    reasoning_delta: str | None = None
+    reasoning_content: str | None = None
     text_delta: str | None = None
     tool_call_id: str | None = None
     tool_ordinal: int | None = None
@@ -296,6 +304,8 @@ class ModelEvent:
             "type": self.type.value,
             "sequence": self.sequence,
             "provider_request_id": self.provider_request_id,
+            "reasoning_delta": self.reasoning_delta,
+            "reasoning_content": self.reasoning_content,
             "text_delta": self.text_delta,
             "tool_call_id": self.tool_call_id,
             "tool_ordinal": self.tool_ordinal,
@@ -316,6 +326,8 @@ class ModelEvent:
             type=ModelEventType(str(value["type"])),
             sequence=int(value["sequence"]),
             provider_request_id=value.get("provider_request_id"),
+            reasoning_delta=value.get("reasoning_delta"),
+            reasoning_content=value.get("reasoning_content"),
             text_delta=value.get("text_delta"),
             tool_call_id=value.get("tool_call_id"),
             tool_ordinal=(
@@ -430,6 +442,7 @@ class ModelRequest:
 @dataclass(frozen=True)
 class ModelResult:
     text: str | None = None
+    reasoning_content: str | None = None
     tool_proposals: tuple[ToolProposal, ...] = ()
     finish_reason: str | None = None
     usage: Usage = field(default_factory=Usage)
@@ -453,12 +466,14 @@ class ModelResult:
         return Message(
             role=MessageRole.ASSISTANT,
             content=self.text,
+            reasoning_content=self.reasoning_content,
             tool_proposals=self.tool_proposals,
         )
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "text": self.text,
+            "reasoning_content": self.reasoning_content,
             "tool_proposals": [proposal.to_dict() for proposal in self.tool_proposals],
             "finish_reason": self.finish_reason,
             "usage": self.usage.to_dict(),
@@ -471,6 +486,7 @@ class ModelResult:
     def from_dict(cls, value: Mapping[str, Any]) -> ModelResult:
         return cls(
             text=value.get("text"),
+            reasoning_content=value.get("reasoning_content"),
             tool_proposals=tuple(
                 ToolProposal.from_dict(item)
                 for item in value.get("tool_proposals", ())

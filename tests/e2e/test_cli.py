@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import io
 import json
+import subprocess
+import sys
 import tempfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
@@ -23,6 +25,13 @@ class CliTests(unittest.TestCase):
             self.assertEqual(code, 0)
             self.assertTrue(payload["workspace_exists"])
             self.assertTrue(payload["state_outside_workspace"])
+            if payload["python_lsp"] is None:
+                self.assertIn(
+                    ".[lsp]",
+                    payload["python_lsp_install_hint"],
+                )
+            else:
+                self.assertIsNone(payload["python_lsp_install_hint"])
 
             output = io.StringIO()
             with redirect_stdout(output):
@@ -44,6 +53,30 @@ class CliTests(unittest.TestCase):
             self.assertEqual(payload["schema_version"], 1)
             self.assertFalse(payload["ok"])
             self.assertIn("error", payload)
+
+    def test_offline_eval_command_runs_packaged_baseline(self) -> None:
+        output = io.StringIO()
+        with redirect_stdout(output):
+            code = cli_main(["eval", "--mode", "offline", "--json"])
+
+        payload = json.loads(output.getvalue())
+        self.assertEqual(code, 0)
+        self.assertTrue(payload["passed"])
+        self.assertEqual(payload["case_count"], 3)
+        self.assertEqual(payload["pass_rate"], 1.0)
+
+    def test_python_module_entrypoint_runs_in_a_subprocess(self) -> None:
+        completed = subprocess.run(
+            [sys.executable, "-m", "rivet", "tools", "--json"],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        tools = json.loads(completed.stdout)
+        self.assertIn("read_file", {tool["name"] for tool in tools})
 
 
 if __name__ == "__main__":

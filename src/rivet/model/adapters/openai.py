@@ -5,7 +5,7 @@ import inspect
 from collections.abc import AsyncIterator, Awaitable, Mapping
 from contextlib import suppress
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Literal
 from urllib.parse import urlparse
 
 from rivet.model.errors import (
@@ -41,6 +41,10 @@ class OpenAIProviderConfig:
     organization: str | None = None
     project: str | None = None
     max_safe_error_chars: int = 2_000
+    max_output_tokens_parameter: Literal[
+        "max_completion_tokens",
+        "max_tokens",
+    ] = "max_completion_tokens"
 
     def __post_init__(self) -> None:
         if not self.model.strip():
@@ -49,6 +53,11 @@ class OpenAIProviderConfig:
             raise ValueError("OpenAI timeout_seconds must be positive")
         if self.max_safe_error_chars <= 0:
             raise ValueError("max_safe_error_chars must be positive")
+        if self.max_output_tokens_parameter not in {
+            "max_completion_tokens",
+            "max_tokens",
+        }:
+            raise ValueError("unsupported max output tokens parameter")
         _validate_base_url(
             self.base_url,
             allow_insecure_loopback=self.allow_insecure_loopback,
@@ -99,6 +108,8 @@ def _message_payload(message: Message) -> dict[str, Any]:
         payload["name"] = message.name
     if message.tool_call_id:
         payload["tool_call_id"] = message.tool_call_id
+    if message.reasoning_content is not None:
+        payload["reasoning_content"] = message.reasoning_content
     if message.tool_proposals:
         payload["tool_calls"] = [
             {
@@ -271,7 +282,9 @@ class OpenAIChatGateway:
             payload["tools"] = [_tool_payload(schema) for schema in request.tools]
             payload["tool_choice"] = "auto"
         if request.max_output_tokens is not None:
-            payload["max_completion_tokens"] = request.max_output_tokens
+            payload[self.config.max_output_tokens_parameter] = (
+                request.max_output_tokens
+            )
         if request.temperature is not None:
             payload["temperature"] = request.temperature
         if stream:
@@ -337,6 +350,15 @@ class OpenAIChatGateway:
                     ModelErrorKind.PROTOCOL,
                     "provider returned unsupported assistant content",
                 )
+            reasoning_content = _get(raw_message, "reasoning_content")
+            if reasoning_content is not None and not isinstance(
+                reasoning_content,
+                str,
+            ):
+                raise ModelGatewayError(
+                    ModelErrorKind.PROTOCOL,
+                    "provider returned unsupported reasoning content",
+                )
             proposals = _parse_tool_proposals(_get(raw_message, "tool_calls"))
             provider_request_id = _get(response, "id")
             usage = _parse_usage(_get(response, "usage"))
@@ -356,6 +378,7 @@ class OpenAIChatGateway:
                         str(provider_request_id) if provider_request_id else None
                     ),
                     text=text,
+                    reasoning_content=reasoning_content,
                     tool_proposals=proposals,
                     usage=usage,
                     finish_reason=str(finish_reason) if finish_reason else None,
@@ -363,6 +386,7 @@ class OpenAIChatGateway:
             )
             return ModelResult(
                 text=text,
+                reasoning_content=reasoning_content,
                 tool_proposals=proposals,
                 finish_reason=str(finish_reason) if finish_reason else None,
                 usage=usage,
@@ -384,6 +408,7 @@ class OpenAIChatGateway:
         stream = None
         sequence = 0
         provider_request_id: str | None = None
+        reasoning_parts: list[str] = []
         text_parts: list[str] = []
         tool_parts: dict[int, dict[str, str]] = {}
         usage = Usage()
@@ -433,6 +458,16 @@ class OpenAIChatGateway:
                 delta = _get(choice, "delta")
                 if delta is None:
                     continue
+                reasoning_delta = _get(delta, "reasoning_content")
+                if isinstance(reasoning_delta, str) and reasoning_delta:
+                    reasoning_parts.append(reasoning_delta)
+                    yield ModelEvent(
+                        type=ModelEventType.REASONING_DELTA,
+                        sequence=sequence,
+                        provider_request_id=provider_request_id,
+                        reasoning_delta=reasoning_delta,
+                    )
+                    sequence += 1
                 text_delta = _get(delta, "content")
                 if isinstance(text_delta, str) and text_delta:
                     text_parts.append(text_delta)
@@ -482,6 +517,7 @@ class OpenAIChatGateway:
                 )
                 for ordinal, parts in sorted(tool_parts.items())
             )
+            reasoning_content = "".join(reasoning_parts) or None
             text = "".join(text_parts) or None
             if text is None and not proposals:
                 raise ModelGatewayError(
@@ -492,6 +528,7 @@ class OpenAIChatGateway:
                 type=ModelEventType.RESPONSE_COMPLETED,
                 sequence=sequence,
                 provider_request_id=provider_request_id,
+                reasoning_content=reasoning_content,
                 text=text,
                 tool_proposals=proposals,
                 usage=usage,
