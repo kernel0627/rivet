@@ -1,0 +1,37 @@
+[
+  {
+    "query": "permission resume prepared digest",
+    "expected_paths": [
+      "src/rivet/runtime/engine.py",
+      "src/rivet/tools/executor.py"
+    ]
+  },
+  {
+    "query": "workspace index refresh deleted files",
+    "expected_paths": [
+      "src/rivet/code_intelligence/indexer.py"
+    ]
+  },
+  {
+    "query": "DeepSeek reasoning content max tokens",
+    "expected_paths": [
+      "src/rivet/model/adapters/openai.py",
+      "src/rivet/model/providers.py",
+      "tests/contract/test_model_openai_adapter.py"
+    ]
+  },
+  {
+    "query": "atomic checkpoint rewind conflict",
+    "expected_paths": [
+      "src/rivet/workspace/checkpoint.py",
+      "src/rivet/workspace/transaction.py"
+    ]
+  },
+  {
+    "query": "eval report output schema",
+    "expected_paths": [
+      "src/rivet/interfaces/cli.py",
+      "src/rivet/evaluation/runner.py"
+    ]
+  }
+]

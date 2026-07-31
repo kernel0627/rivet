@@ -10,6 +10,21 @@ from rivet.configuration.loader import ConfigurationError, load_config
 
 
 class ConfigurationTests(unittest.TestCase):
+    def test_retrieval_defaults_to_sparse_without_hash_dense(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+
+            loaded = load_config(
+                root,
+                user_config_path=root / "missing.toml",
+                environ={},
+            )
+
+            self.assertFalse(loaded.config.retrieval.enabled)
+            self.assertTrue(loaded.config.retrieval.sparse)
+            self.assertFalse(loaded.config.retrieval.dense)
+            self.assertTrue(loaded.config.retrieval.reranker)
+
     def test_workspace_dotenv_is_loaded_without_overriding_process_environment(
         self,
     ) -> None:

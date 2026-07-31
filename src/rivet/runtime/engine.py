@@ -76,6 +76,7 @@ from rivet.runtime.contracts import (
     RuntimeSettings,
     StartRun,
 )
+from rivet.runtime.cursor import decode_cursor, encode_cursor, tool_cursor
 from rivet.runtime.policy import DefaultStopPolicy
 from rivet.runtime.projection import project_events
 from rivet.runtime.repetition import (
@@ -253,7 +254,7 @@ class RuntimeEngine:
         )
         published_after = self._last_sequence(run.run_id)
         try:
-            cursor = _decode_cursor(run.resume_cursor)
+            cursor = decode_cursor(run.resume_cursor)
             turn = self._active_turn(run)
             turn_update: Turn | None = None
             if turn is not None and turn.status is TurnStatus.WAITING:
@@ -498,7 +499,7 @@ class RuntimeEngine:
                 active_turn_id=None,
                 stop_decision=decision,
                 pause_token=self.ids.new("pause"),
-                resume_cursor=_encode_cursor({"kind": "new_turn"}),
+                resume_cursor=encode_cursor({"kind": "new_turn"}),
                 revision=recovering.revision + 1,
                 updated_at=self.clock.now(),
             )
@@ -1077,7 +1078,7 @@ class RuntimeEngine:
                     action_key=repetition.action_key,
                     prior_count=repetition.prior_consecutive_count,
                 )
-                cursor = _tool_cursor(
+                cursor = tool_cursor(
                     current_turn,
                     model_call,
                     proposals,
@@ -1119,7 +1120,7 @@ class RuntimeEngine:
                         tool_name=prepared.name,
                         prepared_digest=prepared.prepared_digest,
                     )
-                    cursor = _tool_cursor(
+                    cursor = tool_cursor(
                         waiting_turn,
                         model_call,
                         proposals,
@@ -2519,7 +2520,7 @@ class RuntimeEngine:
             active_turn_id=None if clear_active_turn else run.active_turn_id,
             stop_decision=decision,
             pause_token=pause_token,
-            resume_cursor=_encode_cursor(cursor),
+            resume_cursor=encode_cursor(cursor),
             revision=run.revision + 1,
             updated_at=self.clock.now(),
         )
@@ -2784,39 +2785,6 @@ def _decision_context(
     from rivet.runtime.policy import DecisionContext
 
     return DecisionContext(run=run, model_result=result, tool_results=tool_results)
-
-
-def _encode_cursor(value: Mapping[str, Any]) -> str:
-    return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
-
-
-def _decode_cursor(value: str | None) -> dict[str, Any]:
-    if not value:
-        return {"kind": "new_turn"}
-    parsed = json.loads(value)
-    if not isinstance(parsed, dict):
-        raise RuntimeCommandError("resume cursor is invalid")
-    return parsed
-
-
-def _tool_cursor(
-    turn: Turn,
-    model_call: ModelCallRecord,
-    proposals: Sequence[ToolProposal],
-    index: int,
-    context_digest: str,
-    execution: ToolExecutionRecord,
-) -> dict[str, Any]:
-    return {
-        "kind": "tool_batch",
-        "turn_id": turn.turn_id,
-        "model_call_id": model_call.model_call_id,
-        "proposals": [proposal.to_dict() for proposal in proposals],
-        "next_index": index,
-        "context_digest": context_digest,
-        "execution_id": execution.execution_id,
-        "prepared_digest": execution.prepared_digest,
-    }
 
 
 def _domain_effect(value: EffectClass) -> DomainEffectClass:

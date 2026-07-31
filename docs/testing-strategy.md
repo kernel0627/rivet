@@ -156,11 +156,17 @@ Fake Model 应按输入条件返回结果，不能只依赖一个简单的“响
 - `rivet eval --mode live` 使用配置的真实 Provider，显式产生网络请求和费用。
 - `rivet eval --mode offline --repeat 10 --json` 重复执行固定场景并输出
   min、mean、median、P95、max 和逐场景耗时。
+- `rivet eval --output report.json` 以原子写入保存带 Schema 版本的脱敏 JSON 报告，
+  避免临时 Eval 工作区清理后只剩终端文本。
 
 当前固定基线覆盖：
 
 - 只读入口解释；
+- 符号搜索、定义定位与并行读取直接调用者；
 - 单文件 Bugfix、受保护测试文件和确定性验收命令；
+- 跨文件 Bugfix、多文件 Checkpoint/Patch 与受保护测试文件；
+- 新增回归测试文件并执行；
+- 写权限暂停、prepared digest 授权、同一 Run 恢复且写入不重复；
 - 工作区逃逸拒绝。
 
 后续扩展数据集继续覆盖：
@@ -218,7 +224,7 @@ Safety: unauthorized writes, boundary violations, rollback success
 ## 4. 固定 Eval 的定位
 
 固定 Eval 证明 Fixture、Runtime、工具、验证命令和 Completion/Safety 评估可以
-重复执行。离线 3/3 通过不证明真实 Provider 的模型行为；真实 Provider 结果必须单独
+重复执行。离线 8/8 通过不证明真实 Provider 的模型行为；真实 Provider 结果必须单独
 记录模型、日期、费用和失败边界。正式验收同时使用 `tests/unit`、`tests/contract`、
 `tests/integration`、`tests/security`、`tests/e2e` 和固定 Eval。
 

@@ -10,7 +10,7 @@ Checkpoint/Rewind、验证、代码智能、Trace 和终端交互。
 工具适配与可选 Reviewer 基线。2026-07-31 的本地离线验收结果为：
 
 ```text
-187 passed, 10 subtests passed
+194 passed, 10 subtests passed
 Ruff: all checks passed
 ```
 
@@ -189,7 +189,7 @@ network_access = "ask"
 [retrieval]
 enabled = true
 sparse = true
-dense = true
+dense = false  # Hash Dense 仅用于实验；接入真实 Embedding 后再显式开启
 reranker = true
 # qdrant_url = "http://127.0.0.1:6333"
 
@@ -297,8 +297,9 @@ python -m pip wheel --no-build-isolation --no-deps . -w /tmp/rivet-wheel
 默认测试完全离线，不访问真实 Provider、Qdrant Server 或收费 API。OpenAI 和
 Qdrant 使用本地 fake/contract adapter 测试；真实服务连通性属于部署环境验收。
 
-仓库内置三个固定 Eval 场景，覆盖只读代码解释、带测试的单文件 Bugfix 和工作区逃逸
-拒绝。默认离线模式使用脚本化模型，适合 CI 和确定性回归：
+仓库内置八个固定 Eval 场景，覆盖只读解释、符号定位、调用链、单文件与跨文件
+Bugfix、新增测试、权限暂停恢复，以及工作区逃逸拒绝。默认离线模式使用脚本化模型，
+适合 CI 和确定性回归：
 
 ```bash
 rivet eval --mode offline --json
@@ -311,6 +312,13 @@ rivet eval --mode offline --json
 rivet eval --mode live --config-workspace . --json
 ```
 
+需要保留可复查的脱敏结构化证据时，使用 `--output`。报告以 `0600` 权限原子写入，
+包含 Schema 版本、逐 Case 结果、实际 Provider/模型和错误分类，不包含 API Key：
+
+```bash
+rivet eval --mode offline --output reports/eval.json --json
+```
+
 需要观察本地 Runtime 和 Eval 基础设施的性能回退时，可以重复执行同一套离线场景：
 
 ```bash
@@ -319,6 +327,16 @@ rivet eval --mode offline --repeat 10 --json
 
 当前机器的首次测量方法与结果见
 [本地性能基线](docs/performance-baseline.md)。
+
+对真实仓库运行离线索引与检索基准：
+
+```bash
+rivet benchmark-retrieval --workspace . --repeat 20 \
+  --output /tmp/rivet-retrieval.json
+```
+
+当前 Rivet 仓库的规模、索引耗时、Sparse/Dense/Hybrid Top-5 命中和延迟见
+[检索性能基线](docs/retrieval-baseline.md)。
 
 ## 9. 目录
 
@@ -350,7 +368,8 @@ src/rivet/
 - 真实 Provider 的凭据、配额、网络和模型行为需要在部署环境单独验证；
 - Qdrant Adapter 已通过离线契约测试，TLS、认证和大规模容量仍需真实服务验收；
 - LSP 能力取决于本机已安装且兼容的 Python Language Server；
-- 大型仓库的索引时间、检索延迟、Token 和任务成功率尚未形成公开性能基线；
+- 当前已有 Rivet 中型仓库的离线索引与检索基线；更大型仓库、Token 和真实任务成功率
+  尚未形成公开基线；
 - 当前 Runtime 是单 Agent 架构，Multi-Agent 与 A2A 不在 V1 范围内。
 
 这些限制的当前状态与后续路线见

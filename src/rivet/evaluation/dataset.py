@@ -42,6 +42,7 @@ class EvalCase(BaseModel):
     expected_final_contains: tuple[str, ...] = ()
     relevant_chunks: tuple[str, ...] = ()
     tags: tuple[str, ...] = ()
+    resume_permissions: tuple[str, ...] = ()
     fixture_files: dict[str, str] = Field(default_factory=dict)
     offline_model: tuple[EvalModelStep, ...] = ()
 
@@ -65,6 +66,27 @@ class EvalCase(BaseModel):
             total_chars += len(content)
         if total_chars > 2_000_000:
             raise ValueError("inline eval fixture exceeds 2,000,000 characters")
+        return values
+
+    @field_validator("resume_permissions", mode="after")
+    @classmethod
+    def validate_resume_permissions(cls, values: tuple[str, ...]) -> tuple[str, ...]:
+        allowed = {
+            "safe_read",
+            "sensitive_read",
+            "workspace_write",
+            "process_execute",
+            "network_access",
+            "external_write",
+            "destructive",
+        }
+        unknown = set(values) - allowed
+        if unknown:
+            raise ValueError(
+                "unknown resume permission(s): " + ", ".join(sorted(unknown))
+            )
+        if len(set(values)) != len(values):
+            raise ValueError("resume permissions must be unique")
         return values
 
 

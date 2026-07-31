@@ -63,7 +63,7 @@ class ContextConfig(StrictModel):
 class RetrievalConfig(StrictModel):
     enabled: bool = False
     sparse: bool = True
-    dense: bool = True
+    dense: bool = False
     reranker: bool = True
     top_k_sparse: int = Field(default=30, ge=1, le=1000)
     top_k_dense: int = Field(default=30, ge=1, le=1000)

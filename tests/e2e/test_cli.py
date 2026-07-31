@@ -55,39 +55,108 @@ class CliTests(unittest.TestCase):
             self.assertIn("error", payload)
 
     def test_offline_eval_command_runs_packaged_baseline(self) -> None:
-        output = io.StringIO()
-        with redirect_stdout(output):
-            code = cli_main(["eval", "--mode", "offline", "--json"])
+        with tempfile.TemporaryDirectory() as directory:
+            report = Path(directory) / "reports" / "offline.json"
+            output = io.StringIO()
+            with redirect_stdout(output):
+                code = cli_main(
+                    [
+                        "eval",
+                        "--mode",
+                        "offline",
+                        "--output",
+                        str(report),
+                        "--json",
+                    ]
+                )
 
-        payload = json.loads(output.getvalue())
-        self.assertEqual(code, 0)
-        self.assertTrue(payload["passed"])
-        self.assertEqual(payload["case_count"], 3)
-        self.assertEqual(payload["pass_rate"], 1.0)
+            payload = json.loads(output.getvalue())
+            self.assertEqual(code, 0)
+            self.assertEqual(payload["schema_version"], 1)
+            self.assertTrue(payload["passed"])
+            self.assertEqual(payload["case_count"], 8)
+            self.assertEqual(payload["pass_rate"], 1.0)
+            self.assertEqual(
+                payload["cases"][0]["metadata"]["provider"],
+                "scripted_fake",
+            )
+            self.assertEqual(
+                payload["cases"][0]["metadata"]["model"],
+                "scripted_eval",
+            )
+            self.assertEqual(json.loads(report.read_text(encoding="utf-8")), payload)
 
     def test_offline_eval_can_report_repeated_performance_baseline(self) -> None:
-        output = io.StringIO()
-        with redirect_stdout(output):
-            code = cli_main(
-                [
-                    "eval",
-                    "--mode",
-                    "offline",
-                    "--case",
-                    "explain_entrypoint",
-                    "--repeat",
-                    "2",
-                    "--json",
-                ]
-            )
+        with tempfile.TemporaryDirectory() as directory:
+            report = Path(directory) / "benchmark.json"
+            output = io.StringIO()
+            with redirect_stdout(output):
+                code = cli_main(
+                    [
+                        "eval",
+                        "--mode",
+                        "offline",
+                        "--case",
+                        "explain_entrypoint",
+                        "--repeat",
+                        "2",
+                        "--output",
+                        str(report),
+                        "--json",
+                    ]
+                )
 
-        payload = json.loads(output.getvalue())
-        self.assertEqual(code, 0)
-        self.assertTrue(payload["passed"])
-        self.assertEqual(payload["repeat"], 2)
-        self.assertEqual(len(payload["runs"]), 2)
-        self.assertEqual(payload["cases"]["explain_entrypoint"]["passed"], 2)
-        self.assertIn("p95", payload["timing_ms"])
+            payload = json.loads(output.getvalue())
+            self.assertEqual(code, 0)
+            self.assertTrue(payload["passed"])
+            self.assertEqual(payload["repeat"], 2)
+            self.assertEqual(len(payload["runs"]), 2)
+            self.assertEqual(payload["cases"]["explain_entrypoint"]["passed"], 2)
+            self.assertIn("p95", payload["timing_ms"])
+            self.assertEqual(json.loads(report.read_text(encoding="utf-8")), payload)
+
+    def test_retrieval_benchmark_writes_structured_report(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "service.py").write_text(
+                "def locate_invoice():\n    return 1\n",
+                encoding="utf-8",
+            )
+            queries = root / "queries.json"
+            queries.write_text(
+                json.dumps(
+                    [
+                        {
+                            "query": "locate invoice",
+                            "expected_paths": ["service.py"],
+                        }
+                    ]
+                ),
+                encoding="utf-8",
+            )
+            report = root / "report.json"
+            output = io.StringIO()
+            with redirect_stdout(output):
+                code = cli_main(
+                    [
+                        "benchmark-retrieval",
+                        "--workspace",
+                        str(root),
+                        "--queries",
+                        str(queries),
+                        "--repeat",
+                        "2",
+                        "--output",
+                        str(report),
+                        "--json",
+                    ]
+                )
+
+            payload = json.loads(output.getvalue())
+            self.assertEqual(code, 0)
+            self.assertTrue(payload["passed"])
+            self.assertEqual(payload["workspace"]["python_files"], 1)
+            self.assertEqual(json.loads(report.read_text(encoding="utf-8")), payload)
 
     def test_python_module_entrypoint_runs_in_a_subprocess(self) -> None:
         completed = subprocess.run(

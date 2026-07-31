@@ -62,6 +62,7 @@ class EvalSuiteResult:
 
     def to_dict(self) -> dict[str, object]:
         return {
+            "schema_version": 1,
             "passed": self.passed,
             "pass_rate": self.pass_rate,
             "case_count": len(self.cases),

@@ -6,6 +6,7 @@ import json
 import os
 import shutil
 import sys
+import tempfile
 from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
@@ -14,6 +15,10 @@ from urllib.parse import urlparse
 from rich.console import Console
 
 from rivet.application import build_application
+from rivet.code_intelligence.benchmark import (
+    benchmark_retrieval,
+    load_benchmark_queries,
+)
 from rivet.code_intelligence.lsp import discover_python_server
 from rivet.configuration import load_config
 from rivet.evaluation import (
@@ -145,7 +150,31 @@ def _parser() -> argparse.ArgumentParser:
         default=1,
         help="Repeat the suite and report timing statistics.",
     )
+    eval_parser.add_argument(
+        "--output",
+        type=Path,
+        help="Atomically save the structured JSON report to this path.",
+    )
     eval_parser.add_argument("--json", action="store_true")
+
+    retrieval_benchmark = commands.add_parser(
+        "benchmark-retrieval",
+        help="Benchmark offline indexing and retrieval on a real workspace.",
+    )
+    retrieval_benchmark.add_argument("--workspace", default=".")
+    retrieval_benchmark.add_argument("--queries", type=Path)
+    retrieval_benchmark.add_argument(
+        "--repeat",
+        type=_positive_int,
+        default=20,
+    )
+    retrieval_benchmark.add_argument(
+        "--limit",
+        type=_positive_int,
+        default=5,
+    )
+    retrieval_benchmark.add_argument("--output", type=Path)
+    retrieval_benchmark.add_argument("--json", action="store_true")
     return parser
 
 
@@ -171,6 +200,8 @@ async def _dispatch(args: argparse.Namespace) -> int:
         return _tools(args)
     if args.command == "eval":
         return await _eval(args)
+    if args.command == "benchmark-retrieval":
+        return _benchmark_retrieval(args)
     overrides = _overrides(args)
     application = build_application(
         Path(args.workspace),
@@ -387,6 +418,7 @@ async def _eval(args: argparse.Namespace) -> int:
             repeat=args.repeat,
         )
         payload = benchmark.to_dict()
+        _write_json_report(args.output, payload)
         if args.json:
             print(json.dumps(payload, ensure_ascii=False))
         else:
@@ -405,6 +437,7 @@ async def _eval(args: argparse.Namespace) -> int:
 
     result = await runner.run(cases)
     payload = result.to_dict()
+    _write_json_report(args.output, payload)
     if args.json:
         print(json.dumps(payload, ensure_ascii=False))
     else:
@@ -418,6 +451,85 @@ async def _eval(args: argparse.Namespace) -> int:
             f"({sum(case.passed for case in result.cases)}/{len(result.cases)})"
         )
     return 0 if result.passed else 1
+
+
+def _write_json_report(
+    output: Path | None,
+    payload: dict[str, object],
+) -> None:
+    if output is None:
+        return
+    target = output.expanduser().resolve(strict=False)
+    target.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+    content = (
+        json.dumps(
+            payload,
+            ensure_ascii=False,
+            allow_nan=False,
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n"
+    ).encode("utf-8")
+    descriptor, temporary_name = tempfile.mkstemp(
+        prefix=f".{target.name}.rivet-",
+        dir=target.parent,
+    )
+    temporary = Path(temporary_name)
+    try:
+        os.fchmod(descriptor, 0o600)
+        with os.fdopen(descriptor, "wb") as handle:
+            handle.write(content)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, target)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+def _benchmark_retrieval(args: argparse.Namespace) -> int:
+    workspace = Path(args.workspace).expanduser().resolve()
+    queries_path = (
+        args.queries.expanduser().resolve()
+        if args.queries is not None
+        else workspace / "benchmarks" / "retrieval_queries.json"
+    )
+    payload = benchmark_retrieval(
+        workspace,
+        load_benchmark_queries(queries_path),
+        repeat=args.repeat,
+        limit=args.limit,
+    )
+    _write_json_report(args.output, payload)
+    if args.json:
+        print(json.dumps(payload, ensure_ascii=False))
+    else:
+        workspace_metrics = payload["workspace"]
+        index_metrics = payload["index"]
+        retrieval_metrics = payload["retrieval"]
+        assert isinstance(workspace_metrics, dict)
+        assert isinstance(index_metrics, dict)
+        assert isinstance(retrieval_metrics, dict)
+        print(
+            "workspace: "
+            f"{workspace_metrics['python_files']} Python files, "
+            f"{workspace_metrics['python_lines']} lines"
+        )
+        print(
+            "index: "
+            f"{index_metrics['cold_ms']} ms cold, "
+            f"{index_metrics['chunk_count']} chunks, "
+            f"{index_metrics['peak_memory_mb']} MiB peak"
+        )
+        for name, metrics in retrieval_metrics.items():
+            assert isinstance(metrics, dict)
+            timing = metrics["timing_ms"]
+            assert isinstance(timing, dict)
+            print(
+                f"{name}: hit_rate={metrics['hit_rate']:.1%}, "
+                f"median={timing['median']} ms, p95={timing['p95']} ms"
+            )
+    return 0 if payload["passed"] else 1
 
 
 def _print_outcome(run: Any, *, as_json: bool) -> None:

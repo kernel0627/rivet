@@ -65,11 +65,36 @@ class RivetEvalExecutor:
                     state_root=state_root,
                 )
                 outcome = await application.service.run(case.objective)
+                permission_resumes = 0
+                while (
+                    outcome.run.status is RunStatus.PAUSED
+                    and outcome.run.stop_decision is not None
+                    and outcome.run.stop_decision.reason == "permission_required"
+                    and permission_resumes < len(case.resume_permissions)
+                ):
+                    prepared_digest = outcome.run.stop_decision.evidence.get(
+                        "prepared_digest"
+                    )
+                    if not isinstance(prepared_digest, str) or not prepared_digest:
+                        raise ValueError(
+                            "permission pause is missing a prepared digest"
+                        )
+                    if outcome.run.pause_token is None:
+                        raise ValueError("permission pause is missing a pause token")
+                    outcome = await application.service.resume(
+                        outcome.run.run_id,
+                        outcome.run.pause_token,
+                        permission_decisions={prepared_digest: "allow"},
+                    )
+                    permission_resumes += 1
                 events = application.service.events(outcome.run.run_id)
                 executions = application.service.state.list_tool_executions(
                     outcome.run.run_id
                 )
                 model_calls = application.service.state.list_model_calls(
+                    outcome.run.run_id
+                )
+                checkpoints = application.service.state.list_checkpoints(
                     outcome.run.run_id
                 )
                 final_response = outcome.run.final_response or ""
@@ -126,6 +151,18 @@ class RivetEvalExecutor:
                     "turns": outcome.run.usage.turns,
                     "model_calls": outcome.run.usage.model_calls,
                     "tool_executions": outcome.run.usage.tool_executions,
+                    "permission_resumes": permission_resumes,
+                    "checkpoint_count": len(checkpoints),
+                    "provider": (
+                        "scripted_fake"
+                        if self.mode == "offline"
+                        else model_calls[-1].provider if model_calls else None
+                    ),
+                    "model": (
+                        "scripted_eval"
+                        if self.mode == "offline"
+                        else model_calls[-1].model if model_calls else None
+                    ),
                     "event_count": len(events),
                     "duration_ms": _elapsed_ms(started_at),
                     "model_errors": [
@@ -159,6 +196,8 @@ class RivetEvalExecutor:
             "reviewer": {"enabled": False},
             "tui": {"enabled": False},
         }
+        for permission in case.resume_permissions:
+            overrides["permissions"][permission] = "ask"
         if self.mode == "offline":
             if not case.offline_model:
                 raise ValueError(

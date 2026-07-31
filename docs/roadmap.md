@@ -2,7 +2,8 @@
 
 状态：M0–M4 completed; M5 extension baseline in progress
 
-当前实现和验证证据见 [implementation-status.md](implementation-status.md)。
+当前实现和验证证据见 [implementation-status.md](implementation-status.md)，具体执行顺序、
+授权边界和验收队列见 [work-plan.md](work-plan.md)。
 
 ## D0：设计冻结
 

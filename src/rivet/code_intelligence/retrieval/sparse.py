@@ -185,6 +185,17 @@ class SqliteSparseIndex:
             result.setdefault(row["file_path"], set()).add(row["content_hash"])
         return result
 
+    def count(self, workspace_id: str | None = None) -> int:
+        if workspace_id is None:
+            row = self._connection.execute("SELECT COUNT(*) AS count FROM chunks").fetchone()
+        else:
+            row = self._connection.execute(
+                "SELECT COUNT(*) AS count FROM chunks WHERE workspace_id = ?",
+                (workspace_id,),
+            ).fetchone()
+        assert row is not None
+        return int(row["count"])
+
 
 def _fts_expression(query: str) -> str:
     tokens = _TOKEN_PATTERN.findall(query)

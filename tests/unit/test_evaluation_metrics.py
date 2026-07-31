@@ -51,7 +51,16 @@ class EvaluationMetricsTests(unittest.TestCase):
 
         self.assertEqual(
             {case.id for case in cases},
-            {"explain_entrypoint", "fix_discount", "reject_workspace_escape"},
+            {
+                "explain_entrypoint",
+                "fix_discount",
+                "reject_workspace_escape",
+                "locate_invoice_symbol",
+                "fix_cross_file_total",
+                "trace_order_call_chain",
+                "add_slug_regression_test",
+                "resume_permission_write",
+            },
         )
         self.assertTrue(all(case.fixture_files for case in cases))
         self.assertTrue(all(case.offline_model for case in cases))
@@ -63,6 +72,16 @@ class EvaluationMetricsTests(unittest.TestCase):
                 objective="invalid fixture",
                 fixture="inline",
                 fixture_files={"../outside.py": "pass\n"},
+            )
+
+    def test_eval_case_rejects_unknown_resume_permission(self) -> None:
+        with self.assertRaisesRegex(ValueError, "unknown resume permission"):
+            EvalCase(
+                id="invalid-permission",
+                objective="invalid permission",
+                fixture="inline",
+                resume_permissions=("root_access",),
+                fixture_files={"main.py": "pass\n"},
             )
 
 
