@@ -29,7 +29,7 @@ python -m pip install -e ".[dev]"
 python -m pytest -q
 rivet eval --mode offline
 ruff check src tests examples
-python -m pip wheel --no-build-isolation --no-deps . -w /tmp/rivet-wheel
+python -m pip wheel --no-deps . -w /tmp/rivet-wheel
 ```
 
 测试默认必须离线运行，不依赖真实 Provider、Qdrant Server 或收费 API。外部服务使用
