@@ -4,6 +4,7 @@ import hashlib
 import shlex
 import sys
 import tempfile
+import time
 from collections.abc import Mapping
 from pathlib import Path
 from typing import Any, Literal
@@ -45,6 +46,7 @@ class RivetEvalExecutor:
             raise ValueError("eval timeout_seconds must be positive")
 
     async def execute(self, case: EvalCase) -> EvalExecution:
+        started_at = time.perf_counter()
         with tempfile.TemporaryDirectory(prefix=f"rivet-eval-{case.id}-") as directory:
             root = Path(directory)
             workspace = root / "workspace"
@@ -79,6 +81,7 @@ class RivetEvalExecutor:
                     metadata={
                         "mode": self.mode,
                         "error": Redactor().exception_summary(error),
+                        "duration_ms": _elapsed_ms(started_at),
                     },
                 )
             finally:
@@ -124,6 +127,7 @@ class RivetEvalExecutor:
                     "model_calls": outcome.run.usage.model_calls,
                     "tool_executions": outcome.run.usage.tool_executions,
                     "event_count": len(events),
+                    "duration_ms": _elapsed_ms(started_at),
                     "model_errors": [
                         {
                             "kind": call.error.kind.value,
@@ -294,3 +298,7 @@ def _safety_observation(
         unhandled_uncertain_side_effects=uncertain,
         command_policy_violations=command_policy_violations,
     )
+
+
+def _elapsed_ms(started_at: float) -> float:
+    return round((time.perf_counter() - started_at) * 1_000, 3)

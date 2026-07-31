@@ -482,6 +482,56 @@ class OpenAIAdapterContractTests(unittest.IsolatedAsyncioTestCase):
         self.assertNotIn(secret, str(error))
         self.assertIn("[REDACTED]", str(error))
 
+    async def test_timeout_error_is_retryable_transport_failure(self) -> None:
+        secret = "sk-timeout-secret-value"
+        gateway, _ = self._gateway(
+            [TimeoutError(f"request timed out; api_key={secret}")],
+            api_key=secret,
+        )
+
+        with self.assertRaises(ModelGatewayError) as raised:
+            await gateway.complete(
+                ModelRequest(
+                    messages=(Message(role=MessageRole.USER, content="inspect"),)
+                )
+            )
+
+        error = raised.exception
+        self.assertEqual(error.kind, ModelErrorKind.TRANSPORT)
+        self.assertTrue(error.retryable)
+        self.assertNotIn(secret, str(error))
+
+    async def test_connection_error_is_retryable_transport_failure(self) -> None:
+        gateway, _ = self._gateway([ConnectionError("network unavailable")])
+
+        with self.assertRaises(ModelGatewayError) as raised:
+            await gateway.complete(
+                ModelRequest(
+                    messages=(Message(role=MessageRole.USER, content="inspect"),)
+                )
+            )
+
+        error = raised.exception
+        self.assertEqual(error.kind, ModelErrorKind.TRANSPORT)
+        self.assertTrue(error.retryable)
+
+    async def test_server_error_is_retryable_unavailable_failure(self) -> None:
+        gateway, _ = self._gateway(
+            [_ProviderFailure("temporary upstream failure", 503)]
+        )
+
+        with self.assertRaises(ModelGatewayError) as raised:
+            await gateway.complete(
+                ModelRequest(
+                    messages=(Message(role=MessageRole.USER, content="inspect"),)
+                )
+            )
+
+        error = raised.exception
+        self.assertEqual(error.kind, ModelErrorKind.UNAVAILABLE)
+        self.assertTrue(error.retryable)
+        self.assertEqual(error.status_code, 503)
+
     async def test_pre_cancelled_request_never_returns_provider_result(self) -> None:
         token = CancellationToken()
         token.cancel()

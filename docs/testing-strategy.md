@@ -154,6 +154,8 @@ Fake Model 应按输入条件返回结果，不能只依赖一个简单的“响
 
 - `rivet eval --mode offline` 使用脚本化模型，默认离线并可进入 CI；
 - `rivet eval --mode live` 使用配置的真实 Provider，显式产生网络请求和费用。
+- `rivet eval --mode offline --repeat 10 --json` 重复执行固定场景并输出
+  min、mean、median、P95、max 和逐场景耗时。
 
 当前固定基线覆盖：
 

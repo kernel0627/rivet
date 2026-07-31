@@ -24,8 +24,9 @@ Rivet 已形成可运行的单 Agent Coding Runtime。正式入口具备：
 默认测试完全离线。本次验收：
 
 ```text
-pytest: 176 passed, 10 subtests passed
+pytest: 187 passed, 10 subtests passed
 offline eval: 3/3 passed
+offline eval benchmark: 10/10 passed, median 198.195 ms, p95 222.322 ms
 ruff: all checks passed
 ```
 
@@ -70,6 +71,8 @@ M5 在设计中属于后续扩展，不是正式 V1 的发布阻塞项。
 - SQLite State 与内容寻址 Artifact；
 - Qdrant `upsert/query_points/delete/count` Adapter；
 - Python LSP 进程生命周期和协议；
+- Python LSP 真实子进程/stdio 生命周期契约；
+- 本机 `python-lsp-server 1.14.0` definition 协议验收；
 - MCP transport-neutral Tool Adapter 与 Code Intelligence Service Core；
 - Prompt Toolkit + Rich TUI。
 
@@ -77,11 +80,15 @@ M5 在设计中属于后续扩展，不是正式 V1 的发布阻塞项。
 
 - 真实 Provider 凭据、配额和网络；
 - 真实 Qdrant Server 的 TLS、认证和容量；
-- 本机具体 Python LSP Server 的安装状态；
+- 其他部署环境的 Python LSP Server 安装与插件差异；
 - 大型仓库上的性能基线；
 - 不同操作系统上的终端与进程树行为。
 
 这些边界不会被离线测试冒充为已经完成的线上验证。
+
+固定 Eval 的本地性能快照见
+[performance-baseline.md](performance-baseline.md)。它用于发现 Runtime 基础设施回退，
+不替代真实 Provider 和大型仓库基线。
 
 ## 5. 测试覆盖
 
@@ -96,6 +103,7 @@ unit
 contract
 ├── SQLite transaction / revision / lease / artifact
 ├── OpenAI adapter
+├── LSP stdio subprocess
 └── Qdrant adapter
 
 integration

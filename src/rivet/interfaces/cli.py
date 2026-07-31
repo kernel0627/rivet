@@ -19,6 +19,7 @@ from rivet.configuration import load_config
 from rivet.evaluation import (
     EvaluationRunner,
     RivetEvalExecutor,
+    benchmark_evaluation,
     load_baseline,
     load_jsonl,
 )
@@ -138,8 +139,21 @@ def _parser() -> argparse.ArgumentParser:
     eval_parser.add_argument("--config-workspace", default=".")
     eval_parser.add_argument("--case", action="append", default=[])
     eval_parser.add_argument("--timeout", type=float, default=120.0)
+    eval_parser.add_argument(
+        "--repeat",
+        type=_positive_int,
+        default=1,
+        help="Repeat the suite and report timing statistics.",
+    )
     eval_parser.add_argument("--json", action="store_true")
     return parser
+
+
+def _positive_int(value: str) -> int:
+    parsed = int(value)
+    if parsed < 1:
+        raise argparse.ArgumentTypeError("value must be positive")
+    return parsed
 
 
 def _common_runtime_arguments(parser: argparse.ArgumentParser) -> None:
@@ -365,7 +379,31 @@ async def _eval(args: argparse.Namespace) -> int:
         config_workspace=Path(args.config_workspace),
         timeout_seconds=args.timeout,
     )
-    result = await EvaluationRunner(executor).run(cases)
+    runner = EvaluationRunner(executor)
+    if args.repeat > 1:
+        benchmark = await benchmark_evaluation(
+            runner,
+            cases,
+            repeat=args.repeat,
+        )
+        payload = benchmark.to_dict()
+        if args.json:
+            print(json.dumps(payload, ensure_ascii=False))
+        else:
+            timing = payload["timing_ms"]
+            assert isinstance(timing, dict)
+            print(
+                f"benchmark: {'PASS' if benchmark.passed else 'FAIL'} "
+                f"({args.repeat} runs)"
+            )
+            print(
+                "timing_ms: "
+                f"median={timing['median']}, p95={timing['p95']}, "
+                f"min={timing['min']}, max={timing['max']}"
+            )
+        return 0 if benchmark.passed else 1
+
+    result = await runner.run(cases)
     payload = result.to_dict()
     if args.json:
         print(json.dumps(payload, ensure_ascii=False))

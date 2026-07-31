@@ -10,7 +10,7 @@ Checkpoint/Rewind、验证、代码智能、Trace 和终端交互。
 工具适配与可选 Reviewer 基线。2026-07-31 的本地离线验收结果为：
 
 ```text
-176 passed, 10 subtests passed
+187 passed, 10 subtests passed
 Ruff: all checks passed
 ```
 
@@ -310,6 +310,15 @@ rivet eval --mode offline --json
 ```bash
 rivet eval --mode live --config-workspace . --json
 ```
+
+需要观察本地 Runtime 和 Eval 基础设施的性能回退时，可以重复执行同一套离线场景：
+
+```bash
+rivet eval --mode offline --repeat 10 --json
+```
+
+当前机器的首次测量方法与结果见
+[本地性能基线](docs/performance-baseline.md)。
 
 ## 9. 目录
 

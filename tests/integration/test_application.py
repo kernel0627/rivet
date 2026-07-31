@@ -6,6 +6,7 @@ from pathlib import Path
 
 from rivet.application import build_application
 from rivet.domain import RunStatus, Session
+from rivet.model.errors import ModelErrorKind, ModelGatewayError
 from rivet.model.fake import FakeModel
 from rivet.model.types import ModelResult, ToolProposal
 from rivet.workspace.checkpoint import RewindConflict
@@ -36,6 +37,42 @@ class ApplicationTests(unittest.IsolatedAsyncioTestCase):
                 self.assertFalse((workspace / ".rivet").exists())
                 trace = application.layout.logs_root / "events.jsonl"
                 self.assertIn("run.completed", trace.read_text(encoding="utf-8"))
+            finally:
+                await application.close()
+
+    async def test_provider_failure_is_redacted_in_jsonl_trace(self) -> None:
+        class LeakyFakeModel(FakeModel):
+            def _select(self, request):
+                self.requests.append(request)
+                raise ModelGatewayError(
+                    ModelErrorKind.PROTOCOL,
+                    "api_key=trace-secret-value",
+                )
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            workspace = root / "workspace"
+            state = root / "state"
+            workspace.mkdir()
+            application = build_application(
+                workspace,
+                model_gateway=LeakyFakeModel(responses=()),
+                state_root=state,
+                overrides={
+                    "model": {"model": "fake", "provider": "fake"},
+                    "tui": {"enabled": False},
+                },
+            )
+            try:
+                outcome = await application.service.run(
+                    "exercise trace redaction"
+                )
+                self.assertEqual(outcome.run.status, RunStatus.FAILED)
+                trace = application.layout.logs_root / "events.jsonl"
+                trace_text = trace.read_text(encoding="utf-8")
+                self.assertIn("model_call.failed", trace_text)
+                self.assertIn("[REDACTED]", trace_text)
+                self.assertNotIn("trace-secret-value", trace_text)
             finally:
                 await application.close()
 

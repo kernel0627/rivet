@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import sys
 import tempfile
 import unittest
@@ -275,6 +276,81 @@ class RuntimeEngineTests(unittest.IsolatedAsyncioTestCase):
         )
         self.assertEqual(calls[1].attempt_no, 2)
         self.assertEqual(outcome.run.usage.turns, 1)
+        store.close()
+
+    async def test_unclassified_provider_exception_is_redacted_before_persistence(
+        self,
+    ) -> None:
+        class LeakyFakeModel(FakeModel):
+            def _select(self, request):
+                self.requests.append(request)
+                raise RuntimeError("api_key=do-not-persist-this-value")
+
+        model = LeakyFakeModel(responses=())
+        engine, store, budget = self.engine(model)
+        started = await engine.start_run(
+            StartRun(
+                workspace=self.workspace,
+                session=self.session,
+                objective="exercise provider failure redaction",
+                budget=budget,
+            )
+        )
+
+        outcome = await engine.drive(started.run.run_id)
+
+        self.assertEqual(outcome.run.status, RunStatus.FAILED)
+        call = store.list_model_calls(outcome.run.run_id)[0]
+        self.assertIsNotNone(call.error)
+        assert call.error is not None
+        self.assertIn("[REDACTED]", call.error.message)
+        persisted = json.dumps(
+            [
+                event.to_dict()
+                for event in store.list_events(outcome.run.run_id)
+            ],
+            ensure_ascii=False,
+        )
+        self.assertNotIn("do-not-persist-this-value", persisted)
+        store.close()
+
+    async def test_gateway_error_is_redacted_again_at_runtime_boundary(self) -> None:
+        model = FakeModel(
+            responses=(
+                ConditionalResponse(
+                    RequestCondition(call_index=0),
+                    error=ModelGatewayError(
+                        ModelErrorKind.PROTOCOL,
+                        "api_key=classified-secret-value",
+                    ),
+                ),
+            )
+        )
+        engine, store, budget = self.engine(model)
+        started = await engine.start_run(
+            StartRun(
+                workspace=self.workspace,
+                session=self.session,
+                objective="exercise classified failure redaction",
+                budget=budget,
+            )
+        )
+
+        outcome = await engine.drive(started.run.run_id)
+
+        self.assertEqual(outcome.run.status, RunStatus.FAILED)
+        call = store.list_model_calls(outcome.run.run_id)[0]
+        self.assertIsNotNone(call.error)
+        assert call.error is not None
+        self.assertEqual(call.error.message, "api_key=[REDACTED]")
+        events = json.dumps(
+            [
+                event.to_dict()
+                for event in store.list_events(outcome.run.run_id)
+            ],
+            ensure_ascii=False,
+        )
+        self.assertNotIn("classified-secret-value", events)
         store.close()
 
     async def test_reviewer_finding_returns_to_agent_before_completion(self) -> None:

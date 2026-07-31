@@ -5,6 +5,12 @@ from rivet.evaluation.assessments import (
     TaskCompletionAssessment,
     trajectory_from_events,
 )
+from rivet.evaluation.benchmark import (
+    EvalBenchmarkCase,
+    EvalBenchmarkResult,
+    EvalBenchmarkRun,
+    benchmark_evaluation,
+)
 from rivet.evaluation.dataset import (
     EvalCase,
     EvalModelStep,
@@ -33,6 +39,9 @@ __all__ = [
     "CompletionObservation",
     "EvalCase",
     "EvalCaseResult",
+    "EvalBenchmarkCase",
+    "EvalBenchmarkResult",
+    "EvalBenchmarkRun",
     "EvalExecution",
     "EvalExecutor",
     "EvalMode",
@@ -45,6 +54,7 @@ __all__ = [
     "SafetyObservation",
     "TaskCompletionAssessment",
     "TrajectoryMetrics",
+    "benchmark_evaluation",
     "iter_by_tag",
     "load_baseline",
     "load_jsonl",

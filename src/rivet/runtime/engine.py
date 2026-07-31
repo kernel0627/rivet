@@ -48,7 +48,11 @@ from rivet.domain import (
 )
 from rivet.domain.artifacts import RedactionStatus
 from rivet.domain.common import new_id, utc_now
-from rivet.model.errors import ModelErrorKind, ModelGatewayError
+from rivet.model.errors import (
+    ModelErrorKind,
+    ModelGatewayError,
+    redact_sensitive,
+)
 from rivet.model.types import (
     Message,
     MessageRole,
@@ -673,11 +677,12 @@ class RuntimeEngine:
                 error_run = calling_run
                 model_error = ModelGatewayError(
                     ModelErrorKind.PROTOCOL,
-                    f"{type(error).__name__}: {str(error)[:1000]}",
+                    _safe_exception_summary(error),
                 )
 
             if model_error is None:
                 break
+            model_error = _safe_model_gateway_error(model_error)
             assert error_run is not None
             model_call_limit = error_run.budget.max_model_calls
             budget_allows_retry = (
@@ -910,7 +915,7 @@ class RuntimeEngine:
                 current,
                 ModelGatewayError(
                     ModelErrorKind.PROTOCOL,
-                    f"{type(error).__name__}: {str(error)[:1000]}",
+                    _safe_exception_summary(error),
                 ),
             ) from error
         if completed is None:
@@ -1571,7 +1576,7 @@ class RuntimeEngine:
         except Exception as error:
             return ToolResult.error(
                 ErrorKind.INTERNAL_ERROR,
-                f"{type(error).__name__}: {str(error)[:1_000]}",
+                _safe_exception_summary(error),
             )
 
     async def _execute_grant(
@@ -1726,7 +1731,7 @@ class RuntimeEngine:
                 EventActor.RUNTIME,
                 {
                     "error_type": type(error).__name__,
-                    "message": str(error)[:1_000],
+                    "message": _safe_exception_summary(error),
                 },
                 turn_id,
             )
@@ -2262,7 +2267,7 @@ class RuntimeEngine:
                 changed_paths=changed_paths,
             )
         except Exception as error:
-            summary = f"{type(error).__name__}: {str(error)[:1_000]}"
+            summary = _safe_exception_summary(error)
             result = VerificationResult(
                 verification_id=self.ids.new("verification"),
                 run_id=run.run_id,
@@ -2361,6 +2366,7 @@ class RuntimeEngine:
                 )
             )
         except ReviewerError as error:
+            safe_error = _safe_exception_summary(error)
             failed = replace(
                 started,
                 revision=started.revision + 1,
@@ -2374,17 +2380,20 @@ class RuntimeEngine:
                     (
                         "reviewer.failed",
                         EventActor.RUNTIME,
-                        {"error": str(error)[:1_000]},
+                        {"error": safe_error},
                         turn.turn_id,
                     ),
                 ),
             )
-            raise _ReviewerInvocationFailure(failed, error) from error
+            raise _ReviewerInvocationFailure(
+                failed,
+                ReviewerError(safe_error),
+            ) from error
         except asyncio.CancelledError:
             raise
         except Exception as error:
             wrapped = ReviewerError(
-                f"reviewer failed: {type(error).__name__}: {str(error)[:1_000]}"
+                "reviewer failed: " + _safe_exception_summary(error)
             )
             failed = replace(
                 started,
@@ -2906,4 +2915,21 @@ def _model_error_info(error: ModelGatewayError) -> ErrorInfo:
             "provider_request_id": error.provider_request_id,
             "model_error_kind": error.kind.value,
         },
+    )
+
+
+def _safe_exception_summary(error: BaseException) -> str:
+    return redact_sensitive(
+        f"{type(error).__name__}: {error}",
+        limit=1_000,
+    )
+
+
+def _safe_model_gateway_error(error: ModelGatewayError) -> ModelGatewayError:
+    return ModelGatewayError(
+        error.kind,
+        redact_sensitive(str(error), limit=1_000),
+        retryable=error.retryable,
+        status_code=error.status_code,
+        provider_request_id=error.provider_request_id,
     )

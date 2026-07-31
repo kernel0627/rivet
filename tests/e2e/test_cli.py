@@ -65,6 +65,30 @@ class CliTests(unittest.TestCase):
         self.assertEqual(payload["case_count"], 3)
         self.assertEqual(payload["pass_rate"], 1.0)
 
+    def test_offline_eval_can_report_repeated_performance_baseline(self) -> None:
+        output = io.StringIO()
+        with redirect_stdout(output):
+            code = cli_main(
+                [
+                    "eval",
+                    "--mode",
+                    "offline",
+                    "--case",
+                    "explain_entrypoint",
+                    "--repeat",
+                    "2",
+                    "--json",
+                ]
+            )
+
+        payload = json.loads(output.getvalue())
+        self.assertEqual(code, 0)
+        self.assertTrue(payload["passed"])
+        self.assertEqual(payload["repeat"], 2)
+        self.assertEqual(len(payload["runs"]), 2)
+        self.assertEqual(payload["cases"]["explain_entrypoint"]["passed"], 2)
+        self.assertIn("p95", payload["timing_ms"])
+
     def test_python_module_entrypoint_runs_in_a_subprocess(self) -> None:
         completed = subprocess.run(
             [sys.executable, "-m", "rivet", "tools", "--json"],
