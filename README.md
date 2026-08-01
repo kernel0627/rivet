@@ -7,10 +7,10 @@ Runtime。它负责模型之外的完整运行边界：Context、工具、权限
 Checkpoint/Rewind、验证、代码智能、Trace 和终端交互。
 
 当前仓库已经实现 `PROJECT_DESIGN.md` 定义的单 Agent 正式 V1 主链，并提供 MCP
-工具适配与可选 Reviewer 基线。2026-07-31 的本地离线验收结果为：
+工具适配与可选 Reviewer 基线。2026-08-01 的本地离线验收结果为：
 
 ```text
-194 passed, 10 subtests passed
+205 passed, 103 subtests passed
 Ruff: all checks passed
 ```
 
@@ -306,10 +306,13 @@ rivet eval --mode offline --json
 ```
 
 真实 Provider 模式复用同一批 Fixture 和验收条件，会产生网络请求和模型费用，需显式
-执行：
+选择 Case 后执行：
 
 ```bash
-rivet eval --mode live --config-workspace . --json
+rivet eval --mode live \
+  --case explain_entrypoint \
+  --config-workspace . \
+  --json
 ```
 
 需要保留可复查的脱敏结构化证据时，使用 `--output`。报告以 `0600` 权限原子写入，
@@ -320,15 +323,17 @@ rivet eval --mode live --config-workspace . --json
 rivet eval --mode offline --output reports/eval.json --json
 ```
 
-真实 Provider 任务与脚本化离线基线分开维护。仓库目前提供四类 live-only 种子任务，
-用于先验证任务契约和报告链路；它们没有 Fake Model 轨迹，离线模式会在执行前拒绝：
+真实 Provider 任务与脚本化离线基线分开维护。仓库提供四任务结构种子和一套 17 任务 V1
+数据集；它们没有 Fake Model 轨迹，离线模式会在执行前拒绝：
 
 ```bash
 rivet eval --mode offline --dataset benchmarks/live_tasks_seed.jsonl
 ```
 
-种子任务尚未形成真实成功率证据。执行 live 模式前必须确认 Provider、模型、Case、Fixture
-外发内容和预算，具体边界见 [评估数据集说明](benchmarks/README.md)。
+可以使用 `--list-cases` 完全离线地查看 V1 任务契约。live 模式要求使用 `--case` 选择
+小批任务，或使用 `--category` 选择四类中的一个执行批次；只有明确准备运行完整数据集时才
+传入 `--all-cases`。V1 任务尚未形成真实成功率证据。执行前必须确认 Provider、模型、
+Case、Fixture 外发内容和预算，具体边界见 [评估数据集说明](benchmarks/README.md)。
 
 需要观察本地 Runtime 和 Eval 基础设施的性能回退时，可以重复执行同一套离线场景：
 

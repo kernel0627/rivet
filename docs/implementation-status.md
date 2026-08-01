@@ -24,7 +24,7 @@ Rivet 已形成可运行的单 Agent Coding Runtime。正式入口具备：
 默认测试完全离线。本次验收：
 
 ```text
-pytest: 199 passed, 13 subtests passed
+pytest: 205 passed, 103 subtests passed
 offline eval: 8/8 passed
 offline eval benchmark: 10/10 passed, median 1426.196 ms, p95 1559.593 ms
 DeepSeek live eval: explain_entrypoint 1/1 passed, 2 model calls, 2 tool executions
@@ -72,7 +72,9 @@ M5 在设计中属于后续扩展，不是正式 V1 的发布阻塞项。
 - Eval Suite/Benchmark 的带版本脱敏 JSON 报告落盘入口；
 - Eval 报告记录 Token、费用可用状态、测试尝试、修改范围、权限干预、错误分类和脱敏
   Event 序列；未知费用明确标为 unavailable；
-- 与 Fake 基线隔离的四类 live-only 任务种子及离线误用保护；
+- 与 Fake 基线隔离的四类 live-only 任务种子，以及 17 任务 V1 数据集；
+- live 数据集支持完全离线的 Case/Category 清单预览，真实执行必须显式选择 Case、Category
+  或确认全量运行；
 - 真实 Rivet 仓库的可重复索引/检索基准 CLI 与固定查询集；
 - Fake Model 条件驱动和脚本驱动；
 - SQLite State 与内容寻址 Artifact；
@@ -114,8 +116,9 @@ Eval 会把 Fixture、SQLite 状态和 Event 放入同一个临时隔离目录�
 测量见 [retrieval-baseline.md](retrieval-baseline.md)。该基线显示 Hash Dense Top-5 为
 `0/5`，因此 Dense 默认关闭；这项结果不替代真实 Embedding 和大型多语言仓库验收。
 
-真实任务种子目前仅完成结构和初始失败条件验证，尚未调用 Provider。它们不构成真实
-Bugfix 成功率证据，扩展目标、指标和授权边界见 [work-plan.md](work-plan.md)。
+真实任务 V1 已完成 17 个任务的结构、修改边界、初始失败条件和本地参考解验证，尚未调用
+Provider。它不构成真实 Bugfix 成功率证据；下一步是确认 Provider、模型、Case 小批次、Fixture
+外发内容和预算后执行，指标和授权边界见 [work-plan.md](work-plan.md)。
 
 ## 5. 测试覆盖
 

@@ -133,7 +133,7 @@ def _parser() -> argparse.ArgumentParser:
 
     eval_parser = commands.add_parser(
         "eval",
-        help="Run the fixed Rivet evaluation suite.",
+        help="Run a Rivet evaluation dataset.",
     )
     eval_parser.add_argument("--dataset", type=Path)
     eval_parser.add_argument(
@@ -142,7 +142,28 @@ def _parser() -> argparse.ArgumentParser:
         default="offline",
     )
     eval_parser.add_argument("--config-workspace", default=".")
-    eval_parser.add_argument("--case", action="append", default=[])
+    eval_selection = eval_parser.add_mutually_exclusive_group()
+    eval_selection.add_argument(
+        "--case",
+        action="append",
+        default=[],
+        help="Run one case ID; repeat this option to select a small batch.",
+    )
+    eval_selection.add_argument(
+        "--category",
+        choices=("read_only", "single_file", "cross_file", "iterative"),
+        help="Run one explicit live-task category as a batch.",
+    )
+    eval_selection.add_argument(
+        "--all-cases",
+        action="store_true",
+        help="Explicitly run every case; required for an unfiltered live run.",
+    )
+    eval_parser.add_argument(
+        "--list-cases",
+        action="store_true",
+        help="List selected case contracts without starting an evaluation.",
+    )
     eval_parser.add_argument("--timeout", type=float, default=120.0)
     eval_parser.add_argument(
         "--repeat",
@@ -405,6 +426,51 @@ async def _eval(args: argparse.Namespace) -> int:
                 "unknown eval case(s): " + ", ".join(sorted(missing))
             )
         cases = [case for case in cases if case.id in requested]
+    elif args.category:
+        cases = [case for case in cases if case.task_category == args.category]
+        if not cases:
+            raise ValueError(
+                f"eval dataset has no cases in category: {args.category}"
+            )
+    if args.list_cases:
+        payload: dict[str, object] = {
+            "schema_version": 1,
+            "case_count": len(cases),
+            "cases": [
+                {
+                    "id": case.id,
+                    "execution_mode": case.execution_mode,
+                    "task_category": case.task_category,
+                    "difficulty": case.difficulty,
+                    "expected_files": list(case.expected_files),
+                    "forbidden_files": list(case.forbidden_files),
+                    "expected_tests": list(case.expected_tests),
+                    "resume_permissions": list(case.resume_permissions),
+                    "tags": list(case.tags),
+                }
+                for case in cases
+            ],
+        }
+        _write_json_report(args.output, payload)
+        if args.json:
+            print(json.dumps(payload, ensure_ascii=False))
+        else:
+            for case in cases:
+                print(
+                    f"{case.id}: {case.task_category} / {case.difficulty} "
+                    f"[{case.execution_mode}]"
+                )
+        return 0
+    if (
+        args.mode == "live"
+        and not args.case
+        and not args.category
+        and not args.all_cases
+    ):
+        raise ValueError(
+            "live eval requires an explicit --case or --category selection; "
+            "pass --all-cases only when the full request count and cost are intentional"
+        )
     if args.mode == "offline":
         live_only = [case.id for case in cases if case.execution_mode == "live_only"]
         if live_only:

@@ -91,14 +91,14 @@ rivet chat --workspace /path/to/repo
 
 截至 2026-08-01：
 
-- 全量离线测试：`194 passed, 10 subtests passed`；
+- 全量离线测试：`205 passed, 103 subtests passed`；
 - 固定离线 Eval：`8/8 passed`，这些结果来自脚本化 Fake Model；
 - DeepSeek live Eval：仅 `explain_entrypoint 1/1 passed`，Fixture 是一个打印 `hello` 的
   5 行文件，不能代表真实 Bugfix；
 - 完整 live Bugfix、跨文件修改、失败后继续修复尚无正式真实 Provider 证据；
 - Rivet 仓库检索基线已证明 Sparse Top-5 `5/5`，Hash Dense Top-5 `0/5`，因此 Hash
   Dense 默认关闭；
-- GitHub Actions 已在提交 `18b555e` 上验证 Python 3.10/3.12/3.14、Ruff 和 Wheel 全部
+- GitHub Actions 已在提交 `51da519` 上验证 Python 3.10/3.12/3.14、Ruff 和 Wheel 全部
   通过；
 - Runtime 已具备 Permission、Checkpoint/Rewind、SQLite 状态、暂停恢复、Event、Verifier
   和 Workspace Boundary，但这些能力仍缺同一批真实任务上的对照数据。
@@ -111,7 +111,7 @@ rivet chat --workspace /path/to/repo
 
 ### 4.1 真实任务集
 
-当前状态：进行中。
+当前状态：本地任务集已完成，等待首批 live 执行。
 
 先完成以下本地工作，再申请一次边界明确的 live 执行授权：
 
@@ -214,12 +214,21 @@ Fixture 内容、Provider、预算上限和外发授权。
 当前进展：
 
 - 已加入只读、单文件、跨文件和权限恢复四类 live-only 种子任务；
+- 已形成 17 任务 V1 数据集：4 个只读、4 个单文件、4 个跨文件和 5 个迭代任务；
+- 13 个写任务均固定预期修改文件、保护文件和验收命令，初始验收已确认失败；
+- 13 个写任务均有只修改允许文件即可通过的本地参考解验证，避免把不可解 Fixture 交给
+  Provider；
 - live-only Case 禁止携带 Fake Model 轨迹，offline 模式会在执行前拒绝；
-- 三个写任务的初始验收命令均已确认失败，避免把本来就通过的 Fixture 计为修复成功；
+- 可通过 `--list-cases` 完全离线检查 Case/Category 选择；live 执行必须显式传入 Case、
+  Category，或明确确认全量；
+- 种子中的三个写任务也继续保留初始失败检查，作为快速结构冒烟；
 - Eval 报告已补 Token、费用可用状态、测试次数、首次测试结果、修改文件、非预期修改、
   权限干预、工具失败和不含 Payload 的 Event 序列；未知费用不会伪装成零费用；
-- 当前全量回归为 `199 passed, 13 subtests passed`，固定离线 Eval 仍为 `8/8 passed`；
+- 当前全量回归为 `205 passed, 103 subtests passed`，固定离线 Eval 仍为 `8/8 passed`；
 - 尚未调用真实 Provider，正式成功率仍为空。
+
+下一步：先选择 2～4 个只读任务作为首批 live 执行，固定 Provider、模型、Fixture 外发
+范围和预算上限；验证报告与 Trace 后，再进入单文件和跨文件任务。
 
 ## 10. 完成与维护规则
 

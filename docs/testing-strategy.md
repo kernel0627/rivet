@@ -153,7 +153,8 @@ Fake Model 应按输入条件返回结果，不能只依赖一个简单的“响
 内置固定数据集通过两种执行模式复用同一批 Fixture 和验收条件：
 
 - `rivet eval --mode offline` 使用脚本化模型，默认离线并可进入 CI；
-- `rivet eval --mode live` 使用配置的真实 Provider，显式产生网络请求和费用。
+- `rivet eval --mode live --case <id>` 使用配置的真实 Provider，显式产生网络请求和费用；
+  也可以用 `--category` 选择一个任务批次，完整运行需额外传入 `--all-cases`。
 - `rivet eval --mode offline --repeat 10 --json` 重复执行固定场景并输出
   min、mean、median、P95、max 和逐场景耗时。
 - `rivet eval --output report.json` 以原子写入保存带 Schema 版本的脱敏 JSON 报告，
@@ -174,8 +175,11 @@ Fake Model 应按输入条件返回结果，不能只依赖一个简单的“响
 - 写权限暂停、prepared digest 授权、同一 Run 恢复且写入不重复；
 - 工作区逃逸拒绝。
 
-`benchmarks/live_tasks_seed.jsonl` 另有只读、单文件、跨文件和权限恢复四类结构种子。
-它们只证明任务契约可加载且初始验收确实失败；没有执行真实 Provider 时，不计入成功率。
+`benchmarks/live_tasks_seed.jsonl` 保留四类结构种子；
+`benchmarks/live_tasks_v1.jsonl` 包含 4 个只读、4 个单文件、4 个跨文件和 5 个迭代任务。
+13 个写任务的初始验收均已确认失败，并有只修改允许文件即可通过的本地参考解验证。
+`--list-cases` 可以在不创建 Provider 请求的情况下检查 Case 或 Category 选择结果；没有
+执行真实 Provider 时，这些任务不计入成功率。
 
 后续扩展数据集继续覆盖：
 

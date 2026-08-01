@@ -148,6 +148,104 @@ class CliTests(unittest.TestCase):
             self.assertEqual(code, 2)
             self.assertIn("live-only", error.getvalue())
 
+    def test_live_eval_requires_explicit_case_selection_before_execution(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            dataset = Path(directory) / "live.jsonl"
+            dataset.write_text(
+                json.dumps(
+                    {
+                        "id": "live-only",
+                        "objective": "inspect main.py",
+                        "fixture": "inline",
+                        "execution_mode": "live_only",
+                        "task_category": "read_only",
+                        "fixture_files": {"main.py": "print('hello')\n"},
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            error = io.StringIO()
+
+            with redirect_stderr(error):
+                code = cli_main(
+                    [
+                        "eval",
+                        "--mode",
+                        "live",
+                        "--dataset",
+                        str(dataset),
+                    ]
+                )
+
+            self.assertEqual(code, 2)
+            self.assertIn("explicit --case or --category", error.getvalue())
+
+    def test_live_only_dataset_can_be_listed_without_execution(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            dataset = Path(directory) / "live.jsonl"
+            dataset.write_text(
+                json.dumps(
+                    {
+                        "id": "live-only",
+                        "objective": "inspect main.py",
+                        "fixture": "inline",
+                        "execution_mode": "live_only",
+                        "task_category": "read_only",
+                        "forbidden_files": ["main.py"],
+                        "fixture_files": {"main.py": "print('hello')\n"},
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            output = io.StringIO()
+
+            with redirect_stdout(output):
+                code = cli_main(
+                    [
+                        "eval",
+                        "--dataset",
+                        str(dataset),
+                        "--list-cases",
+                        "--json",
+                    ]
+                )
+
+            payload = json.loads(output.getvalue())
+            self.assertEqual(code, 0)
+            self.assertEqual(payload["case_count"], 1)
+            self.assertEqual(payload["cases"][0]["id"], "live-only")
+            self.assertEqual(payload["cases"][0]["task_category"], "read_only")
+
+    def test_live_v1_dataset_can_be_listed_by_category(self) -> None:
+        dataset = (
+            Path(__file__).resolve().parents[2]
+            / "benchmarks"
+            / "live_tasks_v1.jsonl"
+        )
+        output = io.StringIO()
+
+        with redirect_stdout(output):
+            code = cli_main(
+                [
+                    "eval",
+                    "--dataset",
+                    str(dataset),
+                    "--category",
+                    "read_only",
+                    "--list-cases",
+                    "--json",
+                ]
+            )
+
+        payload = json.loads(output.getvalue())
+        self.assertEqual(code, 0)
+        self.assertEqual(payload["case_count"], 4)
+        self.assertTrue(
+            all(case["task_category"] == "read_only" for case in payload["cases"])
+        )
+
     def test_retrieval_benchmark_writes_structured_report(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
