@@ -405,6 +405,13 @@ async def _eval(args: argparse.Namespace) -> int:
                 "unknown eval case(s): " + ", ".join(sorted(missing))
             )
         cases = [case for case in cases if case.id in requested]
+    if args.mode == "offline":
+        live_only = [case.id for case in cases if case.execution_mode == "live_only"]
+        if live_only:
+            raise ValueError(
+                "offline mode cannot run live-only eval case(s): "
+                + ", ".join(live_only)
+            )
     executor = RivetEvalExecutor(
         mode=args.mode,
         config_workspace=Path(args.config_workspace),

@@ -4,7 +4,7 @@ import json
 from collections.abc import Iterator
 from importlib import resources
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
@@ -36,6 +36,9 @@ class EvalCase(BaseModel):
     id: str = Field(min_length=1)
     objective: str = Field(min_length=1)
     fixture: str = Field(min_length=1)
+    execution_mode: Literal["offline_or_live", "live_only"] = "offline_or_live"
+    task_category: Literal["read_only", "single_file", "cross_file", "iterative"] | None = None
+    difficulty: Literal["introductory", "intermediate", "advanced"] = "intermediate"
     expected_files: tuple[str, ...] = ()
     forbidden_files: tuple[str, ...] = ()
     expected_tests: tuple[str, ...] = ()
@@ -45,6 +48,20 @@ class EvalCase(BaseModel):
     resume_permissions: tuple[str, ...] = ()
     fixture_files: dict[str, str] = Field(default_factory=dict)
     offline_model: tuple[EvalModelStep, ...] = ()
+
+    @model_validator(mode="after")
+    def validate_execution_contract(self) -> EvalCase:
+        if self.execution_mode == "live_only" and self.offline_model:
+            raise ValueError("live-only eval cases cannot define an offline model script")
+        if self.execution_mode == "live_only" and self.task_category is None:
+            raise ValueError("live-only eval cases require a task category")
+        overlap = set(self.expected_files).intersection(self.forbidden_files)
+        if overlap:
+            raise ValueError(
+                "eval files cannot be both expected and forbidden: "
+                + ", ".join(sorted(overlap))
+            )
+        return self
 
     @field_validator(
         "expected_files",

@@ -84,6 +84,38 @@ class EvaluationMetricsTests(unittest.TestCase):
                 fixture_files={"main.py": "pass\n"},
             )
 
+    def test_live_only_case_requires_category_and_forbids_script(self) -> None:
+        with self.assertRaisesRegex(ValueError, "require a task category"):
+            EvalCase(
+                id="missing-category",
+                objective="live task",
+                fixture="inline",
+                execution_mode="live_only",
+                fixture_files={"main.py": "pass\n"},
+            )
+
+        with self.assertRaisesRegex(ValueError, "cannot define an offline model"):
+            EvalCase(
+                id="scripted-live",
+                objective="live task",
+                fixture="inline",
+                execution_mode="live_only",
+                task_category="read_only",
+                fixture_files={"main.py": "pass\n"},
+                offline_model=({"text": "done"},),
+            )
+
+    def test_eval_case_rejects_expected_forbidden_overlap(self) -> None:
+        with self.assertRaisesRegex(ValueError, "both expected and forbidden"):
+            EvalCase(
+                id="overlap",
+                objective="invalid contract",
+                fixture="inline",
+                expected_files=("main.py",),
+                forbidden_files=("main.py",),
+                fixture_files={"main.py": "pass\n"},
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

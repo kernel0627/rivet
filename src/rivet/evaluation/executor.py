@@ -127,6 +127,35 @@ class RivetEvalExecutor:
                 )
                 and not failed_checks
             )
+            test_executions = tuple(
+                execution
+                for execution in executions
+                if execution.tool_name == "run_tests"
+            )
+            failed_test_runs = sum(
+                execution.status.value != "SUCCEEDED"
+                for execution in test_executions
+            )
+            first_test_run_passed = (
+                test_executions[0].status.value == "SUCCEEDED"
+                if test_executions
+                else None
+            )
+            expected_paths = set(case.expected_files)
+            unexpected_changed_files = tuple(
+                path for path in changed_paths if path not in expected_paths
+            )
+            redactor = Redactor()
+            reported_cost_usd = outcome.run.usage.cost_usd
+            if self.mode == "offline":
+                cost_usd: float | None = 0.0
+                cost_status = "not_applicable"
+            elif reported_cost_usd > 0:
+                cost_usd = reported_cost_usd
+                cost_status = "reported"
+            else:
+                cost_usd = None
+                cost_status = "unavailable"
             return EvalExecution(
                 completion=CompletionObservation(
                     changed_paths=changed_paths,
@@ -151,8 +180,26 @@ class RivetEvalExecutor:
                     "turns": outcome.run.usage.turns,
                     "model_calls": outcome.run.usage.model_calls,
                     "tool_executions": outcome.run.usage.tool_executions,
+                    "test_runs": len(test_executions),
+                    "failed_test_runs": failed_test_runs,
+                    "first_test_run_passed": first_test_run_passed,
+                    "recovered_after_failed_test": bool(
+                        failed_test_runs
+                        and outcome.run.status is RunStatus.COMPLETED
+                        and not failed_checks
+                        and final_evidence_accurate
+                    ),
+                    "input_tokens": outcome.run.usage.input_tokens,
+                    "output_tokens": outcome.run.usage.output_tokens,
+                    "cost_usd": cost_usd,
+                    "cost_status": cost_status,
+                    "changed_files": list(changed_paths),
+                    "unexpected_changed_files": list(unexpected_changed_files),
                     "permission_resumes": permission_resumes,
+                    "permission_intervention_required": permission_resumes > 0,
                     "checkpoint_count": len(checkpoints),
+                    "task_category": case.task_category,
+                    "difficulty": case.difficulty,
                     "provider": (
                         "scripted_fake"
                         if self.mode == "offline"
@@ -173,6 +220,36 @@ class RivetEvalExecutor:
                         }
                         for call in model_calls
                         if call.error is not None
+                    ],
+                    "tool_failures": [
+                        {
+                            "tool": execution.tool_name,
+                            "status": execution.status.value,
+                            "kind": (
+                                execution.error.kind.value
+                                if execution.error is not None
+                                else None
+                            ),
+                            "message": (
+                                redactor.redact_text(
+                                    execution.error.message,
+                                    max_chars=500,
+                                )
+                                if execution.error is not None
+                                else None
+                            ),
+                        }
+                        for execution in executions
+                        if execution.status.value != "SUCCEEDED"
+                    ],
+                    "event_trace": [
+                        {
+                            "sequence": event.sequence,
+                            "event_type": event.event_type,
+                            "actor": event.actor.value,
+                            "turn_id": event.turn_id,
+                        }
+                        for event in events
                     ],
                     "checks": check_metadata,
                 },

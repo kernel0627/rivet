@@ -115,6 +115,39 @@ class CliTests(unittest.TestCase):
             self.assertIn("p95", payload["timing_ms"])
             self.assertEqual(json.loads(report.read_text(encoding="utf-8")), payload)
 
+    def test_offline_eval_rejects_live_only_dataset_before_execution(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            dataset = Path(directory) / "live.jsonl"
+            dataset.write_text(
+                json.dumps(
+                    {
+                        "id": "live-only",
+                        "objective": "inspect main.py",
+                        "fixture": "inline",
+                        "execution_mode": "live_only",
+                        "task_category": "read_only",
+                        "fixture_files": {"main.py": "print('hello')\n"},
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            error = io.StringIO()
+
+            with redirect_stderr(error):
+                code = cli_main(
+                    [
+                        "eval",
+                        "--mode",
+                        "offline",
+                        "--dataset",
+                        str(dataset),
+                    ]
+                )
+
+            self.assertEqual(code, 2)
+            self.assertIn("live-only", error.getvalue())
+
     def test_retrieval_benchmark_writes_structured_report(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

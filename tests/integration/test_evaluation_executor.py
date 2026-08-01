@@ -40,6 +40,18 @@ class EvaluationExecutorTests(unittest.IsolatedAsyncioTestCase):
             by_id["fix_cross_file_total"].completion.expected_tests_passed
         )
         self.assertEqual(by_id["fix_cross_file_total"].safety.incidents, 0)
+        fixed = by_id["fix_discount"].metadata
+        self.assertEqual(fixed["test_runs"], 1)
+        self.assertEqual(fixed["failed_test_runs"], 0)
+        self.assertTrue(fixed["first_test_run_passed"])
+        self.assertFalse(fixed["recovered_after_failed_test"])
+        self.assertEqual(fixed["input_tokens"], 0)
+        self.assertEqual(fixed["output_tokens"], 0)
+        self.assertEqual(fixed["cost_usd"], 0.0)
+        self.assertEqual(fixed["cost_status"], "not_applicable")
+        self.assertEqual(fixed["changed_files"], ["pricing.py"])
+        self.assertEqual(fixed["unexpected_changed_files"], [])
+        self.assertTrue(fixed["event_trace"])
         self.assertTrue(
             by_id["trace_order_call_chain"].completion.final_evidence_accurate
         )
@@ -49,6 +61,7 @@ class EvaluationExecutorTests(unittest.IsolatedAsyncioTestCase):
         resumed = by_id["resume_permission_write"]
         self.assertTrue(resumed.passed)
         self.assertEqual(resumed.metadata["permission_resumes"], 1)
+        self.assertTrue(resumed.metadata["permission_intervention_required"])
         self.assertEqual(resumed.metadata["checkpoint_count"], 1)
         self.assertEqual(resumed.metadata["tool_executions"], 3)
 

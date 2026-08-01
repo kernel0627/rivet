@@ -313,11 +313,22 @@ rivet eval --mode live --config-workspace . --json
 ```
 
 需要保留可复查的脱敏结构化证据时，使用 `--output`。报告以 `0600` 权限原子写入，
-包含 Schema 版本、逐 Case 结果、实际 Provider/模型和错误分类，不包含 API Key：
+包含 Schema 版本、逐 Case 结果、实际 Provider/模型、Token、费用可用状态、测试尝试、修改文件、
+权限干预、错误分类和不含 Payload 的 Event 序列，不包含 API Key：
 
 ```bash
 rivet eval --mode offline --output reports/eval.json --json
 ```
+
+真实 Provider 任务与脚本化离线基线分开维护。仓库目前提供四类 live-only 种子任务，
+用于先验证任务契约和报告链路；它们没有 Fake Model 轨迹，离线模式会在执行前拒绝：
+
+```bash
+rivet eval --mode offline --dataset benchmarks/live_tasks_seed.jsonl
+```
+
+种子任务尚未形成真实成功率证据。执行 live 模式前必须确认 Provider、模型、Case、Fixture
+外发内容和预算，具体边界见 [评估数据集说明](benchmarks/README.md)。
 
 需要观察本地 Runtime 和 Eval 基础设施的性能回退时，可以重复执行同一套离线场景：
 

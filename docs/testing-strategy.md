@@ -158,6 +158,11 @@ Fake Model 应按输入条件返回结果，不能只依赖一个简单的“响
   min、mean、median、P95、max 和逐场景耗时。
 - `rivet eval --output report.json` 以原子写入保存带 Schema 版本的脱敏 JSON 报告，
   避免临时 Eval 工作区清理后只剩终端文本。
+- live-only 数据集不能在 offline 模式运行，且不得包含 `offline_model` 轨迹；真实任务和
+  脚本化基线必须分开统计。
+- live 报告至少记录 Token、费用及其可用状态、测试运行、首次测试结果、修改文件、非预期
+  修改、权限干预、错误分类和不含 Payload 的 Event 序列。Provider 未提供可靠费用时必须
+  标为 unavailable，不能记作零费用。
 
 当前固定基线覆盖：
 
@@ -168,6 +173,9 @@ Fake Model 应按输入条件返回结果，不能只依赖一个简单的“响
 - 新增回归测试文件并执行；
 - 写权限暂停、prepared digest 授权、同一 Run 恢复且写入不重复；
 - 工作区逃逸拒绝。
+
+`benchmarks/live_tasks_seed.jsonl` 另有只读、单文件、跨文件和权限恢复四类结构种子。
+它们只证明任务契约可加载且初始验收确实失败；没有执行真实 Provider 时，不计入成功率。
 
 后续扩展数据集继续覆盖：
 
