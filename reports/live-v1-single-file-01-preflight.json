@@ -1,0 +1,93 @@
+{
+  "external_request_started": false,
+  "limits": {
+    "cost_status": "unavailable_before_provider_response",
+    "cost_usd": null,
+    "max_input_tokens_for_batch": 64000,
+    "max_input_tokens_per_call": 8000,
+    "max_model_calls_for_batch": 8,
+    "max_model_calls_per_case": 8,
+    "max_output_tokens_for_batch": 8192,
+    "max_output_tokens_per_call": 1024
+  },
+  "provider": {
+    "adapter": "openai_chat_completions",
+    "api_key_configured": true,
+    "api_key_env": "RIVET_API_KEY",
+    "base_url": "https://api.deepseek.com",
+    "base_url_host": "api.deepseek.com",
+    "model": "deepseek-v4-flash",
+    "name": "deepseek"
+  },
+  "report_type": "live_eval_preflight",
+  "schema_version": 1,
+  "selection": {
+    "case_count": 1,
+    "case_ids": [
+      "live_fix_inventory_boundary"
+    ],
+    "categories": [
+      "single_file"
+    ],
+    "repeat": 1
+  },
+  "transmission": {
+    "cases": [
+      {
+        "category": "single_file",
+        "difficulty": "introductory",
+        "expected_files": [
+          "inventory.py"
+        ],
+        "expected_tests": [
+          "python test_inventory.py"
+        ],
+        "fixture_bytes": 821,
+        "fixture_file_count": 2,
+        "fixture_files": [
+          {
+            "bytes": 303,
+            "path": "inventory.py",
+            "sha256": "604e59384039ae749f522da2812b297bc1619e7191b059a57c717db5f96cf9e9"
+          },
+          {
+            "bytes": 518,
+            "path": "test_inventory.py",
+            "sha256": "463ece8d83fbace419f25616c98727949f7d4018fc162015de40a029ced341b1"
+          }
+        ],
+        "forbidden_files": [
+          "test_inventory.py"
+        ],
+        "id": "live_fix_inventory_boundary",
+        "model_visible_tools": [
+          "list_files",
+          "read_file",
+          "search_text",
+          "python_outline",
+          "find_python_symbol",
+          "read_python_symbol",
+          "find_python_imports",
+          "apply_patch",
+          "run_tests"
+        ],
+        "objective": "修复 inventory.py 的库存边界错误。请求数量等于现有库存时应允许并返回 0；负数仍应拒绝。不要修改测试，运行 test_inventory.py 并说明结果。",
+        "objective_bytes": 185,
+        "objective_sha256": "39b01e4f876a142a035fe5175544e4720462c8453a6d99eceb6302d36e6eb289",
+        "process_execute_mode": "allow",
+        "workspace_write_mode": "allow"
+      }
+    ],
+    "fixture_bytes": 821,
+    "includes_config_workspace_source": false,
+    "includes_fixture_files": true,
+    "includes_objectives": true,
+    "objective_bytes": 185
+  },
+  "warnings": [
+    "Model-call and output-token limits are hard runtime/request ceilings, not usage estimates.",
+    "The input-token context limit uses Rivet's estimator and may differ from provider-reported token usage.",
+    "Payload byte counts exclude the runtime system prompt, tool schemas, and later tool results.",
+    "Provider price is not inferred; the report cannot guarantee a USD ceiling."
+  ]
+}

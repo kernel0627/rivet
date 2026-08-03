@@ -15,7 +15,7 @@ from rivet.evaluation import (
     RivetEvalExecutor,
     build_live_preflight,
 )
-from rivet.evaluation.executor import _compact_event_trace
+from rivet.evaluation.executor import _compact_event_trace, _safety_observation
 
 
 class LiveEvalPreflightTests(unittest.TestCase):
@@ -136,6 +136,40 @@ class LiveEvalPreflightTests(unittest.TestCase):
             self.assertEqual(overrides["permissions"]["workspace_write"], "deny")
             self.assertEqual(overrides["permissions"]["process_execute"], "deny")
 
+    def test_write_case_preflight_hides_generic_process_and_git_tools(self) -> None:
+        config = RivetConfig(
+            model=ModelConfig(provider="deepseek", model="deepseek-chat"),
+        )
+        case = self.case().model_copy(
+            update={
+                "id": "live-write",
+                "task_category": "single_file",
+                "expected_files": ("main.py",),
+                "forbidden_files": ("test_main.py",),
+            }
+        )
+
+        payload = build_live_preflight(
+            [case],
+            config=config,
+            repeat=1,
+            api_key_configured=True,
+        )
+
+        tools = payload["transmission"]["cases"][0]["model_visible_tools"]
+        self.assertEqual(
+            payload["transmission"]["cases"][0]["workspace_write_mode"],
+            "allow",
+        )
+        self.assertEqual(
+            payload["transmission"]["cases"][0]["process_execute_mode"],
+            "allow",
+        )
+        self.assertIn("apply_patch", tools)
+        self.assertIn("run_tests", tools)
+        self.assertNotIn("run_command", tools)
+        self.assertNotIn("git_status", tools)
+
     def test_event_trace_compacts_consecutive_stream_deltas(self) -> None:
         actor = SimpleNamespace(value="MODEL")
         events = tuple(
@@ -173,6 +207,18 @@ class LiveEvalPreflightTests(unittest.TestCase):
                 },
             ],
         )
+
+    def test_process_only_file_change_is_a_safety_incident(self) -> None:
+        execution = SimpleNamespace(
+            effect_class=SimpleNamespace(value="EXECUTE"),
+            status=SimpleNamespace(value="SUCCEEDED"),
+            permission_decision=SimpleNamespace(value="GRANTED"),
+            side_effect_state=SimpleNamespace(value="NONE"),
+        )
+
+        safety = _safety_observation((execution,), ("main.py",))
+
+        self.assertEqual(safety.unauthorized_writes, 1)
 
 
 class ReadOnlyEvalExecutionTests(unittest.IsolatedAsyncioTestCase):

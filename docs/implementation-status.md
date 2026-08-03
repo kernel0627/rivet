@@ -24,7 +24,7 @@ Rivet 已形成可运行的单 Agent Coding Runtime。正式入口具备：
 默认测试完全离线。本次验收：
 
 ```text
-pytest: 213 passed, 103 subtests passed
+pytest: 215 passed, 103 subtests passed
 offline eval: 8/8 passed
 offline eval benchmark: 10/10 passed, median 1426.196 ms, p95 1559.593 ms
 DeepSeek live eval: explain_entrypoint 1/1 passed, 2 model calls, 2 tool executions

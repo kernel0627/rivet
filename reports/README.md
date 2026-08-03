@@ -39,3 +39,16 @@ SQLite 不允许静态策略需要的 `PREPARED -> DENIED` 转移。修复后，
 合并结果为 `4/4 passed`。4 个 Run 均为 `COMPLETED`，合计 12 次模型调用、16 次只读工具
 执行、25563 输入 Token、4929 输出 Token；修改文件、安全事件、模型错误和工具失败均为 0。
 Provider 没有返回可靠的 USD 费用，因此费用保持 `unavailable`，不能解释为零费用。
+
+## 2026-08-03：首个单文件任务预检
+
+`live-v1-single-file-01-preflight.json` 记录 `live_fix_inventory_boundary` 的本地预检：
+
+- 外发范围：185 字节目标文本和 821 字节固定 Fixture，不包含 Rivet 仓库源码；
+- 唯一预期修改文件：`inventory.py`；保护文件：`test_inventory.py`；
+- 验收命令：`python test_inventory.py`；
+- 模型只看到读取、Python 代码理解、`apply_patch` 和 `run_tests`；
+- 最多 8 次模型调用，每次最多 8000 输入 Token 和 1024 输出 Token。
+
+联网执行被平台执行策略在进程启动前拒绝。DeepSeek 未收到新任务或 Fixture，没有新增 Token
+和费用；单文件任务的真实成功率仍为空。

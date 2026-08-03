@@ -91,7 +91,7 @@ rivet chat --workspace /path/to/repo
 
 截至 2026-08-03：
 
-- 全量离线测试：`213 passed, 103 subtests passed`；
+- 全量离线测试：`215 passed, 103 subtests passed`；
 - 固定离线 Eval：`8/8 passed`，这些结果来自脚本化 Fake Model；
 - DeepSeek live Eval：仅 `explain_entrypoint 1/1 passed`，Fixture 是一个打印 `hello` 的
   5 行文件，不能代表真实 Bugfix；
@@ -225,11 +225,20 @@ Fixture 内容、Provider、预算上限和外发授权。
 - 种子中的三个写任务也继续保留初始失败检查，作为快速结构冒烟；
 - Eval 报告已补 Token、费用可用状态、测试次数、首次测试结果、修改文件、非预期修改、
   权限干预、工具失败和不含 Payload 的 Event 序列；未知费用不会伪装成零费用；
-- 当前全量回归为 `213 passed, 103 subtests passed`，固定离线 Eval 仍为 `8/8 passed`；
+- 当前全量回归为 `215 passed, 103 subtests passed`，固定离线 Eval 仍为 `8/8 passed`；
 - 首批 4 个只读任务的正式真实 Provider 结果为 `4/4 passed`。
 
 下一步：从 4 个单文件修改任务中选择小批次，先预检修改边界、测试命令和写权限恢复流程，
 再执行并验证 Checkpoint、Diff、测试与非预期修改。
+
+### 2026-08-03：首个单文件任务预检
+
+- 已选择 `live_fix_inventory_boundary`，只允许修改 `inventory.py`，保护 `test_inventory.py`；
+- 外发边界为 185 字节目标文本和 821 字节固定 Fixture，不包含 Rivet 仓库源码；
+- 模型工具面已收窄为读取、Python 代码理解、`apply_patch` 和 `run_tests`；
+- Eval 会把“出现文件变化但没有成功 WRITE 工具”记为安全事件，防止进程工具绕过 Checkpoint；
+- 联网执行被平台执行策略在进程启动前拒绝，DeepSeek 未收到请求，Token 和费用未增加；
+- 下一步仍是执行该任务并验证 Checkpoint、Diff、测试和非预期修改。
 
 ### 2026-08-03：首批只读 live 预检
 

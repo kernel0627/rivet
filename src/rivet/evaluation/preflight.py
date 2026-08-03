@@ -16,6 +16,30 @@ READ_ONLY_EVAL_TOOL_NAMES = (
     "read_python_symbol",
     "find_python_imports",
 )
+WRITE_EVAL_TOOL_NAMES = (
+    *READ_ONLY_EVAL_TOOL_NAMES,
+    "apply_patch",
+    "run_tests",
+)
+
+
+def model_visible_tool_names(task_category: str | None) -> tuple[str, ...] | None:
+    if task_category == "read_only":
+        return READ_ONLY_EVAL_TOOL_NAMES
+    if task_category in {"single_file", "cross_file", "iterative"}:
+        return WRITE_EVAL_TOOL_NAMES
+    return None
+
+
+def _permission_mode(case: EvalCase, permission: str) -> str:
+    if case.task_category == "read_only" and permission in {
+        "workspace_write",
+        "process_execute",
+    }:
+        return "deny"
+    if permission in case.resume_permissions:
+        return "ask"
+    return "allow"
 
 
 @dataclass(frozen=True, slots=True)
@@ -159,15 +183,11 @@ def _case_payload(case: EvalCase) -> dict[str, object]:
         "expected_files": list(case.expected_files),
         "forbidden_files": list(case.forbidden_files),
         "expected_tests": list(case.expected_tests),
-        "workspace_write_mode": (
-            "deny" if case.task_category == "read_only" else "allow_or_resume"
-        ),
-        "process_execute_mode": (
-            "deny" if case.task_category == "read_only" else "allow_or_resume"
-        ),
+        "workspace_write_mode": _permission_mode(case, "workspace_write"),
+        "process_execute_mode": _permission_mode(case, "process_execute"),
         "model_visible_tools": (
-            list(READ_ONLY_EVAL_TOOL_NAMES)
-            if case.task_category == "read_only"
+            list(names)
+            if (names := model_visible_tool_names(case.task_category)) is not None
             else None
         ),
     }
