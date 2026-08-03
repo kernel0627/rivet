@@ -1,0 +1,270 @@
+{
+  "external_request_started": false,
+  "limits": {
+    "cost_status": "unavailable_before_provider_response",
+    "cost_usd": null,
+    "max_input_tokens_for_batch": 256000,
+    "max_input_tokens_per_call": 8000,
+    "max_model_calls_for_batch": 32,
+    "max_model_calls_per_case": 8,
+    "max_output_tokens_for_batch": 32768,
+    "max_output_tokens_per_call": 1024
+  },
+  "provider": {
+    "adapter": "openai_chat_completions",
+    "api_key_configured": true,
+    "api_key_env": "RIVET_API_KEY",
+    "base_url": "https://api.deepseek.com",
+    "base_url_host": "api.deepseek.com",
+    "model": "deepseek-v4-flash",
+    "name": "deepseek"
+  },
+  "report_type": "live_eval_preflight",
+  "schema_version": 1,
+  "selection": {
+    "case_count": 4,
+    "case_ids": [
+      "live_fix_order_total_serialization",
+      "live_fix_pagination_contract",
+      "live_fix_cache_key_contract",
+      "live_fix_status_serialization"
+    ],
+    "categories": [
+      "cross_file"
+    ],
+    "repeat": 1
+  },
+  "transmission": {
+    "cases": [
+      {
+        "category": "cross_file",
+        "difficulty": "intermediate",
+        "expected_files": [
+          "pricing.py",
+          "serializer.py"
+        ],
+        "expected_tests": [
+          "python test_order.py"
+        ],
+        "fixture_bytes": 1284,
+        "fixture_file_count": 4,
+        "fixture_files": [
+          {
+            "bytes": 114,
+            "path": "models.py",
+            "sha256": "7b3a36497b794544394ec1881f1024f07833d72f4a67d7ace15744a7e64cf7b8"
+          },
+          {
+            "bytes": 240,
+            "path": "pricing.py",
+            "sha256": "e7bee77c44a102a6d2aa9f39ae3f745b07a6703a8086e039c04e185b4beb6383"
+          },
+          {
+            "bytes": 310,
+            "path": "serializer.py",
+            "sha256": "7237e63b9b7dd213348c099829f7633a2d34bf47b9d48cad94b94bf1113e5d16"
+          },
+          {
+            "bytes": 620,
+            "path": "test_order.py",
+            "sha256": "940e2dcd85a61803cecbff4fb6cd430ad8d1d76561568acecdfc6f01ec914f5a"
+          }
+        ],
+        "forbidden_files": [
+          "models.py",
+          "test_order.py"
+        ],
+        "id": "live_fix_order_total_serialization",
+        "model_visible_tools": [
+          "list_files",
+          "read_file",
+          "search_text",
+          "python_outline",
+          "find_python_symbol",
+          "read_python_symbol",
+          "find_python_imports",
+          "apply_patch",
+          "run_tests"
+        ],
+        "objective": "修复含税订单总额的计算与序列化。tax_percent 是百分数，序列化结果必须使用 total_cents 整数键值。允许修改 pricing.py 和 serializer.py，禁止修改模型和测试。运行 test_order.py 并说明验证结果。",
+        "objective_bytes": 249,
+        "objective_sha256": "a1356985b65ac6160d5e2b62e866e84e39fb488491318dd1efa072dca76b0cb3",
+        "process_execute_mode": "allow",
+        "workspace_write_mode": "allow"
+      },
+      {
+        "category": "cross_file",
+        "difficulty": "intermediate",
+        "expected_files": [
+          "repository.py",
+          "service.py"
+        ],
+        "expected_tests": [
+          "python test_pagination.py"
+        ],
+        "fixture_bytes": 1115,
+        "fixture_file_count": 4,
+        "fixture_files": [
+          {
+            "bytes": 109,
+            "path": "models.py",
+            "sha256": "167c037d1e5e2acb77984e6a9d1a1a732c8c53d5d07857acee33ca2479783665"
+          },
+          {
+            "bytes": 185,
+            "path": "repository.py",
+            "sha256": "d101bbe01841cd48d8aacab745ab7233c7cf8c0ea89add152143f43c3229f0da"
+          },
+          {
+            "bytes": 263,
+            "path": "service.py",
+            "sha256": "61c04756f12722d726bde59dc0eb27f7bdadeb2df92020d184f52fe31009c26c"
+          },
+          {
+            "bytes": 558,
+            "path": "test_pagination.py",
+            "sha256": "7669aa99707d24c812f15a8e1db09d070582276a27bcaa148789f1ac4ac16b0e"
+          }
+        ],
+        "forbidden_files": [
+          "models.py",
+          "test_pagination.py"
+        ],
+        "id": "live_fix_pagination_contract",
+        "model_visible_tools": [
+          "list_files",
+          "read_file",
+          "search_text",
+          "python_outline",
+          "find_python_symbol",
+          "read_python_symbol",
+          "find_python_imports",
+          "apply_patch",
+          "run_tests"
+        ],
+        "objective": "修复用户分页。repository.py 必须正确使用 offset 和 limit，service.py 返回的 total 必须是全部 active 用户数量而非当前页长度。禁止修改模型和测试，运行 test_pagination.py。",
+        "objective_bytes": 217,
+        "objective_sha256": "b5c91ceacb8bbe6b5b765f30ce1004383efa349a93967cbbe14409a119266c2a",
+        "process_execute_mode": "allow",
+        "workspace_write_mode": "allow"
+      },
+      {
+        "category": "cross_file",
+        "difficulty": "intermediate",
+        "expected_files": [
+          "normalizer.py",
+          "cache.py"
+        ],
+        "expected_tests": [
+          "python test_cache.py"
+        ],
+        "fixture_bytes": 815,
+        "fixture_file_count": 3,
+        "fixture_files": [
+          {
+            "bytes": 305,
+            "path": "cache.py",
+            "sha256": "2232cfd1c9a8c2cbf1604ba5e70ff14fe091a05c99c90add0cfdf403f8ed81c8"
+          },
+          {
+            "bytes": 59,
+            "path": "normalizer.py",
+            "sha256": "10b68a4c14395ab854906eef0a33e6e50f67c920937a0f9485778589ce8cf66e"
+          },
+          {
+            "bytes": 451,
+            "path": "test_cache.py",
+            "sha256": "da7cf0d0424df0a6612d75fba71556462192d99591316b3d9f13c9b243309f6a"
+          }
+        ],
+        "forbidden_files": [
+          "test_cache.py"
+        ],
+        "id": "live_fix_cache_key_contract",
+        "model_visible_tools": [
+          "list_files",
+          "read_file",
+          "search_text",
+          "python_outline",
+          "find_python_symbol",
+          "read_python_symbol",
+          "find_python_imports",
+          "apply_patch",
+          "run_tests"
+        ],
+        "objective": "统一缓存键规范。normalizer.py 应生成去除首尾空白的小写键，cache.py 的读写都必须使用共享规范化函数。禁止修改测试，运行 test_cache.py。",
+        "objective_bytes": 181,
+        "objective_sha256": "00764faf56916342e0e2526e0c483a1913be6333354821d126d9db59c2e5c117",
+        "process_execute_mode": "allow",
+        "workspace_write_mode": "allow"
+      },
+      {
+        "category": "cross_file",
+        "difficulty": "advanced",
+        "expected_files": [
+          "status.py",
+          "serializer.py"
+        ],
+        "expected_tests": [
+          "python test_status.py"
+        ],
+        "fixture_bytes": 1017,
+        "fixture_file_count": 4,
+        "fixture_files": [
+          {
+            "bytes": 102,
+            "path": "models.py",
+            "sha256": "97bd25abe54a58b353fc5642289cec0e5fae29e09757333c49a2d0ff3674cc73"
+          },
+          {
+            "bytes": 126,
+            "path": "serializer.py",
+            "sha256": "7e534a6a0620d8b4ee30257407ce232ad726cfc501edbef046a6492948acc2fd"
+          },
+          {
+            "bytes": 181,
+            "path": "status.py",
+            "sha256": "f5245cc5a0eec5bb4c690f816e11435a4378562e8a39ff530b4fa9361e0e01ed"
+          },
+          {
+            "bytes": 608,
+            "path": "test_status.py",
+            "sha256": "3cf726b9e6d1dcb7ac17714b1f1003213e669d36d54afb1e734dfccda964da13"
+          }
+        ],
+        "forbidden_files": [
+          "models.py",
+          "test_status.py"
+        ],
+        "id": "live_fix_status_serialization",
+        "model_visible_tools": [
+          "list_files",
+          "read_file",
+          "search_text",
+          "python_outline",
+          "find_python_symbol",
+          "read_python_symbol",
+          "find_python_imports",
+          "apply_patch",
+          "run_tests"
+        ],
+        "objective": "修复状态规范化和 API 序列化契约。status.py 接受大小写和首尾空白并返回规范值，serializer.py 必须输出 status 字段且拒绝未知状态。禁止修改测试，运行 test_status.py。",
+        "objective_bytes": 217,
+        "objective_sha256": "9c7404ecacc6f70d82d894fb4d8ccae310a855369117b14bc4c5dff5e037a8b2",
+        "process_execute_mode": "allow",
+        "workspace_write_mode": "allow"
+      }
+    ],
+    "fixture_bytes": 4231,
+    "includes_config_workspace_source": false,
+    "includes_fixture_files": true,
+    "includes_objectives": true,
+    "objective_bytes": 864
+  },
+  "warnings": [
+    "Model-call and output-token limits are hard runtime/request ceilings, not usage estimates.",
+    "The input-token context limit uses Rivet's estimator and may differ from provider-reported token usage.",
+    "Payload byte counts exclude the runtime system prompt, tool schemas, and later tool results.",
+    "Provider price is not inferred; the report cannot guarantee a USD ceiling."
+  ]
+}

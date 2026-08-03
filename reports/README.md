@@ -109,3 +109,26 @@ incident。
 合并结果为 `3/3 passed`，合计 17 次模型调用、20 次工具执行、4 次测试、62595 输入 Token、
 3269 输出 Token 和 3 个 Checkpoint。三个任务均只修改各自允许的一个生产文件，首次测试均
 通过；非预期修改、安全事件、模型错误和工具失败均为 0。费用仍为 `unavailable`。
+
+## 2026-08-04：跨文件任务预检
+
+`live-v1-cross-file-01-preflight.json` 是全部 4 个跨文件任务的纯本地预检，
+`external_request_started` 为 `false`，尚未产生 Provider 请求、Token 或费用：
+
+- Case：`live_fix_order_total_serialization`、`live_fix_pagination_contract`、
+  `live_fix_cache_key_contract`、`live_fix_status_serialization`；
+- 目标文本合计 864 字节，固定 Fixture 合计 4231 字节；
+- 4 个 Case 合计 8 个预期修改位置，文件名为 `pricing.py`、`serializer.py`、
+  `repository.py`、`service.py`、`normalizer.py`、`cache.py`、`status.py`；其中两个独立
+  Fixture 各有一个 `serializer.py`，每个 Case 的精确范围独立验收；
+- 保护文件为对应的 `models.py` 和测试文件，Cache Case 只保护 `test_cache.py`；
+- 验收命令分别为 `python test_order.py`、`python test_pagination.py`、
+  `python test_cache.py`、`python test_status.py`；
+- Provider 为 DeepSeek，模型为 `deepseek-v4-flash`，目的地为 `api.deepseek.com`；
+- 每任务最多 8 次模型调用、每次最多 8000 输入 Token 和 1024 输出 Token；批次理论上限
+  为 32 次调用、256000 输入 Token 和 32768 输出 Token；
+- 模型工具面限制为读取、Python 代码理解、`apply_patch` 和 `run_tests`；
+- 不包含 Rivet 仓库源码，Provider 价格仍不推算。
+
+真实批次尚未启动。下一份结果报告只有在整批外发边界明确后才生成；预检文件本身足以复查
+Case、Fixture 哈希、修改范围、工具面和预算上限。

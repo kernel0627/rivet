@@ -144,6 +144,11 @@ Fixture，只允许分别修改 `slug.py`、`windows.py`、`batching.py`，每�
 真实结果推动修复了最终摘要评分语义、常见测试缓存过滤，以及“成功 WRITE 掩盖其他非预期
 路径”的范围漏洞。Provider 未报告费用，仍记为 unavailable。
 
+跨文件阶段的 4 个任务也已完成纯本地预检：候选外发范围为 864 字节目标文本与 4231 字节
+固定 Fixture，每个 Case 最多 8 次模型调用，预期修改范围和保护文件逐项固定。预检报告的
+`external_request_started` 为 `false`，因此尚无跨文件 Provider 成功率、Token 或费用结果，
+也不能把预检记成真实执行证据。
+
 ## 5. 测试覆盖
 
 ```text
