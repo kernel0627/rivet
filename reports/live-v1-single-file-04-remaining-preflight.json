@@ -1,0 +1,183 @@
+{
+  "external_request_started": false,
+  "limits": {
+    "cost_status": "unavailable_before_provider_response",
+    "cost_usd": null,
+    "max_input_tokens_for_batch": 168000,
+    "max_input_tokens_per_call": 8000,
+    "max_model_calls_for_batch": 21,
+    "max_model_calls_per_case": 7,
+    "max_output_tokens_for_batch": 21504,
+    "max_output_tokens_per_call": 1024
+  },
+  "provider": {
+    "adapter": "openai_chat_completions",
+    "api_key_configured": true,
+    "api_key_env": "RIVET_API_KEY",
+    "base_url": "https://api.deepseek.com",
+    "base_url_host": "api.deepseek.com",
+    "model": "deepseek-v4-flash",
+    "name": "deepseek"
+  },
+  "report_type": "live_eval_preflight",
+  "schema_version": 1,
+  "selection": {
+    "case_count": 3,
+    "case_ids": [
+      "live_fix_slug_normalization",
+      "live_fix_window_overlap",
+      "live_fix_batch_chunks"
+    ],
+    "categories": [
+      "single_file"
+    ],
+    "repeat": 1
+  },
+  "transmission": {
+    "cases": [
+      {
+        "category": "single_file",
+        "difficulty": "introductory",
+        "expected_files": [
+          "slug.py"
+        ],
+        "expected_tests": [
+          "python test_slug.py"
+        ],
+        "fixture_bytes": 422,
+        "fixture_file_count": 2,
+        "fixture_files": [
+          {
+            "bytes": 97,
+            "path": "slug.py",
+            "sha256": "13507329b24492a6c47489c9f99383f39b671d990165ac0abbd061a10d603efb"
+          },
+          {
+            "bytes": 325,
+            "path": "test_slug.py",
+            "sha256": "b480af01dc4b94ba50869b6fb4253fb3997b8262c1b4dd3a2bc19f8f122d9263"
+          }
+        ],
+        "forbidden_files": [
+          "test_slug.py"
+        ],
+        "id": "live_fix_slug_normalization",
+        "model_visible_tools": [
+          "list_files",
+          "read_file",
+          "search_text",
+          "python_outline",
+          "find_python_symbol",
+          "read_python_symbol",
+          "find_python_imports",
+          "apply_patch",
+          "run_tests"
+        ],
+        "objective": "修复 slug.py，使标题转换为小写 slug：连续空白、下划线和连字符统一为一个连字符，首尾分隔符移除。不要修改测试，运行 test_slug.py。",
+        "objective_bytes": 179,
+        "objective_sha256": "8684138274444310d618945ab2364eb060a7a00a539d14b4b71261a89986d588",
+        "process_execute_mode": "allow",
+        "workspace_write_mode": "allow"
+      },
+      {
+        "category": "single_file",
+        "difficulty": "introductory",
+        "expected_files": [
+          "windows.py"
+        ],
+        "expected_tests": [
+          "python test_windows.py"
+        ],
+        "fixture_bytes": 594,
+        "fixture_file_count": 2,
+        "fixture_files": [
+          {
+            "bytes": 383,
+            "path": "test_windows.py",
+            "sha256": "ccb01f752c1eab3ffcddce7ce2fe73fefc374b1b5f86ec569c68b18f5f67c218"
+          },
+          {
+            "bytes": 211,
+            "path": "windows.py",
+            "sha256": "fe57913991475d5dbb35b3adbf8912a929d10706619d434cc179a85709e966e6"
+          }
+        ],
+        "forbidden_files": [
+          "test_windows.py"
+        ],
+        "id": "live_fix_window_overlap",
+        "model_visible_tools": [
+          "list_files",
+          "read_file",
+          "search_text",
+          "python_outline",
+          "find_python_symbol",
+          "read_python_symbol",
+          "find_python_imports",
+          "apply_patch",
+          "run_tests"
+        ],
+        "objective": "修复 windows.py 的半开区间重叠判断。两个区间只在端点相接时不算重叠；非法区间仍应拒绝。不要修改测试，运行 test_windows.py。",
+        "objective_bytes": 169,
+        "objective_sha256": "d4dd6e126cc6ee08c6a751dc14cdd4b40bdd3b7145be9e0db082d95f532c6ebb",
+        "process_execute_mode": "allow",
+        "workspace_write_mode": "allow"
+      },
+      {
+        "category": "single_file",
+        "difficulty": "intermediate",
+        "expected_files": [
+          "batching.py"
+        ],
+        "expected_tests": [
+          "python test_batching.py"
+        ],
+        "fixture_bytes": 651,
+        "fixture_file_count": 2,
+        "fixture_files": [
+          {
+            "bytes": 211,
+            "path": "batching.py",
+            "sha256": "f49cec11d96d9c96a078cdf0cdd962944d8213cfa45e7fdcb6b6e4d19222b8fe"
+          },
+          {
+            "bytes": 440,
+            "path": "test_batching.py",
+            "sha256": "53cf2786a951166f59e4dcd4955fdce371b4fef5a293a8828b6b0cc4240063f0"
+          }
+        ],
+        "forbidden_files": [
+          "test_batching.py"
+        ],
+        "id": "live_fix_batch_chunks",
+        "model_visible_tools": [
+          "list_files",
+          "read_file",
+          "search_text",
+          "python_outline",
+          "find_python_symbol",
+          "read_python_symbol",
+          "find_python_imports",
+          "apply_patch",
+          "run_tests"
+        ],
+        "objective": "修复 batching.py，使 chunked 按固定正整数大小分组，保留最后不足一组的数据，并拒绝 size 小于 1。不要修改测试，运行 test_batching.py。",
+        "objective_bytes": 175,
+        "objective_sha256": "a208303fdff518134c08dfa00d40f3a9a4e1b65966f94ad40b12e65dde639e4a",
+        "process_execute_mode": "allow",
+        "workspace_write_mode": "allow"
+      }
+    ],
+    "fixture_bytes": 1667,
+    "includes_config_workspace_source": false,
+    "includes_fixture_files": true,
+    "includes_objectives": true,
+    "objective_bytes": 523
+  },
+  "warnings": [
+    "Model-call and output-token limits are hard runtime/request ceilings, not usage estimates.",
+    "The input-token context limit uses Rivet's estimator and may differ from provider-reported token usage.",
+    "Payload byte counts exclude the runtime system prompt, tool schemas, and later tool results.",
+    "Provider price is not inferred; the report cannot guarantee a USD ceiling."
+  ]
+}

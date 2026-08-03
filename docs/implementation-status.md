@@ -134,6 +134,10 @@ Eval 会把 Fixture、SQLite 状态和 Event 放入同一个临时隔离目录�
 Checkpoint 和 changed files 摘要。下一步扩展其余单文件任务，脱敏证据见
 [reports](../reports/README.md)。
 
+其余 3 个单文件任务已完成纯本地预检：外发候选范围为 523 字节目标文本与 1667 字节固定
+Fixture，只允许分别修改 `slug.py`、`windows.py`、`batching.py`，每任务最多 7 次模型调用。
+预检没有启动外部请求；V1 reference solution 回归已确认每个任务可在允许文件范围内完成。
+
 ## 5. 测试覆盖
 
 ```text

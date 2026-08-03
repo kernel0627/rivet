@@ -67,3 +67,21 @@ Runtime 增加运行期 lease heartbeat 并通过慢流回归测试后，以剩�
 - 最终回答存在，验收证据与实际结果一致。
 
 两份结果报告都不包含 Fixture 内容、Rivet 仓库源码或 API Key。
+
+## 2026-08-04：其余单文件任务预检
+
+`live-v1-single-file-04-remaining-preflight.json` 是其余 3 个单文件任务的纯本地预检，
+`external_request_started` 为 `false`：
+
+- Case：`live_fix_slug_normalization`、`live_fix_window_overlap`、`live_fix_batch_chunks`；
+- 目标文本合计 523 字节，固定 Fixture 合计 1667 字节；
+- 只允许分别修改 `slug.py`、`windows.py`、`batching.py`；
+- 分别保护 `test_slug.py`、`test_windows.py`、`test_batching.py`；
+- 验收命令分别为 `python test_slug.py`、`python test_windows.py`、`python test_batching.py`；
+- 每个任务最多 7 次模型调用、每次最多 8000 输入 Token 和 1024 输出 Token；
+- 三任务理论上限为 21 次调用、168000 输入 Token 和 21504 输出 Token；
+- 模型工具面继续限制为读取、Python 代码理解、`apply_patch` 和 `run_tests`；
+- 不包含 Rivet 仓库源码，Provider 价格仍不推算。
+
+全量本地回归中的 V1 reference solution 测试已确认这 3 个 Fixture 初始失败，且只修改各自允许
+文件即可通过验收。
