@@ -89,15 +89,15 @@ rivet chat --workspace /path/to/repo
 
 ## 3. 当前证据基线
 
-截至 2026-08-03：
+截至 2026-08-04：
 
-- 全量离线测试：`221 passed, 103 subtests passed`；
+- 全量离线测试：`222 passed, 103 subtests passed`；
 - 固定离线 Eval：`8/8 passed`，这些结果来自脚本化 Fake Model；
-- DeepSeek live Eval：最小 `explain_entrypoint 1/1 passed`，另有首个单文件 Bugfix
-  `live_fix_inventory_boundary 1/1 passed`；
+- DeepSeek V1 live Eval：4 个只读、4 个单文件和 4 个跨文件任务最终均成功；另有最小
+  `explain_entrypoint 1/1 passed`；
 - DeepSeek V1 只读任务：`4/4 passed`，全部 Run 为 `COMPLETED`，修改文件和安全事件为 0；
-- 单文件 Bugfix 已有 1 个正式真实 Provider 结果；更多单文件、跨文件修改和失败后继续修复
-  尚无批次证据；
+- 单文件任务最终为 `4/4 passed`，跨文件任务最终为 `4/4 passed`；跨文件首次批次的真实
+  `2/4` 失败和修复后复测均已保留；
 - Rivet 仓库检索基线已证明 Sparse Top-5 `5/5`，Hash Dense Top-5 `0/5`，因此 Hash
   Dense 默认关闭；
 - GitHub Actions 已在提交 `51da519` 上验证 Python 3.10/3.12/3.14、Ruff 和 Wheel 全部
@@ -113,7 +113,7 @@ rivet chat --workspace /path/to/repo
 
 ### 4.1 真实任务集
 
-当前状态：首批 4 个只读任务与首个单文件修改任务已完成，下一步扩展单文件样本。
+当前状态：4 个只读、4 个单文件和 4 个跨文件任务已完成，下一步进入迭代与权限恢复任务。
 
 先完成以下本地工作，再申请一次边界明确的 live 执行授权：
 
@@ -226,11 +226,11 @@ Fixture 内容、Provider、预算上限和外发授权。
 - 种子中的三个写任务也继续保留初始失败检查，作为快速结构冒烟；
 - Eval 报告已补 Token、费用可用状态、测试次数、首次测试结果、修改文件、非预期修改、
   权限干预、工具失败和不含 Payload 的 Event 序列；未知费用不会伪装成零费用；
-- 当前全量回归为 `221 passed, 103 subtests passed`，固定离线 Eval 仍为 `8/8 passed`；
+- 当前全量回归为 `222 passed, 103 subtests passed`，固定离线 Eval 仍为 `8/8 passed`；
 - 首批 4 个只读任务的正式真实 Provider 结果为 `4/4 passed`。
 
-下一步：执行已完成预检的 4 个跨文件任务，比较 Checkpoint、跨文件 Diff、测试、非预期修改
-和调用预算；出现真实失败时再调整 Prompt、工具或 Loop。
+下一步：执行已完成预检的 5 个迭代与权限恢复任务，优先验证首次测试失败后在同一个 Run 内
+继续修复和权限暂停后恢复。
 
 ### 2026-08-04：首个单文件任务结果
 
@@ -250,11 +250,11 @@ Fixture 内容、Provider、预算上限和外发授权。
 - 其余 3 个单文件任务的最终真实结果为 `3/3 passed`，合计 17 次模型调用、20 次工具执行、
   4 次测试、62595 输入 Token 和 3269 输出 Token；每项只修改允许文件，首次测试均通过；
 - 真实执行推动拆分“证据不准确”和“摘要片段缺失”，并补齐缓存过滤与严格非预期路径拒绝；
-- 跨文件阶段的 4 个任务已完成纯本地预检：目标文本共 864 字节、Fixture 共 4231 字节，
-  每任务最多 8 次模型调用；预检未启动外部请求；
-- 下一步整批执行这 4 个任务，并继续观察每个 Case 的跨文件修改范围、测试和调用预算。
+- 跨文件阶段的 4 个任务已完成真实执行与复测，最终为 `4/4 passed`；首次批次 `2/4` 的失败
+  证据也已保留；
+- 下一步进入迭代与权限恢复任务预检，重点观察同一 Run 内的失败测试恢复和权限暂停恢复。
 
-### 2026-08-04：跨文件任务预检
+### 2026-08-04：跨文件任务结果
 
 - 已固定 4 个跨文件 Case，共涉及 8 个预期生产文件位置和 4 条验收命令；
 - 每个 Case 独立限制可修改文件，并保护对应模型文件和测试文件；
@@ -262,9 +262,34 @@ Fixture 内容、Provider、预算上限和外发授权。
 - Provider 为 DeepSeek，模型为 `deepseek-v4-flash`，目的地为 `api.deepseek.com`；
 - 每任务最多 8 次模型调用，每次最多 8000 输入 Token 和 1024 输出 Token；整批理论上限
   为 32 次调用、256000 输入 Token 和 32768 输出 Token；
-- 本地预检的 `external_request_started` 为 `false`，真实批次尚未产生请求、Token 或费用；
-- 下一步一次执行整个跨文件批次，保存逐任务 Trace 与结构化结果；若失败，先按真实失败类别
-  修复并回归，再决定是否进入迭代和权限恢复任务。
+- 本地预检的 `external_request_started` 为 `false`；随后真实执行首次结果为 `2/4 passed`；
+- Pagination 与 Cache 首次通过；Order 只分析未修改便提前结束；Status 在先跑失败测试后被
+  Runtime 错误当成不确定副作用并暂停；
+- Runtime 已把完整返回退出码的失败测试记为已执行结果，允许模型读取失败输出后继续修复，
+  并要求写任务完成修改和验证后才能收尾；直接回归为 `21 passed`；
+- 只复测两个失败 Case，均在各自剩余 5 次调用内通过，最终跨文件结果为 `4/4 passed`；
+- 最终成功证据为 22 次模型调用、32 次工具执行、4 次测试、93247 输入 Token、5907 输出
+  Token、4 个 Checkpoint、0 个非预期修改和 0 个 Safety incident；
+- 计入首次失败尝试后，整批共 28 次模型调用、112728 输入 Token 和 8071 输出 Token；Order
+  与 Status 各使用 8 次总预算；费用仍为 unavailable；
+- 5 个迭代与权限恢复任务的纯本地预检也已完成；下一步执行该批并核对同一 Run 恢复证据。
+
+### 2026-08-04：迭代与权限恢复任务预检
+
+- 已固定 5 个 Case：1 个写权限暂停恢复任务和 4 个根据测试反馈继续修复的任务；
+- 候选外发范围为 1143 字节目标文本和 4790 字节固定 Fixture，不包含 Rivet 仓库源码；
+- 5 个 Case 合计 7 个预期修改位置，分别为 `settings.py`、`importer.py`、`policy.py`、
+  `runner.py`、`validation.py`、`profile.py` 和 `ledger.py`；
+- 保护对应测试文件，并额外保护 `store.py` 与 `account.py`；
+- 验收命令分别为 `python test_settings.py`、`python test_importer.py`、`python test_retry.py`、
+  `python test_profile.py` 和 `python test_ledger.py`；
+- Provider 为 DeepSeek，模型为 `deepseek-v4-flash`，目的地为 `api.deepseek.com`；
+- 每任务最多 10 次模型调用，每次最多 8000 输入 Token 和 1024 输出 Token；整批理论上限
+  为 50 次调用、400000 输入 Token 和 51200 输出 Token；
+- `live_resume_settings_write` 的写权限模式为 `ask`，其余任务为 `allow`，进程执行均为
+  `allow`；
+- 预检 `external_request_started` 为 `false`，没有产生 Provider 请求、Token 或费用；
+- 下一步整批执行并保存逐任务 Trace，重点检查权限恢复次数、首次失败测试和同一 Run 恢复。
 
 ### 2026-08-03：首批只读 live 预检
 

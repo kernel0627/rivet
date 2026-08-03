@@ -24,7 +24,7 @@ Rivet 已形成可运行的单 Agent Coding Runtime。正式入口具备：
 默认测试完全离线。本次验收：
 
 ```text
-pytest: 221 passed, 103 subtests passed
+pytest: 222 passed, 103 subtests passed
 offline eval: 8/8 passed
 offline eval benchmark: 10/10 passed, median 1426.196 ms, p95 1559.593 ms
 DeepSeek live eval: explain_entrypoint 1/1 passed, 2 model calls, 2 tool executions
@@ -144,10 +144,21 @@ Fixture，只允许分别修改 `slug.py`、`windows.py`、`batching.py`，每�
 真实结果推动修复了最终摘要评分语义、常见测试缓存过滤，以及“成功 WRITE 掩盖其他非预期
 路径”的范围漏洞。Provider 未报告费用，仍记为 unavailable。
 
-跨文件阶段的 4 个任务也已完成纯本地预检：候选外发范围为 864 字节目标文本与 4231 字节
-固定 Fixture，每个 Case 最多 8 次模型调用，预期修改范围和保护文件逐项固定。预检报告的
-`external_request_started` 为 `false`，因此尚无跨文件 Provider 成功率、Token 或费用结果，
-也不能把预检记成真实执行证据。
+跨文件阶段的 4 个任务已完成真实执行与复测，最终为 `4/4 passed`。首次批次为 `2/4`：
+Order 在只分析未修改后过早结束；Status 在先跑失败测试后，被 Runtime 错误当成不确定副作用
+而暂停；Pagination 同一 Run 内经历一次可恢复的 Provider 传输错误后完成。失败测试现在记为
+命令已经完整执行的 `APPLIED` 结果，失败输出会回填给模型继续修复；写任务 System Prompt 也
+明确禁止只分析后收尾。
+
+最终成功证据合计 22 次模型调用、32 次工具执行、4 次测试、93247 输入 Token、5907 输出
+Token 和 4 个 Checkpoint；非预期修改、安全事件和工具失败均为 0，包含 1 次已恢复的模型
+传输错误。计入首次失败尝试后，整个批次共使用 28 次模型调用、112728 输入 Token 和 8071
+输出 Token；Order 与 Status 各用满 8 次总预算。Provider 未报告费用，仍记为 unavailable。
+
+剩余 5 个迭代与权限恢复任务已完成纯本地预检：候选外发范围为 1143 字节目标文本和 4790
+字节固定 Fixture，每任务最多 10 次模型调用；其中 `live_resume_settings_write` 强制写权限
+暂停后恢复，其余任务要求根据测试反馈继续修复。预检的 `external_request_started` 为 `false`，
+目前没有该批次的 Provider 请求、Token、费用或成功率。
 
 ## 5. 测试覆盖
 

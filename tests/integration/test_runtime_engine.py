@@ -45,7 +45,12 @@ from rivet.runtime import (
 from rivet.state.artifacts import ContentAddressedArtifactStore
 from rivet.state.protocol import StateMutation
 from rivet.state.sqlite import SQLiteStateStore
-from rivet.tools.builtins import ApplyPatchTool, ListFilesTool, ReadFileTool
+from rivet.tools.builtins import (
+    ApplyPatchTool,
+    ListFilesTool,
+    ReadFileTool,
+    RunTestsTool,
+)
 from rivet.tools.catalog import ToolCatalog
 from rivet.tools.contracts import (
     EffectClass,
@@ -267,6 +272,60 @@ class RuntimeEngineTests(unittest.IsolatedAsyncioTestCase):
         self.assertIsNone(outcome.run.active_turn_id)
         execution = store.list_tool_executions(outcome.run.run_id)[0]
         self.assertEqual(execution.status, ToolExecutionStatus.FAILED)
+        store.close()
+
+    async def test_failed_test_result_continues_after_known_command_completion(
+        self,
+    ) -> None:
+        model = FakeModel.scripted(
+            [
+                ModelResult(
+                    tool_proposals=(
+                        ToolProposal.from_arguments(
+                            tool_call_id="failing-test",
+                            ordinal=0,
+                            name="run_tests",
+                            arguments={
+                                "argv": [
+                                    sys.executable,
+                                    "-c",
+                                    "raise SystemExit(1)",
+                                ]
+                            },
+                        ),
+                    )
+                ),
+                ModelResult(text="The failing test is understood; continue fixing."),
+            ]
+        )
+        engine, store, budget = self.engine(
+            model,
+            extra_tools=(RunTestsTool(),),
+        )
+        started = await engine.start_run(
+            StartRun(
+                workspace=self.workspace,
+                session=self.session,
+                objective="observe a failing test and continue",
+                budget=budget,
+            )
+        )
+        permission_pause = await engine.drive(started.run.run_id)
+        digest = str(permission_pause.run.stop_decision.evidence["prepared_digest"])
+
+        outcome = await engine.resume_run(
+            ResumeRun(
+                run_id=permission_pause.run.run_id,
+                pause_token=permission_pause.run.pause_token,
+                permission_decisions={digest: "allow"},
+            )
+        )
+
+        self.assertEqual(outcome.run.status, RunStatus.COMPLETED)
+        self.assertEqual(outcome.final_response, "The failing test is understood; continue fixing.")
+        execution = store.list_tool_executions(outcome.run.run_id)[0]
+        self.assertEqual(execution.status, ToolExecutionStatus.FAILED)
+        self.assertEqual(execution.side_effect_state.value, "APPLIED")
         store.close()
 
     async def test_retryable_provider_error_creates_a_new_attempt_in_same_turn(

@@ -15,7 +15,7 @@ from rivet.tools.contracts import (
     ToolProposal,
 )
 from rivet.tools.executor import ToolExecutor
-from rivet.tools.results import ErrorKind
+from rivet.tools.results import ErrorKind, SideEffectState
 from rivet.workspace.boundary import WorkspaceBoundary
 from rivet.workspace.command import ProcessResult
 
@@ -109,6 +109,7 @@ class ProcessAndGitToolTests(unittest.IsolatedAsyncioTestCase):
 
         self.assertEqual(result.error_kind, ErrorKind.VERIFICATION_FAILED)
         self.assertEqual(result.content[0].exit_code, 1)
+        self.assertEqual(result.side_effect_state, SideEffectState.APPLIED)
 
     @patch("rivet.tools.builtins.git.shutil.which", return_value="/usr/bin/git")
     async def test_git_diff_disables_external_programs_and_terminates_options(

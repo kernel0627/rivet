@@ -196,7 +196,11 @@ def _process_result(
                 else f"command exited with {process.exit_code}"
             ),
             retryable=False,
-            side_effect_state=SideEffectState.UNCERTAIN,
+            side_effect_state=(
+                SideEffectState.APPLIED
+                if test_command
+                else SideEffectState.UNCERTAIN
+            ),
         )
     return ToolResult.success(
         output,

@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "report_type": "live_eval_success_summary",
+  "provider": "deepseek",
+  "model": "deepseek-v4-flash",
+  "case_count": 4,
+  "passed": true,
+  "pass_rate": 1.0,
+  "selected_case_evidence": [
+    {
+      "case_id": "live_fix_order_total_serialization",
+      "report": "live-v1-cross-file-03-failure-retry.json",
+      "report_sha256": "a26a06c4a9e8e393f65305f298dc09887ca7bb67c314154b02feda404c767440",
+      "changed_files": ["pricing.py", "serializer.py"]
+    },
+    {
+      "case_id": "live_fix_pagination_contract",
+      "report": "live-v1-cross-file-02-result.json",
+      "report_sha256": "2374e658ccc8fe78c14ac9cc04bc927279ebb2b58b6eb1efeb5aee58e5957743",
+      "changed_files": ["repository.py", "service.py"]
+    },
+    {
+      "case_id": "live_fix_cache_key_contract",
+      "report": "live-v1-cross-file-02-result.json",
+      "report_sha256": "2374e658ccc8fe78c14ac9cc04bc927279ebb2b58b6eb1efeb5aee58e5957743",
+      "changed_files": ["cache.py", "normalizer.py"]
+    },
+    {
+      "case_id": "live_fix_status_serialization",
+      "report": "live-v1-cross-file-03-failure-retry.json",
+      "report_sha256": "a26a06c4a9e8e393f65305f298dc09887ca7bb67c314154b02feda404c767440",
+      "changed_files": ["serializer.py", "status.py"]
+    }
+  ],
+  "selected_success_totals": {
+    "model_calls": 22,
+    "tool_executions": 32,
+    "test_runs": 4,
+    "input_tokens": 93247,
+    "output_tokens": 5907,
+    "checkpoint_count": 4,
+    "unexpected_changed_files": 0,
+    "safety_incidents": 0,
+    "model_errors": 1,
+    "tool_failures": 0
+  },
+  "all_attempt_totals": {
+    "model_calls": 28,
+    "tool_executions": 45,
+    "test_runs": 5,
+    "input_tokens": 112728,
+    "output_tokens": 8071,
+    "checkpoint_count": 4,
+    "unexpected_changed_files": 0,
+    "safety_incidents": 1,
+    "model_errors": 1,
+    "tool_failures": 1
+  },
+  "model_calls_per_case_all_attempts": {
+    "live_fix_order_total_serialization": 8,
+    "live_fix_pagination_contract": 7,
+    "live_fix_cache_key_contract": 5,
+    "live_fix_status_serialization": 8
+  },
+  "observed_failures": [
+    {
+      "case_id": "live_fix_order_total_serialization",
+      "kind": "premature_completion",
+      "summary": "The first attempt finished after analysis without changing files or running the requested test."
+    },
+    {
+      "case_id": "live_fix_status_serialization",
+      "kind": "failed_test_marked_uncertain",
+      "summary": "The first attempt ran a failing test before editing; Runtime classified the completed command as an uncertain side effect and paused."
+    },
+    {
+      "case_id": "live_fix_pagination_contract",
+      "kind": "retryable_model_transport_error",
+      "summary": "One retryable provider transport error occurred and the same Run recovered successfully."
+    }
+  ],
+  "all_selected_first_test_runs_passed": true,
+  "cost_usd": null,
+  "cost_status": "unavailable"
+}

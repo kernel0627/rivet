@@ -130,5 +130,51 @@ incident。
 - 模型工具面限制为读取、Python 代码理解、`apply_patch` 和 `run_tests`；
 - 不包含 Rivet 仓库源码，Provider 价格仍不推算。
 
-真实批次尚未启动。下一份结果报告只有在整批外发边界明确后才生成；预检文件本身足以复查
-Case、Fixture 哈希、修改范围、工具面和预算上限。
+预检文件本身足以复查 Case、Fixture 哈希、修改范围、工具面和预算上限。
+
+## 2026-08-04：跨文件任务结果
+
+`live-v1-cross-file-02-result.json` 保存首次真实批次，原始结果为 `2/4 passed`：
+
+- Pagination 与 Cache 完成，均只修改两个允许文件，测试首次通过；
+- Order 在读取和分析后未修改文件、未调用 `run_tests` 便提前结束；
+- Status 先执行了一次失败测试，Runtime 将完整结束且返回退出码 1 的测试命令记成
+  `UNCERTAIN`，因此以 `uncertain_side_effect` 暂停；
+- Pagination 经历一次可恢复的 `MODEL_TRANSPORT_ERROR`，同一 Run 重试后成功；
+- 首次批次没有非预期文件修改；Status 的暂停形成 1 个 Safety incident，这正是随后修复的
+  错误分类，不能从原始报告中删除。
+
+修复把非零退出的 `run_tests` 记为已完整执行的 `APPLIED` 结果，使失败输出能够回填给模型并
+继续下一轮；超时仍保持 `UNCERTAIN`。同时写任务的 System Prompt 明确要求完成修改和指定
+验证后再收尾。`live-v1-cross-file-03-failure-retry.json` 只复测 Order 与 Status，每项最多使用
+原预算剩余的 5 次调用，结果为 `2/2 passed`。
+
+`live-v1-cross-file-success-summary.json` 按 Case 选择最终成功证据并记录两组总数：
+
+- 最终成功证据：`4/4 passed`，22 次模型调用、32 次工具执行、4 次测试、93247 输入 Token、
+  5907 输出 Token 和 4 个 Checkpoint；非预期修改、安全事件和工具失败均为 0；Pagination
+  保留 1 次已恢复的模型传输错误；
+- 所有尝试：28 次模型调用、45 次工具执行、5 次测试、112728 输入 Token、8071 输出 Token，
+  另包含首次 Status 的 1 次工具失败和 1 个 Safety incident；
+- Order 与 Status 各使用 8 次总调用预算，Pagination 使用 7 次，Cache 使用 5 次；
+- Provider 未报告可靠 USD 费用，费用为 `unavailable`。
+
+## 2026-08-04：迭代与权限恢复任务预检
+
+`live-v1-iterative-01-preflight.json` 是剩余 5 个 V1 任务的纯本地预检，
+`external_request_started` 为 `false`：
+
+- Case：`live_resume_settings_write`、`live_fix_csv_import_recovery`、
+  `live_fix_retry_execution_flow`、`live_fix_profile_validation_order`、
+  `live_fix_ledger_commit_order`；
+- 目标文本合计 1143 字节，固定 Fixture 合计 4790 字节；
+- 预期修改位置为 `settings.py`、`importer.py`、`policy.py`、`runner.py`、
+  `validation.py`、`profile.py` 和 `ledger.py`；
+- 保护全部测试文件，并额外保护 `store.py` 与 `account.py`；
+- 验收命令分别为 `python test_settings.py`、`python test_importer.py`、
+  `python test_retry.py`、`python test_profile.py` 和 `python test_ledger.py`；
+- `live_resume_settings_write` 强制写权限 `ask`，用于验证原 Run 暂停后恢复；其余任务允许写入；
+- 每任务最多 10 次模型调用、每次最多 8000 输入 Token 和 1024 输出 Token；整批理论上限
+  为 50 次调用、400000 输入 Token 和 51200 输出 Token；
+- 模型工具面限制为读取、Python 代码理解、`apply_patch` 和 `run_tests`；
+- 不包含 Rivet 仓库源码，尚未产生 Provider 请求、Token 或费用。
