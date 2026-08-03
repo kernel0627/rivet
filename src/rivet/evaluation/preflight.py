@@ -183,6 +183,7 @@ def _case_payload(case: EvalCase) -> dict[str, object]:
         "expected_files": list(case.expected_files),
         "forbidden_files": list(case.forbidden_files),
         "expected_tests": list(case.expected_tests),
+        "automatic_resume_permissions": list(case.resume_permissions),
         "workspace_write_mode": _permission_mode(case, "workspace_write"),
         "process_execute_mode": _permission_mode(case, "process_execute"),
         "model_visible_tools": (

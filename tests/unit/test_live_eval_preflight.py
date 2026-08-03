@@ -170,6 +170,33 @@ class LiveEvalPreflightTests(unittest.TestCase):
         self.assertNotIn("run_command", tools)
         self.assertNotIn("git_status", tools)
 
+    def test_preflight_discloses_automatic_permission_resumes(self) -> None:
+        config = RivetConfig(
+            model=ModelConfig(provider="deepseek", model="deepseek-chat"),
+        )
+        case = self.case().model_copy(
+            update={
+                "id": "live-resume-write",
+                "task_category": "iterative",
+                "expected_files": ("main.py",),
+                "resume_permissions": ("workspace_write",),
+            }
+        )
+
+        payload = build_live_preflight(
+            [case],
+            config=config,
+            repeat=1,
+            api_key_configured=True,
+        )
+
+        case_payload = payload["transmission"]["cases"][0]
+        self.assertEqual(case_payload["workspace_write_mode"], "ask")
+        self.assertEqual(
+            case_payload["automatic_resume_permissions"],
+            ["workspace_write"],
+        )
+
     def test_event_trace_compacts_consecutive_stream_deltas(self) -> None:
         actor = SimpleNamespace(value="MODEL")
         events = tuple(

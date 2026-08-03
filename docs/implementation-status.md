@@ -24,7 +24,7 @@ Rivet 已形成可运行的单 Agent Coding Runtime。正式入口具备：
 默认测试完全离线。本次验收：
 
 ```text
-pytest: 222 passed, 103 subtests passed
+pytest: 223 passed, 103 subtests passed
 offline eval: 8/8 passed
 offline eval benchmark: 10/10 passed, median 1426.196 ms, p95 1559.593 ms
 DeepSeek live eval: explain_entrypoint 1/1 passed, 2 model calls, 2 tool executions
@@ -157,8 +157,9 @@ Token 和 4 个 Checkpoint；非预期修改、安全事件和工具失败均为
 
 剩余 5 个迭代与权限恢复任务已完成纯本地预检：候选外发范围为 1143 字节目标文本和 4790
 字节固定 Fixture，每任务最多 10 次模型调用；其中 `live_resume_settings_write` 强制写权限
-暂停后恢复，其余任务要求根据测试反馈继续修复。预检的 `external_request_started` 为 `false`，
-目前没有该批次的 Provider 请求、Token、费用或成功率。
+暂停后恢复，其余任务要求根据测试反馈继续修复。预检现在显式记录每个 Case 的
+`automatic_resume_permissions`，不会只显示 `workspace_write = ask` 而隐藏自动恢复行为。预检的
+`external_request_started` 为 `false`，目前没有该批次的 Provider 请求、Token、费用或成功率。
 
 ## 5. 测试覆盖
 

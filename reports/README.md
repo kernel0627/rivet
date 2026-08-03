@@ -173,7 +173,8 @@ incident。
 - 保护全部测试文件，并额外保护 `store.py` 与 `account.py`；
 - 验收命令分别为 `python test_settings.py`、`python test_importer.py`、
   `python test_retry.py`、`python test_profile.py` 和 `python test_ledger.py`；
-- `live_resume_settings_write` 强制写权限 `ask`，用于验证原 Run 暂停后恢复；其余任务允许写入；
+- `live_resume_settings_write` 强制写权限 `ask`，用于验证原 Run 暂停后恢复；报告明确记录其
+  `automatic_resume_permissions` 只有 `workspace_write`，其余任务的自动恢复列表为空；
 - 每任务最多 10 次模型调用、每次最多 8000 输入 Token 和 1024 输出 Token；整批理论上限
   为 50 次调用、400000 输入 Token 和 51200 输出 Token；
 - 模型工具面限制为读取、Python 代码理解、`apply_patch` 和 `run_tests`；

@@ -91,7 +91,7 @@ rivet chat --workspace /path/to/repo
 
 截至 2026-08-04：
 
-- 全量离线测试：`222 passed, 103 subtests passed`；
+- 全量离线测试：`223 passed, 103 subtests passed`；
 - 固定离线 Eval：`8/8 passed`，这些结果来自脚本化 Fake Model；
 - DeepSeek V1 live Eval：4 个只读、4 个单文件和 4 个跨文件任务最终均成功；另有最小
   `explain_entrypoint 1/1 passed`；
@@ -226,7 +226,7 @@ Fixture 内容、Provider、预算上限和外发授权。
 - 种子中的三个写任务也继续保留初始失败检查，作为快速结构冒烟；
 - Eval 报告已补 Token、费用可用状态、测试次数、首次测试结果、修改文件、非预期修改、
   权限干预、工具失败和不含 Payload 的 Event 序列；未知费用不会伪装成零费用；
-- 当前全量回归为 `222 passed, 103 subtests passed`，固定离线 Eval 仍为 `8/8 passed`；
+- 当前全量回归为 `223 passed, 103 subtests passed`，固定离线 Eval 仍为 `8/8 passed`；
 - 首批 4 个只读任务的正式真实 Provider 结果为 `4/4 passed`。
 
 下一步：执行已完成预检的 5 个迭代与权限恢复任务，优先验证首次测试失败后在同一个 Run 内
@@ -288,6 +288,8 @@ Fixture 内容、Provider、预算上限和外发授权。
   为 50 次调用、400000 输入 Token 和 51200 输出 Token；
 - `live_resume_settings_write` 的写权限模式为 `ask`，其余任务为 `allow`，进程执行均为
   `allow`；
+- 预检逐 Case 显式记录 `automatic_resume_permissions`，权限任务仅自动恢复
+  `workspace_write`；
 - 预检 `external_request_started` 为 `false`，没有产生 Provider 请求、Token 或费用；
 - 下一步整批执行并保存逐任务 Trace，重点检查权限恢复次数、首次失败测试和同一 Run 恢复。
 
