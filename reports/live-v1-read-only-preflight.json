@@ -1,0 +1,184 @@
+{
+  "external_request_started": false,
+  "limits": {
+    "cost_status": "unavailable_before_provider_response",
+    "cost_usd": null,
+    "max_input_tokens_for_batch": 96000,
+    "max_input_tokens_per_call": 8000,
+    "max_model_calls_for_batch": 12,
+    "max_model_calls_per_case": 3,
+    "max_output_tokens_for_batch": 12288,
+    "max_output_tokens_per_call": 1024
+  },
+  "provider": {
+    "adapter": "openai_chat_completions",
+    "api_key_configured": true,
+    "api_key_env": "RIVET_API_KEY",
+    "base_url": "https://api.deepseek.com",
+    "base_url_host": "api.deepseek.com",
+    "model": "deepseek-v4-flash",
+    "name": "deepseek"
+  },
+  "report_type": "live_eval_preflight",
+  "schema_version": 1,
+  "selection": {
+    "case_count": 4,
+    "case_ids": [
+      "live_explain_checkout_failure",
+      "live_explain_session_expiry",
+      "live_explain_retry_delay",
+      "live_explain_config_precedence"
+    ],
+    "categories": [
+      "read_only"
+    ],
+    "repeat": 1
+  },
+  "transmission": {
+    "cases": [
+      {
+        "category": "read_only",
+        "difficulty": "intermediate",
+        "expected_files": [],
+        "expected_tests": [],
+        "fixture_bytes": 664,
+        "fixture_file_count": 4,
+        "fixture_files": [
+          {
+            "bytes": 0,
+            "path": "src/__init__.py",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "bytes": 169,
+            "path": "src/checkout.py",
+            "sha256": "5fcb1ef04778247b29348e3f9c67478437d89023a3611711cd4f1fd08ba1e895"
+          },
+          {
+            "bytes": 254,
+            "path": "src/payments.py",
+            "sha256": "22c3748d98448bf7f910b7f40ba8f54ec9e53212252e85510f71232c37b36f91"
+          },
+          {
+            "bytes": 241,
+            "path": "test_checkout.py",
+            "sha256": "6ee0151a6febe38388a6affbb8b08cf1ab5d82447be58a7271e515dc6b9c39c7"
+          }
+        ],
+        "forbidden_files": [
+          "src/__init__.py",
+          "src/payments.py",
+          "src/checkout.py",
+          "test_checkout.py"
+        ],
+        "id": "live_explain_checkout_failure",
+        "objective": "阅读失败测试及相关实现，说明 total_with_fee 的计算为什么错误、问题位于哪个函数，以及 rate 参数应如何解释。不要修改文件。",
+        "objective_bytes": 169,
+        "objective_sha256": "ebe9ae51f993436c92e040259601dfb9d872afedfc27ba1c59a3e20aceb1708d",
+        "process_execute_mode": "deny",
+        "workspace_write_mode": "deny"
+      },
+      {
+        "category": "read_only",
+        "difficulty": "introductory",
+        "expected_files": [],
+        "expected_tests": [],
+        "fixture_bytes": 485,
+        "fixture_file_count": 2,
+        "fixture_files": [
+          {
+            "bytes": 131,
+            "path": "sessions.py",
+            "sha256": "3e399ec916e189204813e66f0b87ac9b5e9d5f625b9ed2dafd76e006725830f7"
+          },
+          {
+            "bytes": 354,
+            "path": "test_sessions.py",
+            "sha256": "a491b2aae3123a570dc7b628dbc5b446d13e66e9371c9803edb2723107e91a45"
+          }
+        ],
+        "forbidden_files": [
+          "sessions.py",
+          "test_sessions.py"
+        ],
+        "id": "live_explain_session_expiry",
+        "objective": "阅读会话过期逻辑和失败测试，说明边界时刻为什么被错误地视为有效，并指出应修改的判断条件。不要修改文件。",
+        "objective_bytes": 153,
+        "objective_sha256": "d2249657f2be651414637afe8db12f956e75f0adac4edfaee7abe93d13fb5824",
+        "process_execute_mode": "deny",
+        "workspace_write_mode": "deny"
+      },
+      {
+        "category": "read_only",
+        "difficulty": "intermediate",
+        "expected_files": [],
+        "expected_tests": [],
+        "fixture_bytes": 431,
+        "fixture_file_count": 2,
+        "fixture_files": [
+          {
+            "bytes": 163,
+            "path": "backoff.py",
+            "sha256": "9de0f2ccdf614ffba0ed8f154962eb6145604a6dbde9874cb0c7b9d50cd1168b"
+          },
+          {
+            "bytes": 268,
+            "path": "test_backoff.py",
+            "sha256": "2a706e1e71c787d508aacf2c91841e5347f5ad730fb8f9c50498a8594ef07235"
+          }
+        ],
+        "forbidden_files": [
+          "backoff.py",
+          "test_backoff.py"
+        ],
+        "id": "live_explain_retry_delay",
+        "objective": "分析 retry_delay 的失败测试，解释 attempt 的编号约定、当前公式产生的序列，以及正确的指数退避公式。不要修改文件。",
+        "objective_bytes": 157,
+        "objective_sha256": "10d46f900bf7c64a764b5996b844d11ea195a2770bdf5634deb5b0129c3a2303",
+        "process_execute_mode": "deny",
+        "workspace_write_mode": "deny"
+      },
+      {
+        "category": "read_only",
+        "difficulty": "intermediate",
+        "expected_files": [],
+        "expected_tests": [],
+        "fixture_bytes": 420,
+        "fixture_file_count": 2,
+        "fixture_files": [
+          {
+            "bytes": 135,
+            "path": "config.py",
+            "sha256": "e0e597ce0152d0a28e0aa406ba65c618d66986db56602068387cd24c70906ae8"
+          },
+          {
+            "bytes": 285,
+            "path": "test_config.py",
+            "sha256": "7d46cd89deeb90bc994879eee1d41c6676d9ed282c334b16c0587314e73648f3"
+          }
+        ],
+        "forbidden_files": [
+          "config.py",
+          "test_config.py"
+        ],
+        "id": "live_explain_config_precedence",
+        "objective": "阅读配置合并实现和失败测试，说明为什么环境覆盖值没有生效、字典展开顺序代表什么，并给出最小修复建议。不要修改文件。",
+        "objective_bytes": 171,
+        "objective_sha256": "82ee337cad7c588c9d4aefe028ef15bb70c9793f8cd29a59dc09b22a45236ad6",
+        "process_execute_mode": "deny",
+        "workspace_write_mode": "deny"
+      }
+    ],
+    "fixture_bytes": 2000,
+    "includes_config_workspace_source": false,
+    "includes_fixture_files": true,
+    "includes_objectives": true,
+    "objective_bytes": 650
+  },
+  "warnings": [
+    "Model-call and output-token limits are hard runtime/request ceilings, not usage estimates.",
+    "The input-token context limit uses Rivet's estimator and may differ from provider-reported token usage.",
+    "Payload byte counts exclude the runtime system prompt, tool schemas, and later tool results.",
+    "Provider price is not inferred; the report cannot guarantee a USD ceiling."
+  ]
+}

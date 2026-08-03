@@ -27,6 +27,7 @@ from rivet.evaluation.metrics import (
     recall_at_k,
     reciprocal_rank,
 )
+from rivet.evaluation.preflight import LiveEvalLimits, build_live_preflight
 from rivet.evaluation.runner import (
     EvalCaseResult,
     EvalExecution,
@@ -49,12 +50,14 @@ __all__ = [
     "EvalSuiteResult",
     "EvalToolCall",
     "EvaluationRunner",
+    "LiveEvalLimits",
     "RetrievalMetrics",
     "SafetyAssessment",
     "SafetyObservation",
     "TaskCompletionAssessment",
     "TrajectoryMetrics",
     "benchmark_evaluation",
+    "build_live_preflight",
     "iter_by_tag",
     "load_baseline",
     "load_jsonl",

@@ -10,7 +10,7 @@ Checkpoint/Rewind、验证、代码智能、Trace 和终端交互。
 工具适配与可选 Reviewer 基线。2026-08-01 的本地离线验收结果为：
 
 ```text
-205 passed, 103 subtests passed
+210 passed, 103 subtests passed
 Ruff: all checks passed
 ```
 
@@ -334,6 +334,27 @@ rivet eval --mode offline --dataset benchmarks/live_tasks_seed.jsonl
 小批任务，或使用 `--category` 选择四类中的一个执行批次；只有明确准备运行完整数据集时才
 传入 `--all-cases`。V1 任务尚未形成真实成功率证据。执行前必须确认 Provider、模型、
 Case、Fixture 外发内容和预算，具体边界见 [评估数据集说明](benchmarks/README.md)。
+
+使用 `--preflight` 可以在不发送请求的情况下生成目的地主机、模型、Case、Fixture 文件哈希、
+字节数和理论 Token 上限。live 执行可临时收紧每个 Case 的边界：
+
+```bash
+rivet eval --mode live \
+  --dataset benchmarks/live_tasks_v1.jsonl \
+  --category read_only \
+  --config-workspace . \
+  --preflight \
+  --max-model-calls 3 \
+  --max-input-tokens 8000 \
+  --max-output-tokens 1024 \
+  --output reports/live-v1-read-only-preflight.json \
+  --json
+```
+
+模型调用次数和输出 Token 数是运行时/请求硬上限，不是用量预测；输入 Token 上限由
+Rivet 的 Token 估算器执行，可能与 Provider 最终报告的用量有差异。没有 Provider 定价时
+不会伪造 USD 上限。只读 Case 的 `workspace_write` 和 `process_execute` 权限均由 Eval
+Runtime 直接设为 `deny`。
 
 需要观察本地 Runtime 和 Eval 基础设施的性能回退时，可以重复执行同一套离线场景：
 

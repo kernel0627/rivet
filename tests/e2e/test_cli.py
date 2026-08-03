@@ -2,12 +2,14 @@ from __future__ import annotations
 
 import io
 import json
+import os
 import subprocess
 import sys
 import tempfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
+from unittest.mock import patch
 
 from rivet.interfaces.cli import main as cli_main
 from rivet.interfaces.headless import main as headless_main
@@ -245,6 +247,80 @@ class CliTests(unittest.TestCase):
         self.assertTrue(
             all(case["task_category"] == "read_only" for case in payload["cases"])
         )
+
+    def test_live_preflight_reports_boundary_without_sending_request(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            project = root / ".rivet"
+            project.mkdir()
+            (project / "config.toml").write_text(
+                "\n".join(
+                    (
+                        "[model]",
+                        'provider = "deepseek"',
+                        'model = "deepseek-chat"',
+                        'api_key_env = "RIVET_TEST_KEY"',
+                    )
+                ),
+                encoding="utf-8",
+            )
+            dataset = root / "live.jsonl"
+            dataset.write_text(
+                json.dumps(
+                    {
+                        "id": "live-only",
+                        "objective": "inspect main.py without editing",
+                        "fixture": "inline",
+                        "execution_mode": "live_only",
+                        "task_category": "read_only",
+                        "forbidden_files": ["main.py"],
+                        "fixture_files": {"main.py": "print('hello')\n"},
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            report = root / "preflight.json"
+            output = io.StringIO()
+
+            with patch.dict(
+                os.environ,
+                {"RIVET_TEST_KEY": "top-secret"},
+                clear=True,
+            ), redirect_stdout(output):
+                code = cli_main(
+                    [
+                        "eval",
+                        "--mode",
+                        "live",
+                        "--dataset",
+                        str(dataset),
+                        "--case",
+                        "live-only",
+                        "--config-workspace",
+                        str(root),
+                        "--preflight",
+                        "--max-model-calls",
+                        "3",
+                        "--max-input-tokens",
+                        "4000",
+                        "--max-output-tokens",
+                        "512",
+                        "--output",
+                        str(report),
+                        "--json",
+                    ]
+                )
+
+            payload = json.loads(output.getvalue())
+            self.assertEqual(code, 0)
+            self.assertFalse(payload["external_request_started"])
+            self.assertEqual(payload["provider"]["name"], "deepseek")
+            self.assertTrue(payload["provider"]["api_key_configured"])
+            self.assertEqual(payload["limits"]["max_model_calls_for_batch"], 3)
+            self.assertEqual(payload["selection"]["case_ids"], ["live-only"])
+            self.assertEqual(json.loads(report.read_text(encoding="utf-8")), payload)
+            self.assertNotIn("top-secret", output.getvalue())
 
     def test_retrieval_benchmark_writes_structured_report(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

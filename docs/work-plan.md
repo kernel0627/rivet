@@ -1,7 +1,7 @@
 # Rivet 后续工作计划
 
 状态：Active
-最近更新：2026-08-01
+最近更新：2026-08-03
 
 这份文档只维护 Rivet 接下来真正要证明什么、先做什么、怎样验收。
 [implementation-status.md](implementation-status.md) 记录已经实现和验证的能力，
@@ -91,7 +91,7 @@ rivet chat --workspace /path/to/repo
 
 截至 2026-08-01：
 
-- 全量离线测试：`205 passed, 103 subtests passed`；
+- 全量离线测试：`210 passed, 103 subtests passed`；
 - 固定离线 Eval：`8/8 passed`，这些结果来自脚本化 Fake Model；
 - DeepSeek live Eval：仅 `explain_entrypoint 1/1 passed`，Fixture 是一个打印 `hello` 的
   5 行文件，不能代表真实 Bugfix；
@@ -111,7 +111,7 @@ rivet chat --workspace /path/to/repo
 
 ### 4.1 真实任务集
 
-当前状态：本地任务集已完成，等待首批 live 执行。
+当前状态：本地任务集与首批预检已完成，等待明确外发授权。
 
 先完成以下本地工作，再申请一次边界明确的 live 执行授权：
 
@@ -224,11 +224,25 @@ Fixture 内容、Provider、预算上限和外发授权。
 - 种子中的三个写任务也继续保留初始失败检查，作为快速结构冒烟；
 - Eval 报告已补 Token、费用可用状态、测试次数、首次测试结果、修改文件、非预期修改、
   权限干预、工具失败和不含 Payload 的 Event 序列；未知费用不会伪装成零费用；
-- 当前全量回归为 `205 passed, 103 subtests passed`，固定离线 Eval 仍为 `8/8 passed`；
+- 当前全量回归为 `210 passed, 103 subtests passed`，固定离线 Eval 仍为 `8/8 passed`；
 - 尚未调用真实 Provider，正式成功率仍为空。
 
 下一步：先选择 2～4 个只读任务作为首批 live 执行，固定 Provider、模型、Fixture 外发
 范围和预算上限；验证报告与 Trace 后，再进入单文件和跨文件任务。
+
+### 2026-08-03：首批只读 live 预检
+
+- 已选择 4 个只读任务，目标为 `api.deepseek.com`，模型为 `deepseek-v4-flash`；
+- 外发范围为 650 字节目标文本和 2000 字节 inline Fixture，不包含当前 Rivet 仓库源码；
+- 每任务最多 3 次模型调用，每次最多 8000 输入 Token 和 1024 输出 Token；
+- Eval Runtime 对只读 Case 强制 `workspace_write = deny` 和 `process_execute = deny`；
+- 预检没有启动外部请求；
+- 受限网络内的首次启动形成 4 个 `provider_unavailable`，实际 Token 和费用为 0；
+- 联网执行在进程启动前被审批层拒绝，正式真实 Provider 成功率仍为空；
+- 预检与阻断报告保存在 [reports](../reports/README.md)。
+
+下一动作需要用户明确授权：将上述 4 个任务目标和 2000 字节 Fixture 发送到
+`api.deepseek.com`，使用 `deepseek-v4-flash`，接受可能费用，并保持上述调用与 Token 上限。
 
 ## 10. 完成与维护规则
 

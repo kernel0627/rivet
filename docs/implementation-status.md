@@ -24,7 +24,7 @@ Rivet 已形成可运行的单 Agent Coding Runtime。正式入口具备：
 默认测试完全离线。本次验收：
 
 ```text
-pytest: 205 passed, 103 subtests passed
+pytest: 210 passed, 103 subtests passed
 offline eval: 8/8 passed
 offline eval benchmark: 10/10 passed, median 1426.196 ms, p95 1559.593 ms
 DeepSeek live eval: explain_entrypoint 1/1 passed, 2 model calls, 2 tool executions
@@ -75,6 +75,8 @@ M5 在设计中属于后续扩展，不是正式 V1 的发布阻塞项。
 - 与 Fake 基线隔离的四类 live-only 任务种子，以及 17 任务 V1 数据集；
 - live 数据集支持完全离线的 Case/Category 清单预览，真实执行必须显式选择 Case、Category
   或确认全量运行；
+- live 预检报告目的地 URL/主机、模型、Fixture 哈希/字节数和理论 Token 上限，支持按本次
+  Eval 收紧模型调用和输入/输出 Token；只读任务强制拒绝工作区写入和进程执行；
 - 真实 Rivet 仓库的可重复索引/检索基准 CLI 与固定查询集；
 - Fake Model 条件驱动和脚本驱动；
 - SQLite State 与内容寻址 Artifact；
@@ -119,6 +121,10 @@ Eval 会把 Fixture、SQLite 状态和 Event 放入同一个临时隔离目录�
 真实任务 V1 已完成 17 个任务的结构、修改边界、初始失败条件和本地参考解验证，尚未调用
 Provider。它不构成真实 Bugfix 成功率证据；下一步是确认 Provider、模型、Case 小批次、Fixture
 外发内容和预算后执行，指标和授权边界见 [work-plan.md](work-plan.md)。
+
+2026-08-03 已为 4 个只读 V1 任务生成本地预检。受限网络内的首次启动记录为 4 个
+`provider_unavailable`，实际 Token 和费用为 0；联网执行在进程启动前被审批层拒绝，因此
+正式真实 Provider 成功率仍为空。脱敏证据见 [reports](../reports/README.md)。
 
 ## 5. 测试覆盖
 

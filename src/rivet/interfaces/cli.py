@@ -23,8 +23,10 @@ from rivet.code_intelligence.lsp import discover_python_server
 from rivet.configuration import load_config
 from rivet.evaluation import (
     EvaluationRunner,
+    LiveEvalLimits,
     RivetEvalExecutor,
     benchmark_evaluation,
+    build_live_preflight,
     load_baseline,
     load_jsonl,
 )
@@ -163,6 +165,26 @@ def _parser() -> argparse.ArgumentParser:
         "--list-cases",
         action="store_true",
         help="List selected case contracts without starting an evaluation.",
+    )
+    eval_parser.add_argument(
+        "--preflight",
+        action="store_true",
+        help="Report the live destination, payload boundary, and limits without sending a request.",
+    )
+    eval_parser.add_argument(
+        "--max-model-calls",
+        type=_positive_int,
+        help="Override the maximum model calls for each live case.",
+    )
+    eval_parser.add_argument(
+        "--max-input-tokens",
+        type=_positive_int,
+        help="Override the maximum input context tokens for each live model call.",
+    )
+    eval_parser.add_argument(
+        "--max-output-tokens",
+        type=_positive_int,
+        help="Override the maximum output tokens for each live model call.",
     )
     eval_parser.add_argument("--timeout", type=float, default=120.0)
     eval_parser.add_argument(
@@ -461,6 +483,11 @@ async def _eval(args: argparse.Namespace) -> int:
                     f"[{case.execution_mode}]"
                 )
         return 0
+    live_limits = LiveEvalLimits(
+        max_model_calls=args.max_model_calls,
+        max_input_tokens=args.max_input_tokens,
+        max_output_tokens=args.max_output_tokens,
+    )
     if (
         args.mode == "live"
         and not args.case
@@ -471,6 +498,56 @@ async def _eval(args: argparse.Namespace) -> int:
             "live eval requires an explicit --case or --category selection; "
             "pass --all-cases only when the full request count and cost are intentional"
         )
+    if args.preflight:
+        if args.mode != "live":
+            raise ValueError("eval --preflight requires --mode live")
+        loaded = load_config(
+            Path(args.config_workspace),
+            overrides=live_limits.config_overrides(),
+        )
+        payload = build_live_preflight(
+            cases,
+            config=loaded.config,
+            repeat=args.repeat,
+            api_key_configured=bool(
+                os.environ.get(loaded.config.model.api_key_env)
+            ),
+        )
+        _write_json_report(args.output, payload)
+        if args.json:
+            print(json.dumps(payload, ensure_ascii=False))
+        else:
+            provider = payload["provider"]
+            selection = payload["selection"]
+            limits = payload["limits"]
+            transmission = payload["transmission"]
+            assert isinstance(provider, dict)
+            assert isinstance(selection, dict)
+            assert isinstance(limits, dict)
+            assert isinstance(transmission, dict)
+            print(
+                f"provider: {provider['name']} / {provider['model']} "
+                f"@ {provider['base_url_host']}"
+            )
+            print(
+                f"selection: {selection['case_count']} case(s), "
+                f"repeat={selection['repeat']}"
+            )
+            print(
+                "limits: "
+                f"model_calls={limits['max_model_calls_for_batch']}, "
+                f"input_tokens={limits['max_input_tokens_for_batch']}, "
+                f"output_tokens={limits['max_output_tokens_for_batch']}"
+            )
+            print(
+                "payload: "
+                f"objectives={transmission['objective_bytes']} bytes, "
+                f"fixtures={transmission['fixture_bytes']} bytes"
+            )
+            print("external_request_started: false")
+        return 0
+    if args.mode != "live" and live_limits.has_overrides:
+        raise ValueError("live Eval limit overrides require --mode live")
     if args.mode == "offline":
         live_only = [case.id for case in cases if case.execution_mode == "live_only"]
         if live_only:
@@ -482,6 +559,7 @@ async def _eval(args: argparse.Namespace) -> int:
         mode=args.mode,
         config_workspace=Path(args.config_workspace),
         timeout_seconds=args.timeout,
+        live_limits=live_limits,
     )
     runner = EvaluationRunner(executor)
     if args.repeat > 1:

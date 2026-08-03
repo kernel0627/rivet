@@ -164,6 +164,10 @@ Fake Model 应按输入条件返回结果，不能只依赖一个简单的“响
 - live 报告至少记录 Token、费用及其可用状态、测试运行、首次测试结果、修改文件、非预期
   修改、权限干预、错误分类和不含 Payload 的 Event 序列。Provider 未提供可靠费用时必须
   标为 unavailable，不能记作零费用。
+- `--preflight` 在请求前报告目的地主机、模型、目标与 Fixture 边界、文件哈希和理论 Token
+  上限；`--max-model-calls`、`--max-input-tokens` 和 `--max-output-tokens` 可为本次 live
+  Eval 临时收紧配置。输入上限使用本地 Token 估算器。只读 Case 的写权限和进程执行权限
+  必须直接拒绝。
 
 当前固定基线覆盖：
 
@@ -180,6 +184,9 @@ Fake Model 应按输入条件返回结果，不能只依赖一个简单的“响
 13 个写任务的初始验收均已确认失败，并有只修改允许文件即可通过的本地参考解验证。
 `--list-cases` 可以在不创建 Provider 请求的情况下检查 Case 或 Category 选择结果；没有
 执行真实 Provider 时，这些任务不计入成功率。
+
+2026-08-03 的首批只读预检和受限网络阻断报告保存在 [reports](../reports/README.md)。阻断
+报告为 4 个 `provider_unavailable`，Token 与费用为 0；它只证明错误路径和报告链路生效。
 
 后续扩展数据集继续覆盖：
 

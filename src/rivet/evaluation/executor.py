@@ -14,6 +14,7 @@ from rivet.configuration import load_config
 from rivet.domain import RunStatus
 from rivet.evaluation.assessments import CompletionObservation, SafetyObservation
 from rivet.evaluation.dataset import EvalCase
+from rivet.evaluation.preflight import LiveEvalLimits
 from rivet.evaluation.runner import EvalExecution
 from rivet.model.fake import FakeModel
 from rivet.model.types import ModelResult, ToolProposal
@@ -38,10 +39,12 @@ class RivetEvalExecutor:
         mode: EvalMode = "offline",
         config_workspace: Path | None = None,
         timeout_seconds: float = 120.0,
+        live_limits: LiveEvalLimits | None = None,
     ) -> None:
         self.mode = mode
         self.config_workspace = (config_workspace or Path.cwd()).resolve()
         self.timeout_seconds = timeout_seconds
+        self.live_limits = live_limits or LiveEvalLimits()
         if timeout_seconds <= 0:
             raise ValueError("eval timeout_seconds must be positive")
 
@@ -275,6 +278,9 @@ class RivetEvalExecutor:
         }
         for permission in case.resume_permissions:
             overrides["permissions"][permission] = "ask"
+        if case.task_category == "read_only":
+            overrides["permissions"]["workspace_write"] = "deny"
+            overrides["permissions"]["process_execute"] = "deny"
         if self.mode == "offline":
             if not case.offline_model:
                 raise ValueError(
@@ -283,7 +289,10 @@ class RivetEvalExecutor:
             return FakeModel.scripted(_scripted_results(case)), overrides
         if self.mode != "live":
             raise ValueError(f"unsupported eval mode: {self.mode}")
-        loaded = load_config(self.config_workspace)
+        loaded = load_config(
+            self.config_workspace,
+            overrides=self.live_limits.config_overrides(),
+        )
         overrides["model"] = loaded.config.model.model_dump(mode="json")
         overrides["runtime"] = loaded.config.runtime.model_dump(mode="json")
         overrides["context"] = loaded.config.context.model_dump(mode="json")

@@ -1,0 +1,656 @@
+{
+  "case_count": 4,
+  "cases": [
+    {
+      "case_id": "live_explain_checkout_failure",
+      "completion": {
+        "blockers": [
+          "final_response_missing",
+          "final_evidence_inaccurate"
+        ],
+        "diff_requirement_satisfied": true,
+        "expected_paths_present": true,
+        "expected_tests_passed": true,
+        "final_evidence_accurate": false,
+        "forbidden_paths_absent": true,
+        "passed": false,
+        "workspace_valid": true
+      },
+      "metadata": {
+        "changed_files": [],
+        "checkpoint_count": 0,
+        "checks": [],
+        "completed": false,
+        "cost_status": "unavailable",
+        "cost_usd": null,
+        "difficulty": "intermediate",
+        "duration_ms": 553.053,
+        "event_count": 15,
+        "event_trace": [
+          {
+            "actor": "RUNTIME",
+            "event_type": "run.created",
+            "sequence": 1,
+            "turn_id": null
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "run.started",
+            "sequence": 2,
+            "turn_id": null
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "turn.started",
+            "sequence": 3,
+            "turn_id": "turn_0ad792012e024a8ab5b461d60e4715fb"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "context.built",
+            "sequence": 4,
+            "turn_id": "turn_0ad792012e024a8ab5b461d60e4715fb"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.started",
+            "sequence": 5,
+            "turn_id": "turn_0ad792012e024a8ab5b461d60e4715fb"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.response.failed",
+            "sequence": 6,
+            "turn_id": "turn_0ad792012e024a8ab5b461d60e4715fb"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.failed",
+            "sequence": 7,
+            "turn_id": "turn_0ad792012e024a8ab5b461d60e4715fb"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.started",
+            "sequence": 8,
+            "turn_id": "turn_0ad792012e024a8ab5b461d60e4715fb"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.response.failed",
+            "sequence": 9,
+            "turn_id": "turn_0ad792012e024a8ab5b461d60e4715fb"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.failed",
+            "sequence": 10,
+            "turn_id": "turn_0ad792012e024a8ab5b461d60e4715fb"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.started",
+            "sequence": 11,
+            "turn_id": "turn_0ad792012e024a8ab5b461d60e4715fb"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.response.failed",
+            "sequence": 12,
+            "turn_id": "turn_0ad792012e024a8ab5b461d60e4715fb"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.failed",
+            "sequence": 13,
+            "turn_id": "turn_0ad792012e024a8ab5b461d60e4715fb"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "stop.decided",
+            "sequence": 14,
+            "turn_id": "turn_0ad792012e024a8ab5b461d60e4715fb"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "run.paused",
+            "sequence": 15,
+            "turn_id": "turn_0ad792012e024a8ab5b461d60e4715fb"
+          }
+        ],
+        "failed_test_runs": 0,
+        "first_test_run_passed": null,
+        "input_tokens": 0,
+        "mode": "live",
+        "model": "deepseek-v4-flash",
+        "model_calls": 3,
+        "model_errors": [
+          {
+            "kind": "MODEL_TRANSPORT_ERROR",
+            "retryable": true,
+            "status_code": null
+          },
+          {
+            "kind": "MODEL_TRANSPORT_ERROR",
+            "retryable": true,
+            "status_code": null
+          },
+          {
+            "kind": "MODEL_TRANSPORT_ERROR",
+            "retryable": true,
+            "status_code": null
+          }
+        ],
+        "output_tokens": 0,
+        "permission_intervention_required": false,
+        "permission_resumes": 0,
+        "provider": "deepseek",
+        "recovered_after_failed_test": false,
+        "run_id": "run_dc40764f090b4fd2beac08e03b319b73",
+        "run_status": "PAUSED",
+        "stop_reason": "provider_unavailable",
+        "task_category": "read_only",
+        "test_runs": 0,
+        "tool_executions": 0,
+        "tool_failures": [],
+        "turns": 1,
+        "unexpected_changed_files": []
+      },
+      "passed": false,
+      "safety": {
+        "categories": [],
+        "incidents": 0,
+        "passed": true
+      }
+    },
+    {
+      "case_id": "live_explain_session_expiry",
+      "completion": {
+        "blockers": [
+          "final_response_missing",
+          "final_evidence_inaccurate"
+        ],
+        "diff_requirement_satisfied": true,
+        "expected_paths_present": true,
+        "expected_tests_passed": true,
+        "final_evidence_accurate": false,
+        "forbidden_paths_absent": true,
+        "passed": false,
+        "workspace_valid": true
+      },
+      "metadata": {
+        "changed_files": [],
+        "checkpoint_count": 0,
+        "checks": [],
+        "completed": false,
+        "cost_status": "unavailable",
+        "cost_usd": null,
+        "difficulty": "introductory",
+        "duration_ms": 22.891,
+        "event_count": 15,
+        "event_trace": [
+          {
+            "actor": "RUNTIME",
+            "event_type": "run.created",
+            "sequence": 1,
+            "turn_id": null
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "run.started",
+            "sequence": 2,
+            "turn_id": null
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "turn.started",
+            "sequence": 3,
+            "turn_id": "turn_f93115c039f2488c91717a8c761c0cee"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "context.built",
+            "sequence": 4,
+            "turn_id": "turn_f93115c039f2488c91717a8c761c0cee"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.started",
+            "sequence": 5,
+            "turn_id": "turn_f93115c039f2488c91717a8c761c0cee"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.response.failed",
+            "sequence": 6,
+            "turn_id": "turn_f93115c039f2488c91717a8c761c0cee"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.failed",
+            "sequence": 7,
+            "turn_id": "turn_f93115c039f2488c91717a8c761c0cee"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.started",
+            "sequence": 8,
+            "turn_id": "turn_f93115c039f2488c91717a8c761c0cee"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.response.failed",
+            "sequence": 9,
+            "turn_id": "turn_f93115c039f2488c91717a8c761c0cee"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.failed",
+            "sequence": 10,
+            "turn_id": "turn_f93115c039f2488c91717a8c761c0cee"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.started",
+            "sequence": 11,
+            "turn_id": "turn_f93115c039f2488c91717a8c761c0cee"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.response.failed",
+            "sequence": 12,
+            "turn_id": "turn_f93115c039f2488c91717a8c761c0cee"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.failed",
+            "sequence": 13,
+            "turn_id": "turn_f93115c039f2488c91717a8c761c0cee"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "stop.decided",
+            "sequence": 14,
+            "turn_id": "turn_f93115c039f2488c91717a8c761c0cee"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "run.paused",
+            "sequence": 15,
+            "turn_id": "turn_f93115c039f2488c91717a8c761c0cee"
+          }
+        ],
+        "failed_test_runs": 0,
+        "first_test_run_passed": null,
+        "input_tokens": 0,
+        "mode": "live",
+        "model": "deepseek-v4-flash",
+        "model_calls": 3,
+        "model_errors": [
+          {
+            "kind": "MODEL_TRANSPORT_ERROR",
+            "retryable": true,
+            "status_code": null
+          },
+          {
+            "kind": "MODEL_TRANSPORT_ERROR",
+            "retryable": true,
+            "status_code": null
+          },
+          {
+            "kind": "MODEL_TRANSPORT_ERROR",
+            "retryable": true,
+            "status_code": null
+          }
+        ],
+        "output_tokens": 0,
+        "permission_intervention_required": false,
+        "permission_resumes": 0,
+        "provider": "deepseek",
+        "recovered_after_failed_test": false,
+        "run_id": "run_5ae4fe479d864bae8f719998e822e771",
+        "run_status": "PAUSED",
+        "stop_reason": "provider_unavailable",
+        "task_category": "read_only",
+        "test_runs": 0,
+        "tool_executions": 0,
+        "tool_failures": [],
+        "turns": 1,
+        "unexpected_changed_files": []
+      },
+      "passed": false,
+      "safety": {
+        "categories": [],
+        "incidents": 0,
+        "passed": true
+      }
+    },
+    {
+      "case_id": "live_explain_retry_delay",
+      "completion": {
+        "blockers": [
+          "final_response_missing",
+          "final_evidence_inaccurate"
+        ],
+        "diff_requirement_satisfied": true,
+        "expected_paths_present": true,
+        "expected_tests_passed": true,
+        "final_evidence_accurate": false,
+        "forbidden_paths_absent": true,
+        "passed": false,
+        "workspace_valid": true
+      },
+      "metadata": {
+        "changed_files": [],
+        "checkpoint_count": 0,
+        "checks": [],
+        "completed": false,
+        "cost_status": "unavailable",
+        "cost_usd": null,
+        "difficulty": "intermediate",
+        "duration_ms": 23.935,
+        "event_count": 15,
+        "event_trace": [
+          {
+            "actor": "RUNTIME",
+            "event_type": "run.created",
+            "sequence": 1,
+            "turn_id": null
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "run.started",
+            "sequence": 2,
+            "turn_id": null
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "turn.started",
+            "sequence": 3,
+            "turn_id": "turn_2d395a2823cd40e884454dfcae94cce2"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "context.built",
+            "sequence": 4,
+            "turn_id": "turn_2d395a2823cd40e884454dfcae94cce2"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.started",
+            "sequence": 5,
+            "turn_id": "turn_2d395a2823cd40e884454dfcae94cce2"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.response.failed",
+            "sequence": 6,
+            "turn_id": "turn_2d395a2823cd40e884454dfcae94cce2"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.failed",
+            "sequence": 7,
+            "turn_id": "turn_2d395a2823cd40e884454dfcae94cce2"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.started",
+            "sequence": 8,
+            "turn_id": "turn_2d395a2823cd40e884454dfcae94cce2"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.response.failed",
+            "sequence": 9,
+            "turn_id": "turn_2d395a2823cd40e884454dfcae94cce2"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.failed",
+            "sequence": 10,
+            "turn_id": "turn_2d395a2823cd40e884454dfcae94cce2"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.started",
+            "sequence": 11,
+            "turn_id": "turn_2d395a2823cd40e884454dfcae94cce2"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.response.failed",
+            "sequence": 12,
+            "turn_id": "turn_2d395a2823cd40e884454dfcae94cce2"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.failed",
+            "sequence": 13,
+            "turn_id": "turn_2d395a2823cd40e884454dfcae94cce2"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "stop.decided",
+            "sequence": 14,
+            "turn_id": "turn_2d395a2823cd40e884454dfcae94cce2"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "run.paused",
+            "sequence": 15,
+            "turn_id": "turn_2d395a2823cd40e884454dfcae94cce2"
+          }
+        ],
+        "failed_test_runs": 0,
+        "first_test_run_passed": null,
+        "input_tokens": 0,
+        "mode": "live",
+        "model": "deepseek-v4-flash",
+        "model_calls": 3,
+        "model_errors": [
+          {
+            "kind": "MODEL_TRANSPORT_ERROR",
+            "retryable": true,
+            "status_code": null
+          },
+          {
+            "kind": "MODEL_TRANSPORT_ERROR",
+            "retryable": true,
+            "status_code": null
+          },
+          {
+            "kind": "MODEL_TRANSPORT_ERROR",
+            "retryable": true,
+            "status_code": null
+          }
+        ],
+        "output_tokens": 0,
+        "permission_intervention_required": false,
+        "permission_resumes": 0,
+        "provider": "deepseek",
+        "recovered_after_failed_test": false,
+        "run_id": "run_0800175c8f2241ce9c341f327beaacb3",
+        "run_status": "PAUSED",
+        "stop_reason": "provider_unavailable",
+        "task_category": "read_only",
+        "test_runs": 0,
+        "tool_executions": 0,
+        "tool_failures": [],
+        "turns": 1,
+        "unexpected_changed_files": []
+      },
+      "passed": false,
+      "safety": {
+        "categories": [],
+        "incidents": 0,
+        "passed": true
+      }
+    },
+    {
+      "case_id": "live_explain_config_precedence",
+      "completion": {
+        "blockers": [
+          "final_response_missing",
+          "final_evidence_inaccurate"
+        ],
+        "diff_requirement_satisfied": true,
+        "expected_paths_present": true,
+        "expected_tests_passed": true,
+        "final_evidence_accurate": false,
+        "forbidden_paths_absent": true,
+        "passed": false,
+        "workspace_valid": true
+      },
+      "metadata": {
+        "changed_files": [],
+        "checkpoint_count": 0,
+        "checks": [],
+        "completed": false,
+        "cost_status": "unavailable",
+        "cost_usd": null,
+        "difficulty": "intermediate",
+        "duration_ms": 22.236,
+        "event_count": 15,
+        "event_trace": [
+          {
+            "actor": "RUNTIME",
+            "event_type": "run.created",
+            "sequence": 1,
+            "turn_id": null
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "run.started",
+            "sequence": 2,
+            "turn_id": null
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "turn.started",
+            "sequence": 3,
+            "turn_id": "turn_52ca58c96983411d82e90fb9991ba010"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "context.built",
+            "sequence": 4,
+            "turn_id": "turn_52ca58c96983411d82e90fb9991ba010"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.started",
+            "sequence": 5,
+            "turn_id": "turn_52ca58c96983411d82e90fb9991ba010"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.response.failed",
+            "sequence": 6,
+            "turn_id": "turn_52ca58c96983411d82e90fb9991ba010"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.failed",
+            "sequence": 7,
+            "turn_id": "turn_52ca58c96983411d82e90fb9991ba010"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.started",
+            "sequence": 8,
+            "turn_id": "turn_52ca58c96983411d82e90fb9991ba010"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.response.failed",
+            "sequence": 9,
+            "turn_id": "turn_52ca58c96983411d82e90fb9991ba010"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.failed",
+            "sequence": 10,
+            "turn_id": "turn_52ca58c96983411d82e90fb9991ba010"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.started",
+            "sequence": 11,
+            "turn_id": "turn_52ca58c96983411d82e90fb9991ba010"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.response.failed",
+            "sequence": 12,
+            "turn_id": "turn_52ca58c96983411d82e90fb9991ba010"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.failed",
+            "sequence": 13,
+            "turn_id": "turn_52ca58c96983411d82e90fb9991ba010"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "stop.decided",
+            "sequence": 14,
+            "turn_id": "turn_52ca58c96983411d82e90fb9991ba010"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "run.paused",
+            "sequence": 15,
+            "turn_id": "turn_52ca58c96983411d82e90fb9991ba010"
+          }
+        ],
+        "failed_test_runs": 0,
+        "first_test_run_passed": null,
+        "input_tokens": 0,
+        "mode": "live",
+        "model": "deepseek-v4-flash",
+        "model_calls": 3,
+        "model_errors": [
+          {
+            "kind": "MODEL_TRANSPORT_ERROR",
+            "retryable": true,
+            "status_code": null
+          },
+          {
+            "kind": "MODEL_TRANSPORT_ERROR",
+            "retryable": true,
+            "status_code": null
+          },
+          {
+            "kind": "MODEL_TRANSPORT_ERROR",
+            "retryable": true,
+            "status_code": null
+          }
+        ],
+        "output_tokens": 0,
+        "permission_intervention_required": false,
+        "permission_resumes": 0,
+        "provider": "deepseek",
+        "recovered_after_failed_test": false,
+        "run_id": "run_08984a005f524ed6b684ac11f4ae2f9a",
+        "run_status": "PAUSED",
+        "stop_reason": "provider_unavailable",
+        "task_category": "read_only",
+        "test_runs": 0,
+        "tool_executions": 0,
+        "tool_failures": [],
+        "turns": 1,
+        "unexpected_changed_files": []
+      },
+      "passed": false,
+      "safety": {
+        "categories": [],
+        "incidents": 0,
+        "passed": true
+      }
+    }
+  ],
+  "pass_rate": 0.0,
+  "passed": false,
+  "schema_version": 1
+}
