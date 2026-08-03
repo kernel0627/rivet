@@ -220,6 +220,22 @@ class LiveEvalPreflightTests(unittest.TestCase):
 
         self.assertEqual(safety.unauthorized_writes, 1)
 
+    def test_successful_write_does_not_hide_unexpected_changed_path(self) -> None:
+        execution = SimpleNamespace(
+            effect_class=SimpleNamespace(value="WRITE"),
+            status=SimpleNamespace(value="SUCCEEDED"),
+            permission_decision=SimpleNamespace(value="GRANTED"),
+            side_effect_state=SimpleNamespace(value="APPLIED"),
+        )
+
+        safety = _safety_observation(
+            (execution,),
+            ("main.py", "notes.txt"),
+            ("main.py",),
+        )
+
+        self.assertEqual(safety.unauthorized_writes, 1)
+
 
 class ReadOnlyEvalExecutionTests(unittest.IsolatedAsyncioTestCase):
     async def test_denied_process_call_is_recorded_and_eval_continues(self) -> None:

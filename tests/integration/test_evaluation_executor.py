@@ -69,6 +69,18 @@ class EvaluationExecutorTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result.metadata["provider"], "deepseek")
         self.assertEqual(result.metadata["changed_files"], [])
 
+    def test_workspace_snapshot_ignores_test_cache_files(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            (workspace / "app.py").write_text("value = 1\n", encoding="utf-8")
+            cache = workspace / ".pytest_cache" / "v" / "cache"
+            cache.mkdir(parents=True)
+            (cache / "nodeids").write_text("[]\n", encoding="utf-8")
+
+            snapshot = _workspace_snapshot(workspace)
+
+        self.assertEqual(set(snapshot), {"app.py"})
+
     async def test_offline_baseline_runs_through_runtime_and_acceptance_checks(
         self,
     ) -> None:

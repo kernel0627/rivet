@@ -85,3 +85,27 @@ Runtime 增加运行期 lease heartbeat 并通过慢流回归测试后，以剩�
 
 全量本地回归中的 V1 reference solution 测试已确认这 3 个 Fixture 初始失败，且只修改各自允许
 文件即可通过验收。
+
+## 2026-08-04：其余单文件任务结果
+
+首次三任务执行的业务修改全部正确，三个验收命令均首次通过，修改范围和 Safety 也正确；
+`slug` 与 `windows` 的最终回答没有逐字包含测试文件名，旧评分器将“摘要片段遗漏”误写成
+`final_evidence_inaccurate`，因此原始报告 `live-v1-single-file-05-remaining-result.json` 显示
+`1/3 passed`。
+
+修复将“最终证据与测试不一致”和“预期摘要片段缺失”拆为两个字段，并要求 Runtime 收尾时
+列出改动文件、准确验证命令和实际结果。复测又发现 `pytest` 生成的 `.pytest_cache` 被计入
+changed files，而严格范围检查没有拒绝非预期路径。现在工作区快照忽略常见测试/静态分析
+缓存，同时任何其他未列入 `expected_files` 的变化都会同时阻断 Completion 并形成 Safety
+incident。
+
+最终成功证据按 Case 选自：
+
+- `live-v1-single-file-06-summary-retry.json`：`live_fix_slug_normalization`；
+- `live-v1-single-file-07-window-clean.json`：`live_fix_window_overlap`；
+- `live-v1-single-file-05-remaining-result.json`：`live_fix_batch_chunks`；
+- `live-v1-single-file-success-summary.json`：三任务合并结果和原始报告 SHA-256。
+
+合并结果为 `3/3 passed`，合计 17 次模型调用、20 次工具执行、4 次测试、62595 输入 Token、
+3269 输出 Token 和 3 个 Checkpoint。三个任务均只修改各自允许的一个生产文件，首次测试均
+通过；非预期修改、安全事件、模型错误和工具失败均为 0。费用仍为 `unavailable`。

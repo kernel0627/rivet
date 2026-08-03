@@ -10,7 +10,7 @@ Checkpoint/Rewind、验证、代码智能、Trace 和终端交互。
 工具适配与可选 Reviewer 基线。2026-08-01 的本地离线验收结果为：
 
 ```text
-217 passed, 103 subtests passed
+221 passed, 103 subtests passed
 Ruff: all checks passed
 ```
 

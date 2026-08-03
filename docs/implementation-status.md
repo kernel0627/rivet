@@ -24,7 +24,7 @@ Rivet 已形成可运行的单 Agent Coding Runtime。正式入口具备：
 默认测试完全离线。本次验收：
 
 ```text
-pytest: 217 passed, 103 subtests passed
+pytest: 221 passed, 103 subtests passed
 offline eval: 8/8 passed
 offline eval benchmark: 10/10 passed, median 1426.196 ms, p95 1559.593 ms
 DeepSeek live eval: explain_entrypoint 1/1 passed, 2 model calls, 2 tool executions
@@ -137,6 +137,12 @@ Checkpoint 和 changed files 摘要。下一步扩展其余单文件任务，脱
 其余 3 个单文件任务已完成纯本地预检：外发候选范围为 523 字节目标文本与 1667 字节固定
 Fixture，只允许分别修改 `slug.py`、`windows.py`、`batching.py`，每任务最多 7 次模型调用。
 预检没有启动外部请求；V1 reference solution 回归已确认每个任务可在允许文件范围内完成。
+
+同日完成上述 3 个任务的真实执行与复核，最终为 `3/3 passed`：合计 17 次模型调用、20 次
+工具执行、4 次测试、62595 输入 Token、3269 输出 Token 和 3 个 Checkpoint；每项只修改
+各自允许的生产文件，首次测试均通过，非预期修改、安全事件、模型错误和工具失败均为 0。
+真实结果推动修复了最终摘要评分语义、常见测试缓存过滤，以及“成功 WRITE 掩盖其他非预期
+路径”的范围漏洞。Provider 未报告费用，仍记为 unavailable。
 
 ## 5. 测试覆盖
 

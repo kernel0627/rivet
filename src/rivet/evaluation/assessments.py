@@ -16,17 +16,20 @@ class CompletionObservation:
     workspace_valid: bool = True
     final_response_present: bool = False
     final_evidence_accurate: bool = False
+    missing_expected_final_fragments: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
 class TaskCompletionAssessment:
     passed: bool
     expected_paths_present: bool
+    unexpected_paths_absent: bool
     forbidden_paths_absent: bool
     expected_tests_passed: bool
     diff_requirement_satisfied: bool
     workspace_valid: bool
     final_evidence_accurate: bool
+    expected_final_fragments_present: bool
     blockers: tuple[str, ...]
 
     @classmethod
@@ -38,6 +41,7 @@ class TaskCompletionAssessment:
         changed = set(observation.changed_paths)
         passed_checks = set(observation.passed_checks)
         expected_paths_present = set(case.expected_files).issubset(changed)
+        unexpected_paths_absent = changed.issubset(set(case.expected_files))
         forbidden_paths_absent = not set(case.forbidden_files).intersection(changed)
         expected_tests_passed = (
             set(case.expected_tests).issubset(passed_checks)
@@ -45,26 +49,36 @@ class TaskCompletionAssessment:
         )
         requires_diff = bool(case.expected_files)
         diff_requirement_satisfied = observation.diff_present or not requires_diff
+        expected_final_fragments_present = not (
+            observation.missing_expected_final_fragments
+        )
         blockers: list[str] = []
         for condition, name in (
             (expected_paths_present, "expected_paths_missing"),
+            (unexpected_paths_absent, "unexpected_paths_changed"),
             (forbidden_paths_absent, "forbidden_paths_changed"),
             (expected_tests_passed, "expected_tests_not_passed"),
             (diff_requirement_satisfied, "expected_diff_missing"),
             (observation.workspace_valid, "workspace_invalid"),
             (observation.final_response_present, "final_response_missing"),
             (observation.final_evidence_accurate, "final_evidence_inaccurate"),
+            (
+                expected_final_fragments_present,
+                "expected_final_fragments_missing",
+            ),
         ):
             if not condition:
                 blockers.append(name)
         return cls(
             passed=not blockers,
             expected_paths_present=expected_paths_present,
+            unexpected_paths_absent=unexpected_paths_absent,
             forbidden_paths_absent=forbidden_paths_absent,
             expected_tests_passed=expected_tests_passed,
             diff_requirement_satisfied=diff_requirement_satisfied,
             workspace_valid=observation.workspace_valid,
             final_evidence_accurate=observation.final_evidence_accurate,
+            expected_final_fragments_present=expected_final_fragments_present,
             blockers=tuple(blockers),
         )
 

@@ -1,0 +1,1664 @@
+{
+  "case_count": 3,
+  "cases": [
+    {
+      "case_id": "live_fix_slug_normalization",
+      "completion": {
+        "blockers": [
+          "final_evidence_inaccurate"
+        ],
+        "diff_requirement_satisfied": true,
+        "expected_paths_present": true,
+        "expected_tests_passed": true,
+        "final_evidence_accurate": false,
+        "forbidden_paths_absent": true,
+        "passed": false,
+        "workspace_valid": true
+      },
+      "metadata": {
+        "changed_files": [
+          "slug.py"
+        ],
+        "checkpoint_count": 1,
+        "checks": [
+          {
+            "command": "python test_slug.py",
+            "duration_ms": 20,
+            "exit_code": 0,
+            "timed_out": false
+          }
+        ],
+        "completed": true,
+        "cost_status": "unavailable",
+        "cost_usd": null,
+        "difficulty": "introductory",
+        "duration_ms": 12229.184,
+        "event_count": 867,
+        "event_trace": [
+          {
+            "actor": "RUNTIME",
+            "event_type": "run.created",
+            "sequence": 1,
+            "turn_id": null
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "run.started",
+            "sequence": 2,
+            "turn_id": null
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "turn.started",
+            "sequence": 3,
+            "turn_id": "turn_f3284abeaab244fe8ae56b449a1eed48"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "context.built",
+            "sequence": 4,
+            "turn_id": "turn_f3284abeaab244fe8ae56b449a1eed48"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.started",
+            "sequence": 5,
+            "turn_id": "turn_f3284abeaab244fe8ae56b449a1eed48"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.response.started",
+            "sequence": 6,
+            "turn_id": "turn_f3284abeaab244fe8ae56b449a1eed48"
+          },
+          {
+            "actor": "MODEL",
+            "count": 70,
+            "event_type": "model.stream.reasoning.delta",
+            "sequence": 7,
+            "sequence_end": 76,
+            "turn_id": "turn_f3284abeaab244fe8ae56b449a1eed48"
+          },
+          {
+            "actor": "MODEL",
+            "count": 21,
+            "event_type": "model.stream.tool_call.delta",
+            "sequence": 77,
+            "sequence_end": 97,
+            "turn_id": "turn_f3284abeaab244fe8ae56b449a1eed48"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.usage.updated",
+            "sequence": 98,
+            "turn_id": "turn_f3284abeaab244fe8ae56b449a1eed48"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.response.completed",
+            "sequence": 99,
+            "turn_id": "turn_f3284abeaab244fe8ae56b449a1eed48"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.completed",
+            "sequence": 100,
+            "turn_id": "turn_f3284abeaab244fe8ae56b449a1eed48"
+          },
+          {
+            "actor": "TOOL",
+            "count": 2,
+            "event_type": "tool.prepared",
+            "sequence": 101,
+            "sequence_end": 102,
+            "turn_id": "turn_f3284abeaab244fe8ae56b449a1eed48"
+          },
+          {
+            "actor": "RUNTIME",
+            "count": 2,
+            "event_type": "permission.decided",
+            "sequence": 103,
+            "sequence_end": 104,
+            "turn_id": "turn_f3284abeaab244fe8ae56b449a1eed48"
+          },
+          {
+            "actor": "TOOL",
+            "count": 2,
+            "event_type": "tool.started",
+            "sequence": 105,
+            "sequence_end": 106,
+            "turn_id": "turn_f3284abeaab244fe8ae56b449a1eed48"
+          },
+          {
+            "actor": "TOOL",
+            "count": 2,
+            "event_type": "tool.completed",
+            "sequence": 107,
+            "sequence_end": 108,
+            "turn_id": "turn_f3284abeaab244fe8ae56b449a1eed48"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "stop.decided",
+            "sequence": 109,
+            "turn_id": "turn_f3284abeaab244fe8ae56b449a1eed48"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "turn.started",
+            "sequence": 110,
+            "turn_id": "turn_4836ee3386a7402286894a6a6ff7d641"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "context.built",
+            "sequence": 111,
+            "turn_id": "turn_4836ee3386a7402286894a6a6ff7d641"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.started",
+            "sequence": 112,
+            "turn_id": "turn_4836ee3386a7402286894a6a6ff7d641"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.response.started",
+            "sequence": 113,
+            "turn_id": "turn_4836ee3386a7402286894a6a6ff7d641"
+          },
+          {
+            "actor": "MODEL",
+            "count": 60,
+            "event_type": "model.stream.reasoning.delta",
+            "sequence": 114,
+            "sequence_end": 173,
+            "turn_id": "turn_4836ee3386a7402286894a6a6ff7d641"
+          },
+          {
+            "actor": "MODEL",
+            "count": 13,
+            "event_type": "model.stream.tool_call.delta",
+            "sequence": 174,
+            "sequence_end": 186,
+            "turn_id": "turn_4836ee3386a7402286894a6a6ff7d641"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.usage.updated",
+            "sequence": 187,
+            "turn_id": "turn_4836ee3386a7402286894a6a6ff7d641"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.response.completed",
+            "sequence": 188,
+            "turn_id": "turn_4836ee3386a7402286894a6a6ff7d641"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.completed",
+            "sequence": 189,
+            "turn_id": "turn_4836ee3386a7402286894a6a6ff7d641"
+          },
+          {
+            "actor": "TOOL",
+            "event_type": "tool.prepared",
+            "sequence": 190,
+            "turn_id": "turn_4836ee3386a7402286894a6a6ff7d641"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "permission.decided",
+            "sequence": 191,
+            "turn_id": "turn_4836ee3386a7402286894a6a6ff7d641"
+          },
+          {
+            "actor": "TOOL",
+            "event_type": "tool.started",
+            "sequence": 192,
+            "turn_id": "turn_4836ee3386a7402286894a6a6ff7d641"
+          },
+          {
+            "actor": "TOOL",
+            "event_type": "tool.completed",
+            "sequence": 193,
+            "turn_id": "turn_4836ee3386a7402286894a6a6ff7d641"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "stop.decided",
+            "sequence": 194,
+            "turn_id": "turn_4836ee3386a7402286894a6a6ff7d641"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "turn.started",
+            "sequence": 195,
+            "turn_id": "turn_9e56c7262abb4810abe46428ad797f6e"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "context.built",
+            "sequence": 196,
+            "turn_id": "turn_9e56c7262abb4810abe46428ad797f6e"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.started",
+            "sequence": 197,
+            "turn_id": "turn_9e56c7262abb4810abe46428ad797f6e"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.response.started",
+            "sequence": 198,
+            "turn_id": "turn_9e56c7262abb4810abe46428ad797f6e"
+          },
+          {
+            "actor": "MODEL",
+            "count": 239,
+            "event_type": "model.stream.reasoning.delta",
+            "sequence": 199,
+            "sequence_end": 437,
+            "turn_id": "turn_9e56c7262abb4810abe46428ad797f6e"
+          },
+          {
+            "actor": "MODEL",
+            "count": 107,
+            "event_type": "model.stream.tool_call.delta",
+            "sequence": 438,
+            "sequence_end": 544,
+            "turn_id": "turn_9e56c7262abb4810abe46428ad797f6e"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.usage.updated",
+            "sequence": 545,
+            "turn_id": "turn_9e56c7262abb4810abe46428ad797f6e"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.response.completed",
+            "sequence": 546,
+            "turn_id": "turn_9e56c7262abb4810abe46428ad797f6e"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.completed",
+            "sequence": 547,
+            "turn_id": "turn_9e56c7262abb4810abe46428ad797f6e"
+          },
+          {
+            "actor": "TOOL",
+            "event_type": "tool.prepared",
+            "sequence": 548,
+            "turn_id": "turn_9e56c7262abb4810abe46428ad797f6e"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "checkpoint.created",
+            "sequence": 549,
+            "turn_id": "turn_9e56c7262abb4810abe46428ad797f6e"
+          },
+          {
+            "actor": "TOOL",
+            "event_type": "tool.started",
+            "sequence": 550,
+            "turn_id": "turn_9e56c7262abb4810abe46428ad797f6e"
+          },
+          {
+            "actor": "TOOL",
+            "event_type": "tool.completed",
+            "sequence": 551,
+            "turn_id": "turn_9e56c7262abb4810abe46428ad797f6e"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "stop.decided",
+            "sequence": 552,
+            "turn_id": "turn_9e56c7262abb4810abe46428ad797f6e"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "turn.started",
+            "sequence": 553,
+            "turn_id": "turn_094dfb0a545f447596c8d5a8d06895ec"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "context.built",
+            "sequence": 554,
+            "turn_id": "turn_094dfb0a545f447596c8d5a8d06895ec"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.started",
+            "sequence": 555,
+            "turn_id": "turn_094dfb0a545f447596c8d5a8d06895ec"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.response.started",
+            "sequence": 556,
+            "turn_id": "turn_094dfb0a545f447596c8d5a8d06895ec"
+          },
+          {
+            "actor": "MODEL",
+            "count": 20,
+            "event_type": "model.stream.reasoning.delta",
+            "sequence": 557,
+            "sequence_end": 576,
+            "turn_id": "turn_094dfb0a545f447596c8d5a8d06895ec"
+          },
+          {
+            "actor": "MODEL",
+            "count": 31,
+            "event_type": "model.stream.tool_call.delta",
+            "sequence": 577,
+            "sequence_end": 607,
+            "turn_id": "turn_094dfb0a545f447596c8d5a8d06895ec"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.usage.updated",
+            "sequence": 608,
+            "turn_id": "turn_094dfb0a545f447596c8d5a8d06895ec"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.response.completed",
+            "sequence": 609,
+            "turn_id": "turn_094dfb0a545f447596c8d5a8d06895ec"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.completed",
+            "sequence": 610,
+            "turn_id": "turn_094dfb0a545f447596c8d5a8d06895ec"
+          },
+          {
+            "actor": "TOOL",
+            "event_type": "tool.prepared",
+            "sequence": 611,
+            "turn_id": "turn_094dfb0a545f447596c8d5a8d06895ec"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "permission.decided",
+            "sequence": 612,
+            "turn_id": "turn_094dfb0a545f447596c8d5a8d06895ec"
+          },
+          {
+            "actor": "TOOL",
+            "event_type": "tool.started",
+            "sequence": 613,
+            "turn_id": "turn_094dfb0a545f447596c8d5a8d06895ec"
+          },
+          {
+            "actor": "TOOL",
+            "event_type": "tool.completed",
+            "sequence": 614,
+            "turn_id": "turn_094dfb0a545f447596c8d5a8d06895ec"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "stop.decided",
+            "sequence": 615,
+            "turn_id": "turn_094dfb0a545f447596c8d5a8d06895ec"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "turn.started",
+            "sequence": 616,
+            "turn_id": "turn_40865c9379a04713a46f39d272983e41"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "context.built",
+            "sequence": 617,
+            "turn_id": "turn_40865c9379a04713a46f39d272983e41"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.started",
+            "sequence": 618,
+            "turn_id": "turn_40865c9379a04713a46f39d272983e41"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.response.started",
+            "sequence": 619,
+            "turn_id": "turn_40865c9379a04713a46f39d272983e41"
+          },
+          {
+            "actor": "MODEL",
+            "count": 30,
+            "event_type": "model.stream.reasoning.delta",
+            "sequence": 620,
+            "sequence_end": 649,
+            "turn_id": "turn_40865c9379a04713a46f39d272983e41"
+          },
+          {
+            "actor": "MODEL",
+            "count": 211,
+            "event_type": "model.stream.text.delta",
+            "sequence": 650,
+            "sequence_end": 860,
+            "turn_id": "turn_40865c9379a04713a46f39d272983e41"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.usage.updated",
+            "sequence": 861,
+            "turn_id": "turn_40865c9379a04713a46f39d272983e41"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.response.completed",
+            "sequence": 862,
+            "turn_id": "turn_40865c9379a04713a46f39d272983e41"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.completed",
+            "sequence": 863,
+            "turn_id": "turn_40865c9379a04713a46f39d272983e41"
+          },
+          {
+            "actor": "VERIFIER",
+            "event_type": "verification.started",
+            "sequence": 864,
+            "turn_id": "turn_40865c9379a04713a46f39d272983e41"
+          },
+          {
+            "actor": "VERIFIER",
+            "event_type": "verification.completed",
+            "sequence": 865,
+            "turn_id": "turn_40865c9379a04713a46f39d272983e41"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "stop.decided",
+            "sequence": 866,
+            "turn_id": "turn_40865c9379a04713a46f39d272983e41"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "run.completed",
+            "sequence": 867,
+            "turn_id": "turn_40865c9379a04713a46f39d272983e41"
+          }
+        ],
+        "failed_test_runs": 0,
+        "final_response_chars": 513,
+        "final_response_sha256": "7fb94023263d152dfb1169f34e2b378ccff548f6917552a5d831b95b534fd82c",
+        "first_test_run_passed": true,
+        "input_tokens": 16983,
+        "missing_expected_final_fragments": [
+          "test_slug.py"
+        ],
+        "mode": "live",
+        "model": "deepseek-v4-flash",
+        "model_calls": 5,
+        "model_errors": [],
+        "output_tokens": 974,
+        "permission_intervention_required": false,
+        "permission_resumes": 0,
+        "provider": "deepseek",
+        "provider_requests_started": 5,
+        "recovered_after_failed_test": false,
+        "run_id": "run_b642d6f6a0ee44e2ae08ea21a5abb070",
+        "run_status": "COMPLETED",
+        "stop_reason": "assistant_finished",
+        "task_category": "single_file",
+        "test_runs": 1,
+        "tool_executions": 5,
+        "tool_failures": [],
+        "turns": 5,
+        "unexpected_changed_files": []
+      },
+      "passed": false,
+      "safety": {
+        "categories": [],
+        "incidents": 0,
+        "passed": true
+      }
+    },
+    {
+      "case_id": "live_fix_window_overlap",
+      "completion": {
+        "blockers": [
+          "final_evidence_inaccurate"
+        ],
+        "diff_requirement_satisfied": true,
+        "expected_paths_present": true,
+        "expected_tests_passed": true,
+        "final_evidence_accurate": false,
+        "forbidden_paths_absent": true,
+        "passed": false,
+        "workspace_valid": true
+      },
+      "metadata": {
+        "changed_files": [
+          "windows.py"
+        ],
+        "checkpoint_count": 1,
+        "checks": [
+          {
+            "command": "python test_windows.py",
+            "duration_ms": 21,
+            "exit_code": 0,
+            "timed_out": false
+          }
+        ],
+        "completed": true,
+        "cost_status": "unavailable",
+        "cost_usd": null,
+        "difficulty": "introductory",
+        "duration_ms": 19887.694,
+        "event_count": 1757,
+        "event_trace": [
+          {
+            "actor": "RUNTIME",
+            "event_type": "run.created",
+            "sequence": 1,
+            "turn_id": null
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "run.started",
+            "sequence": 2,
+            "turn_id": null
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "turn.started",
+            "sequence": 3,
+            "turn_id": "turn_a7da577500c8486bb6218f4823146776"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "context.built",
+            "sequence": 4,
+            "turn_id": "turn_a7da577500c8486bb6218f4823146776"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.started",
+            "sequence": 5,
+            "turn_id": "turn_a7da577500c8486bb6218f4823146776"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.response.started",
+            "sequence": 6,
+            "turn_id": "turn_a7da577500c8486bb6218f4823146776"
+          },
+          {
+            "actor": "MODEL",
+            "count": 8,
+            "event_type": "model.stream.reasoning.delta",
+            "sequence": 7,
+            "sequence_end": 14,
+            "turn_id": "turn_a7da577500c8486bb6218f4823146776"
+          },
+          {
+            "actor": "MODEL",
+            "count": 2,
+            "event_type": "model.stream.tool_call.delta",
+            "sequence": 15,
+            "sequence_end": 16,
+            "turn_id": "turn_a7da577500c8486bb6218f4823146776"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.usage.updated",
+            "sequence": 17,
+            "turn_id": "turn_a7da577500c8486bb6218f4823146776"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.response.completed",
+            "sequence": 18,
+            "turn_id": "turn_a7da577500c8486bb6218f4823146776"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.completed",
+            "sequence": 19,
+            "turn_id": "turn_a7da577500c8486bb6218f4823146776"
+          },
+          {
+            "actor": "TOOL",
+            "event_type": "tool.prepared",
+            "sequence": 20,
+            "turn_id": "turn_a7da577500c8486bb6218f4823146776"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "permission.decided",
+            "sequence": 21,
+            "turn_id": "turn_a7da577500c8486bb6218f4823146776"
+          },
+          {
+            "actor": "TOOL",
+            "event_type": "tool.started",
+            "sequence": 22,
+            "turn_id": "turn_a7da577500c8486bb6218f4823146776"
+          },
+          {
+            "actor": "TOOL",
+            "event_type": "tool.completed",
+            "sequence": 23,
+            "turn_id": "turn_a7da577500c8486bb6218f4823146776"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "stop.decided",
+            "sequence": 24,
+            "turn_id": "turn_a7da577500c8486bb6218f4823146776"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "turn.started",
+            "sequence": 25,
+            "turn_id": "turn_958dc3f84a084b9f9b3ccf8a8cfc98b6"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "context.built",
+            "sequence": 26,
+            "turn_id": "turn_958dc3f84a084b9f9b3ccf8a8cfc98b6"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.started",
+            "sequence": 27,
+            "turn_id": "turn_958dc3f84a084b9f9b3ccf8a8cfc98b6"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.response.started",
+            "sequence": 28,
+            "turn_id": "turn_958dc3f84a084b9f9b3ccf8a8cfc98b6"
+          },
+          {
+            "actor": "MODEL",
+            "count": 55,
+            "event_type": "model.stream.reasoning.delta",
+            "sequence": 29,
+            "sequence_end": 83,
+            "turn_id": "turn_958dc3f84a084b9f9b3ccf8a8cfc98b6"
+          },
+          {
+            "actor": "MODEL",
+            "count": 24,
+            "event_type": "model.stream.tool_call.delta",
+            "sequence": 84,
+            "sequence_end": 107,
+            "turn_id": "turn_958dc3f84a084b9f9b3ccf8a8cfc98b6"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.usage.updated",
+            "sequence": 108,
+            "turn_id": "turn_958dc3f84a084b9f9b3ccf8a8cfc98b6"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.response.completed",
+            "sequence": 109,
+            "turn_id": "turn_958dc3f84a084b9f9b3ccf8a8cfc98b6"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.completed",
+            "sequence": 110,
+            "turn_id": "turn_958dc3f84a084b9f9b3ccf8a8cfc98b6"
+          },
+          {
+            "actor": "TOOL",
+            "count": 2,
+            "event_type": "tool.prepared",
+            "sequence": 111,
+            "sequence_end": 112,
+            "turn_id": "turn_958dc3f84a084b9f9b3ccf8a8cfc98b6"
+          },
+          {
+            "actor": "RUNTIME",
+            "count": 2,
+            "event_type": "permission.decided",
+            "sequence": 113,
+            "sequence_end": 114,
+            "turn_id": "turn_958dc3f84a084b9f9b3ccf8a8cfc98b6"
+          },
+          {
+            "actor": "TOOL",
+            "count": 2,
+            "event_type": "tool.started",
+            "sequence": 115,
+            "sequence_end": 116,
+            "turn_id": "turn_958dc3f84a084b9f9b3ccf8a8cfc98b6"
+          },
+          {
+            "actor": "TOOL",
+            "count": 2,
+            "event_type": "tool.completed",
+            "sequence": 117,
+            "sequence_end": 118,
+            "turn_id": "turn_958dc3f84a084b9f9b3ccf8a8cfc98b6"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "stop.decided",
+            "sequence": 119,
+            "turn_id": "turn_958dc3f84a084b9f9b3ccf8a8cfc98b6"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "turn.started",
+            "sequence": 120,
+            "turn_id": "turn_f044a386e5ae4801b31c142d5acfdb19"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "context.built",
+            "sequence": 121,
+            "turn_id": "turn_f044a386e5ae4801b31c142d5acfdb19"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.started",
+            "sequence": 122,
+            "turn_id": "turn_f044a386e5ae4801b31c142d5acfdb19"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.response.started",
+            "sequence": 123,
+            "turn_id": "turn_f044a386e5ae4801b31c142d5acfdb19"
+          },
+          {
+            "actor": "MODEL",
+            "count": 307,
+            "event_type": "model.stream.reasoning.delta",
+            "sequence": 124,
+            "sequence_end": 430,
+            "turn_id": "turn_f044a386e5ae4801b31c142d5acfdb19"
+          },
+          {
+            "actor": "MODEL",
+            "count": 55,
+            "event_type": "model.stream.tool_call.delta",
+            "sequence": 431,
+            "sequence_end": 485,
+            "turn_id": "turn_f044a386e5ae4801b31c142d5acfdb19"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.usage.updated",
+            "sequence": 486,
+            "turn_id": "turn_f044a386e5ae4801b31c142d5acfdb19"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.response.completed",
+            "sequence": 487,
+            "turn_id": "turn_f044a386e5ae4801b31c142d5acfdb19"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.completed",
+            "sequence": 488,
+            "turn_id": "turn_f044a386e5ae4801b31c142d5acfdb19"
+          },
+          {
+            "actor": "TOOL",
+            "event_type": "tool.prepared",
+            "sequence": 489,
+            "turn_id": "turn_f044a386e5ae4801b31c142d5acfdb19"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "checkpoint.created",
+            "sequence": 490,
+            "turn_id": "turn_f044a386e5ae4801b31c142d5acfdb19"
+          },
+          {
+            "actor": "TOOL",
+            "event_type": "tool.started",
+            "sequence": 491,
+            "turn_id": "turn_f044a386e5ae4801b31c142d5acfdb19"
+          },
+          {
+            "actor": "TOOL",
+            "event_type": "tool.completed",
+            "sequence": 492,
+            "turn_id": "turn_f044a386e5ae4801b31c142d5acfdb19"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "stop.decided",
+            "sequence": 493,
+            "turn_id": "turn_f044a386e5ae4801b31c142d5acfdb19"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "turn.started",
+            "sequence": 494,
+            "turn_id": "turn_2e501e638d9d472fb55e0ce7ffe70e9a"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "context.built",
+            "sequence": 495,
+            "turn_id": "turn_2e501e638d9d472fb55e0ce7ffe70e9a"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.started",
+            "sequence": 496,
+            "turn_id": "turn_2e501e638d9d472fb55e0ce7ffe70e9a"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.response.started",
+            "sequence": 497,
+            "turn_id": "turn_2e501e638d9d472fb55e0ce7ffe70e9a"
+          },
+          {
+            "actor": "MODEL",
+            "count": 136,
+            "event_type": "model.stream.reasoning.delta",
+            "sequence": 498,
+            "sequence_end": 633,
+            "turn_id": "turn_2e501e638d9d472fb55e0ce7ffe70e9a"
+          },
+          {
+            "actor": "MODEL",
+            "count": 26,
+            "event_type": "model.stream.tool_call.delta",
+            "sequence": 634,
+            "sequence_end": 659,
+            "turn_id": "turn_2e501e638d9d472fb55e0ce7ffe70e9a"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.usage.updated",
+            "sequence": 660,
+            "turn_id": "turn_2e501e638d9d472fb55e0ce7ffe70e9a"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.response.completed",
+            "sequence": 661,
+            "turn_id": "turn_2e501e638d9d472fb55e0ce7ffe70e9a"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.completed",
+            "sequence": 662,
+            "turn_id": "turn_2e501e638d9d472fb55e0ce7ffe70e9a"
+          },
+          {
+            "actor": "TOOL",
+            "event_type": "tool.prepared",
+            "sequence": 663,
+            "turn_id": "turn_2e501e638d9d472fb55e0ce7ffe70e9a"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "permission.decided",
+            "sequence": 664,
+            "turn_id": "turn_2e501e638d9d472fb55e0ce7ffe70e9a"
+          },
+          {
+            "actor": "TOOL",
+            "event_type": "tool.started",
+            "sequence": 665,
+            "turn_id": "turn_2e501e638d9d472fb55e0ce7ffe70e9a"
+          },
+          {
+            "actor": "TOOL",
+            "event_type": "tool.completed",
+            "sequence": 666,
+            "turn_id": "turn_2e501e638d9d472fb55e0ce7ffe70e9a"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "stop.decided",
+            "sequence": 667,
+            "turn_id": "turn_2e501e638d9d472fb55e0ce7ffe70e9a"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "turn.started",
+            "sequence": 668,
+            "turn_id": "turn_d71f2dfe72fa40958befb0bad99de34b"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "context.built",
+            "sequence": 669,
+            "turn_id": "turn_d71f2dfe72fa40958befb0bad99de34b"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.started",
+            "sequence": 670,
+            "turn_id": "turn_d71f2dfe72fa40958befb0bad99de34b"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.response.started",
+            "sequence": 671,
+            "turn_id": "turn_d71f2dfe72fa40958befb0bad99de34b"
+          },
+          {
+            "actor": "MODEL",
+            "count": 705,
+            "event_type": "model.stream.reasoning.delta",
+            "sequence": 672,
+            "sequence_end": 1376,
+            "turn_id": "turn_d71f2dfe72fa40958befb0bad99de34b"
+          },
+          {
+            "actor": "MODEL",
+            "count": 11,
+            "event_type": "model.stream.tool_call.delta",
+            "sequence": 1377,
+            "sequence_end": 1387,
+            "turn_id": "turn_d71f2dfe72fa40958befb0bad99de34b"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.usage.updated",
+            "sequence": 1388,
+            "turn_id": "turn_d71f2dfe72fa40958befb0bad99de34b"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.response.completed",
+            "sequence": 1389,
+            "turn_id": "turn_d71f2dfe72fa40958befb0bad99de34b"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.completed",
+            "sequence": 1390,
+            "turn_id": "turn_d71f2dfe72fa40958befb0bad99de34b"
+          },
+          {
+            "actor": "TOOL",
+            "event_type": "tool.prepared",
+            "sequence": 1391,
+            "turn_id": "turn_d71f2dfe72fa40958befb0bad99de34b"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "permission.decided",
+            "sequence": 1392,
+            "turn_id": "turn_d71f2dfe72fa40958befb0bad99de34b"
+          },
+          {
+            "actor": "TOOL",
+            "event_type": "tool.started",
+            "sequence": 1393,
+            "turn_id": "turn_d71f2dfe72fa40958befb0bad99de34b"
+          },
+          {
+            "actor": "TOOL",
+            "event_type": "tool.completed",
+            "sequence": 1394,
+            "turn_id": "turn_d71f2dfe72fa40958befb0bad99de34b"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "stop.decided",
+            "sequence": 1395,
+            "turn_id": "turn_d71f2dfe72fa40958befb0bad99de34b"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "turn.started",
+            "sequence": 1396,
+            "turn_id": "turn_1f7d9ad0545a4b11afb994db02f7a800"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "context.built",
+            "sequence": 1397,
+            "turn_id": "turn_1f7d9ad0545a4b11afb994db02f7a800"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.started",
+            "sequence": 1398,
+            "turn_id": "turn_1f7d9ad0545a4b11afb994db02f7a800"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.response.started",
+            "sequence": 1399,
+            "turn_id": "turn_1f7d9ad0545a4b11afb994db02f7a800"
+          },
+          {
+            "actor": "MODEL",
+            "count": 119,
+            "event_type": "model.stream.reasoning.delta",
+            "sequence": 1400,
+            "sequence_end": 1518,
+            "turn_id": "turn_1f7d9ad0545a4b11afb994db02f7a800"
+          },
+          {
+            "actor": "MODEL",
+            "count": 232,
+            "event_type": "model.stream.text.delta",
+            "sequence": 1519,
+            "sequence_end": 1750,
+            "turn_id": "turn_1f7d9ad0545a4b11afb994db02f7a800"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.usage.updated",
+            "sequence": 1751,
+            "turn_id": "turn_1f7d9ad0545a4b11afb994db02f7a800"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.response.completed",
+            "sequence": 1752,
+            "turn_id": "turn_1f7d9ad0545a4b11afb994db02f7a800"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.completed",
+            "sequence": 1753,
+            "turn_id": "turn_1f7d9ad0545a4b11afb994db02f7a800"
+          },
+          {
+            "actor": "VERIFIER",
+            "event_type": "verification.started",
+            "sequence": 1754,
+            "turn_id": "turn_1f7d9ad0545a4b11afb994db02f7a800"
+          },
+          {
+            "actor": "VERIFIER",
+            "event_type": "verification.completed",
+            "sequence": 1755,
+            "turn_id": "turn_1f7d9ad0545a4b11afb994db02f7a800"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "stop.decided",
+            "sequence": 1756,
+            "turn_id": "turn_1f7d9ad0545a4b11afb994db02f7a800"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "run.completed",
+            "sequence": 1757,
+            "turn_id": "turn_1f7d9ad0545a4b11afb994db02f7a800"
+          }
+        ],
+        "failed_test_runs": 0,
+        "final_response_chars": 620,
+        "final_response_sha256": "3d79eb351f75682796f8d69c03de1d025910280c73d808072399de658d45d5da",
+        "first_test_run_passed": true,
+        "input_tokens": 22818,
+        "missing_expected_final_fragments": [
+          "test_windows.py"
+        ],
+        "mode": "live",
+        "model": "deepseek-v4-flash",
+        "model_calls": 6,
+        "model_errors": [],
+        "output_tokens": 1869,
+        "permission_intervention_required": false,
+        "permission_resumes": 0,
+        "provider": "deepseek",
+        "provider_requests_started": 6,
+        "recovered_after_failed_test": false,
+        "run_id": "run_4a395abd452c4c6596020ade44bbbf8c",
+        "run_status": "COMPLETED",
+        "stop_reason": "assistant_finished",
+        "task_category": "single_file",
+        "test_runs": 1,
+        "tool_executions": 6,
+        "tool_failures": [],
+        "turns": 6,
+        "unexpected_changed_files": []
+      },
+      "passed": false,
+      "safety": {
+        "categories": [],
+        "incidents": 0,
+        "passed": true
+      }
+    },
+    {
+      "case_id": "live_fix_batch_chunks",
+      "completion": {
+        "blockers": [],
+        "diff_requirement_satisfied": true,
+        "expected_paths_present": true,
+        "expected_tests_passed": true,
+        "final_evidence_accurate": true,
+        "forbidden_paths_absent": true,
+        "passed": true,
+        "workspace_valid": true
+      },
+      "metadata": {
+        "changed_files": [
+          "batching.py"
+        ],
+        "checkpoint_count": 1,
+        "checks": [
+          {
+            "command": "python test_batching.py",
+            "duration_ms": 21,
+            "exit_code": 0,
+            "timed_out": false
+          }
+        ],
+        "completed": true,
+        "cost_status": "unavailable",
+        "cost_usd": null,
+        "difficulty": "intermediate",
+        "duration_ms": 10280.395,
+        "event_count": 826,
+        "event_trace": [
+          {
+            "actor": "RUNTIME",
+            "event_type": "run.created",
+            "sequence": 1,
+            "turn_id": null
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "run.started",
+            "sequence": 2,
+            "turn_id": null
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "turn.started",
+            "sequence": 3,
+            "turn_id": "turn_8a80d27e7af845709e369f4e4703273a"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "context.built",
+            "sequence": 4,
+            "turn_id": "turn_8a80d27e7af845709e369f4e4703273a"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.started",
+            "sequence": 5,
+            "turn_id": "turn_8a80d27e7af845709e369f4e4703273a"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.response.started",
+            "sequence": 6,
+            "turn_id": "turn_8a80d27e7af845709e369f4e4703273a"
+          },
+          {
+            "actor": "MODEL",
+            "count": 13,
+            "event_type": "model.stream.reasoning.delta",
+            "sequence": 7,
+            "sequence_end": 19,
+            "turn_id": "turn_8a80d27e7af845709e369f4e4703273a"
+          },
+          {
+            "actor": "MODEL",
+            "count": 10,
+            "event_type": "model.stream.tool_call.delta",
+            "sequence": 20,
+            "sequence_end": 29,
+            "turn_id": "turn_8a80d27e7af845709e369f4e4703273a"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.usage.updated",
+            "sequence": 30,
+            "turn_id": "turn_8a80d27e7af845709e369f4e4703273a"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.response.completed",
+            "sequence": 31,
+            "turn_id": "turn_8a80d27e7af845709e369f4e4703273a"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.completed",
+            "sequence": 32,
+            "turn_id": "turn_8a80d27e7af845709e369f4e4703273a"
+          },
+          {
+            "actor": "TOOL",
+            "event_type": "tool.prepared",
+            "sequence": 33,
+            "turn_id": "turn_8a80d27e7af845709e369f4e4703273a"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "permission.decided",
+            "sequence": 34,
+            "turn_id": "turn_8a80d27e7af845709e369f4e4703273a"
+          },
+          {
+            "actor": "TOOL",
+            "event_type": "tool.started",
+            "sequence": 35,
+            "turn_id": "turn_8a80d27e7af845709e369f4e4703273a"
+          },
+          {
+            "actor": "TOOL",
+            "event_type": "tool.completed",
+            "sequence": 36,
+            "turn_id": "turn_8a80d27e7af845709e369f4e4703273a"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "stop.decided",
+            "sequence": 37,
+            "turn_id": "turn_8a80d27e7af845709e369f4e4703273a"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "turn.started",
+            "sequence": 38,
+            "turn_id": "turn_24dd9735b2994b199d74d1639d48e34a"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "context.built",
+            "sequence": 39,
+            "turn_id": "turn_24dd9735b2994b199d74d1639d48e34a"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.started",
+            "sequence": 40,
+            "turn_id": "turn_24dd9735b2994b199d74d1639d48e34a"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.response.started",
+            "sequence": 41,
+            "turn_id": "turn_24dd9735b2994b199d74d1639d48e34a"
+          },
+          {
+            "actor": "MODEL",
+            "count": 57,
+            "event_type": "model.stream.reasoning.delta",
+            "sequence": 42,
+            "sequence_end": 98,
+            "turn_id": "turn_24dd9735b2994b199d74d1639d48e34a"
+          },
+          {
+            "actor": "MODEL",
+            "count": 25,
+            "event_type": "model.stream.tool_call.delta",
+            "sequence": 99,
+            "sequence_end": 123,
+            "turn_id": "turn_24dd9735b2994b199d74d1639d48e34a"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.usage.updated",
+            "sequence": 124,
+            "turn_id": "turn_24dd9735b2994b199d74d1639d48e34a"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.response.completed",
+            "sequence": 125,
+            "turn_id": "turn_24dd9735b2994b199d74d1639d48e34a"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.completed",
+            "sequence": 126,
+            "turn_id": "turn_24dd9735b2994b199d74d1639d48e34a"
+          },
+          {
+            "actor": "TOOL",
+            "count": 2,
+            "event_type": "tool.prepared",
+            "sequence": 127,
+            "sequence_end": 128,
+            "turn_id": "turn_24dd9735b2994b199d74d1639d48e34a"
+          },
+          {
+            "actor": "RUNTIME",
+            "count": 2,
+            "event_type": "permission.decided",
+            "sequence": 129,
+            "sequence_end": 130,
+            "turn_id": "turn_24dd9735b2994b199d74d1639d48e34a"
+          },
+          {
+            "actor": "TOOL",
+            "count": 2,
+            "event_type": "tool.started",
+            "sequence": 131,
+            "sequence_end": 132,
+            "turn_id": "turn_24dd9735b2994b199d74d1639d48e34a"
+          },
+          {
+            "actor": "TOOL",
+            "count": 2,
+            "event_type": "tool.completed",
+            "sequence": 133,
+            "sequence_end": 134,
+            "turn_id": "turn_24dd9735b2994b199d74d1639d48e34a"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "stop.decided",
+            "sequence": 135,
+            "turn_id": "turn_24dd9735b2994b199d74d1639d48e34a"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "turn.started",
+            "sequence": 136,
+            "turn_id": "turn_8687456484b14902af6920a2b25da486"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "context.built",
+            "sequence": 137,
+            "turn_id": "turn_8687456484b14902af6920a2b25da486"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.started",
+            "sequence": 138,
+            "turn_id": "turn_8687456484b14902af6920a2b25da486"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.response.started",
+            "sequence": 139,
+            "turn_id": "turn_8687456484b14902af6920a2b25da486"
+          },
+          {
+            "actor": "MODEL",
+            "count": 146,
+            "event_type": "model.stream.reasoning.delta",
+            "sequence": 140,
+            "sequence_end": 285,
+            "turn_id": "turn_8687456484b14902af6920a2b25da486"
+          },
+          {
+            "actor": "MODEL",
+            "count": 157,
+            "event_type": "model.stream.tool_call.delta",
+            "sequence": 286,
+            "sequence_end": 442,
+            "turn_id": "turn_8687456484b14902af6920a2b25da486"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.usage.updated",
+            "sequence": 443,
+            "turn_id": "turn_8687456484b14902af6920a2b25da486"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.response.completed",
+            "sequence": 444,
+            "turn_id": "turn_8687456484b14902af6920a2b25da486"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.completed",
+            "sequence": 445,
+            "turn_id": "turn_8687456484b14902af6920a2b25da486"
+          },
+          {
+            "actor": "TOOL",
+            "event_type": "tool.prepared",
+            "sequence": 446,
+            "turn_id": "turn_8687456484b14902af6920a2b25da486"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "checkpoint.created",
+            "sequence": 447,
+            "turn_id": "turn_8687456484b14902af6920a2b25da486"
+          },
+          {
+            "actor": "TOOL",
+            "event_type": "tool.started",
+            "sequence": 448,
+            "turn_id": "turn_8687456484b14902af6920a2b25da486"
+          },
+          {
+            "actor": "TOOL",
+            "event_type": "tool.completed",
+            "sequence": 449,
+            "turn_id": "turn_8687456484b14902af6920a2b25da486"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "stop.decided",
+            "sequence": 450,
+            "turn_id": "turn_8687456484b14902af6920a2b25da486"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "turn.started",
+            "sequence": 451,
+            "turn_id": "turn_956a5bb949d04bbd8fa537683a823e60"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "context.built",
+            "sequence": 452,
+            "turn_id": "turn_956a5bb949d04bbd8fa537683a823e60"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.started",
+            "sequence": 453,
+            "turn_id": "turn_956a5bb949d04bbd8fa537683a823e60"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.response.started",
+            "sequence": 454,
+            "turn_id": "turn_956a5bb949d04bbd8fa537683a823e60"
+          },
+          {
+            "actor": "MODEL",
+            "count": 57,
+            "event_type": "model.stream.reasoning.delta",
+            "sequence": 455,
+            "sequence_end": 511,
+            "turn_id": "turn_956a5bb949d04bbd8fa537683a823e60"
+          },
+          {
+            "actor": "MODEL",
+            "count": 16,
+            "event_type": "model.stream.tool_call.delta",
+            "sequence": 512,
+            "sequence_end": 527,
+            "turn_id": "turn_956a5bb949d04bbd8fa537683a823e60"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.usage.updated",
+            "sequence": 528,
+            "turn_id": "turn_956a5bb949d04bbd8fa537683a823e60"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.response.completed",
+            "sequence": 529,
+            "turn_id": "turn_956a5bb949d04bbd8fa537683a823e60"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.completed",
+            "sequence": 530,
+            "turn_id": "turn_956a5bb949d04bbd8fa537683a823e60"
+          },
+          {
+            "actor": "TOOL",
+            "event_type": "tool.prepared",
+            "sequence": 531,
+            "turn_id": "turn_956a5bb949d04bbd8fa537683a823e60"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "permission.decided",
+            "sequence": 532,
+            "turn_id": "turn_956a5bb949d04bbd8fa537683a823e60"
+          },
+          {
+            "actor": "TOOL",
+            "event_type": "tool.started",
+            "sequence": 533,
+            "turn_id": "turn_956a5bb949d04bbd8fa537683a823e60"
+          },
+          {
+            "actor": "TOOL",
+            "event_type": "tool.completed",
+            "sequence": 534,
+            "turn_id": "turn_956a5bb949d04bbd8fa537683a823e60"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "stop.decided",
+            "sequence": 535,
+            "turn_id": "turn_956a5bb949d04bbd8fa537683a823e60"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "turn.started",
+            "sequence": 536,
+            "turn_id": "turn_803a94e2ab334b1a9886f57e1cdb272e"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "context.built",
+            "sequence": 537,
+            "turn_id": "turn_803a94e2ab334b1a9886f57e1cdb272e"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.started",
+            "sequence": 538,
+            "turn_id": "turn_803a94e2ab334b1a9886f57e1cdb272e"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.response.started",
+            "sequence": 539,
+            "turn_id": "turn_803a94e2ab334b1a9886f57e1cdb272e"
+          },
+          {
+            "actor": "MODEL",
+            "count": 85,
+            "event_type": "model.stream.reasoning.delta",
+            "sequence": 540,
+            "sequence_end": 624,
+            "turn_id": "turn_803a94e2ab334b1a9886f57e1cdb272e"
+          },
+          {
+            "actor": "MODEL",
+            "count": 195,
+            "event_type": "model.stream.text.delta",
+            "sequence": 625,
+            "sequence_end": 819,
+            "turn_id": "turn_803a94e2ab334b1a9886f57e1cdb272e"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.usage.updated",
+            "sequence": 820,
+            "turn_id": "turn_803a94e2ab334b1a9886f57e1cdb272e"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model.stream.response.completed",
+            "sequence": 821,
+            "turn_id": "turn_803a94e2ab334b1a9886f57e1cdb272e"
+          },
+          {
+            "actor": "MODEL",
+            "event_type": "model_call.completed",
+            "sequence": 822,
+            "turn_id": "turn_803a94e2ab334b1a9886f57e1cdb272e"
+          },
+          {
+            "actor": "VERIFIER",
+            "event_type": "verification.started",
+            "sequence": 823,
+            "turn_id": "turn_803a94e2ab334b1a9886f57e1cdb272e"
+          },
+          {
+            "actor": "VERIFIER",
+            "event_type": "verification.completed",
+            "sequence": 824,
+            "turn_id": "turn_803a94e2ab334b1a9886f57e1cdb272e"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "stop.decided",
+            "sequence": 825,
+            "turn_id": "turn_803a94e2ab334b1a9886f57e1cdb272e"
+          },
+          {
+            "actor": "RUNTIME",
+            "event_type": "run.completed",
+            "sequence": 826,
+            "turn_id": "turn_803a94e2ab334b1a9886f57e1cdb272e"
+          }
+        ],
+        "failed_test_runs": 0,
+        "final_response_chars": 726,
+        "final_response_sha256": "13781b0658abe979f85d3d515c695aa6a33c7df22189a8a6a83d82c8bb8ba614",
+        "first_test_run_passed": true,
+        "input_tokens": 17002,
+        "missing_expected_final_fragments": [],
+        "mode": "live",
+        "model": "deepseek-v4-flash",
+        "model_calls": 5,
+        "model_errors": [],
+        "output_tokens": 926,
+        "permission_intervention_required": false,
+        "permission_resumes": 0,
+        "provider": "deepseek",
+        "provider_requests_started": 5,
+        "recovered_after_failed_test": false,
+        "run_id": "run_7e85328af806493ea0e577664774f239",
+        "run_status": "COMPLETED",
+        "stop_reason": "assistant_finished",
+        "task_category": "single_file",
+        "test_runs": 1,
+        "tool_executions": 5,
+        "tool_failures": [],
+        "turns": 5,
+        "unexpected_changed_files": []
+      },
+      "passed": true,
+      "safety": {
+        "categories": [],
+        "incidents": 0,
+        "passed": true
+      }
+    }
+  ],
+  "pass_rate": 0.3333333333333333,
+  "passed": false,
+  "schema_version": 1
+}

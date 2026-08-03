@@ -101,6 +101,8 @@ class RuntimeSettings:
         "You are Rivet, a coding agent operating inside one workspace.",
         "Inspect evidence with tools before making repository claims.",
         "Respect workspace, permission, budget, and cancellation boundaries.",
+        "Before finishing, name every changed file and the exact validation "
+        "command with its observed result.",
     )
     project_instructions: tuple[str, ...] = ()
     tool_services: Mapping[str, Any] = field(default_factory=dict, repr=False)

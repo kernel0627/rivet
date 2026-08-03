@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "report_type": "live_eval_success_summary",
+  "provider": "deepseek",
+  "model": "deepseek-v4-flash",
+  "case_count": 3,
+  "passed": true,
+  "pass_rate": 1.0,
+  "selected_case_evidence": [
+    {
+      "case_id": "live_fix_slug_normalization",
+      "report": "live-v1-single-file-06-summary-retry.json",
+      "report_sha256": "519a7a8eb47b4c9db4fcc06d1a745a211b34f0039ce8731e16c1a931075fe37a",
+      "changed_files": ["slug.py"]
+    },
+    {
+      "case_id": "live_fix_window_overlap",
+      "report": "live-v1-single-file-07-window-clean.json",
+      "report_sha256": "95b851e0317a77bc97b53086916086ddd6d2b92b7683347c7eea92202085402e",
+      "changed_files": ["windows.py"]
+    },
+    {
+      "case_id": "live_fix_batch_chunks",
+      "report": "live-v1-single-file-05-remaining-result.json",
+      "report_sha256": "a9e0b11ab19d26da322b99c6a2800573f9fe5f40dabc5ae65d270a93005b894f",
+      "changed_files": ["batching.py"]
+    }
+  ],
+  "totals": {
+    "model_calls": 17,
+    "tool_executions": 20,
+    "test_runs": 4,
+    "input_tokens": 62595,
+    "output_tokens": 3269,
+    "checkpoint_count": 3,
+    "unexpected_changed_files": 0,
+    "safety_incidents": 0,
+    "model_errors": 0,
+    "tool_failures": 0
+  },
+  "all_first_test_runs_passed": true,
+  "cost_usd": null,
+  "cost_status": "unavailable"
+}

@@ -91,7 +91,7 @@ rivet chat --workspace /path/to/repo
 
 截至 2026-08-03：
 
-- 全量离线测试：`217 passed, 103 subtests passed`；
+- 全量离线测试：`221 passed, 103 subtests passed`；
 - 固定离线 Eval：`8/8 passed`，这些结果来自脚本化 Fake Model；
 - DeepSeek live Eval：最小 `explain_entrypoint 1/1 passed`，另有首个单文件 Bugfix
   `live_fix_inventory_boundary 1/1 passed`；
@@ -226,7 +226,7 @@ Fixture 内容、Provider、预算上限和外发授权。
 - 种子中的三个写任务也继续保留初始失败检查，作为快速结构冒烟；
 - Eval 报告已补 Token、费用可用状态、测试次数、首次测试结果、修改文件、非预期修改、
   权限干预、工具失败和不含 Payload 的 Event 序列；未知费用不会伪装成零费用；
-- 当前全量回归为 `217 passed, 103 subtests passed`，固定离线 Eval 仍为 `8/8 passed`；
+- 当前全量回归为 `221 passed, 103 subtests passed`，固定离线 Eval 仍为 `8/8 passed`；
 - 首批 4 个只读任务的正式真实 Provider 结果为 `4/4 passed`。
 
 下一步：对其余 3 个单文件任务逐一做本地预检，按小批次执行并比较 Checkpoint、Diff、测试、
@@ -247,7 +247,10 @@ Fixture 内容、Provider、预算上限和外发授权。
 - 仅修改 `inventory.py`，测试首次通过，1 个 Checkpoint，非预期修改和安全事件为 0；
 - 其余 3 个单文件任务的本地预检已完成：目标文本共 523 字节，Fixture 共 1667 字节，
   每任务最多 7 次模型调用；预检未启动外部请求；
-- 下一步按预检固定边界执行这 3 个任务，先观察样本间稳定性，再进入跨文件任务。
+- 其余 3 个单文件任务的最终真实结果为 `3/3 passed`，合计 17 次模型调用、20 次工具执行、
+  4 次测试、62595 输入 Token 和 3269 输出 Token；每项只修改允许文件，首次测试均通过；
+- 真实执行推动拆分“证据不准确”和“摘要片段缺失”，并补齐缓存过滤与严格非预期路径拒绝；
+- 下一步进入跨文件任务预检，继续用小批次观察修改范围、测试和调用预算。
 
 ### 2026-08-03：首批只读 live 预检
 
