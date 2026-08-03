@@ -46,7 +46,7 @@ intermediate 和 advanced。
       --category read_only \
       --config-workspace . \
       --preflight \
-      --max-model-calls 3 \
+      --max-model-calls 5 \
       --max-input-tokens 8000 \
       --max-output-tokens 1024 \
       --output reports/live-v1-read-only-preflight.json \
@@ -55,7 +55,7 @@ intermediate 和 advanced。
 预检列出目的地 URL/主机、模型、目标文本、Fixture 路径/字节数/哈希和批次理论 Token
 上限，但不会输出 API Key。输入上限使用 Rivet 的 Token 估算器，可能与 Provider 报告值
 有差异。只读任务在 Runtime 中强制使用 `workspace_write = deny` 和
-`process_execute = deny`。
+`process_execute = deny`，模型工具面同时收窄为文件读取、搜索和 Python 代码理解工具。
 
 真实执行会发送所选 Case 的 objective 和 fixture_files 给配置的 Provider，并可能产生费用。
 live 模式必须使用 `--case` 或 `--category` 显式选择任务。首批只读任务可以这样运行：

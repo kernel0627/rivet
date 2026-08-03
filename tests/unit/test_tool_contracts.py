@@ -103,6 +103,15 @@ class ToolContractTests(unittest.TestCase):
         with self.assertRaises(DuplicateToolError):
             catalog.register(ExampleTool())
 
+    def test_catalog_can_narrow_the_model_visible_surface(self) -> None:
+        catalog = ToolCatalog([ExampleTool()], model_visible_names=())
+
+        self.assertIsNotNone(catalog.get("example"))
+        self.assertEqual(catalog.model_schemas(), ())
+
+        with self.assertRaisesRegex(ValueError, "unknown model-visible tool"):
+            ToolCatalog([ExampleTool()], model_visible_names=("missing",))
+
     def test_structured_result_serializes_content_and_error(self) -> None:
         success = ToolResult.success(TextBlock("hello"))
         failure = ToolResult.error(

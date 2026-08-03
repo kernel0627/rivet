@@ -2,7 +2,7 @@
 
 状态：正式 V1 主链已实现  
 基线：`PROJECT_DESIGN.md`  
-最近验证：2026-08-01
+最近验证：2026-08-03
 
 ## 1. 当前结论
 
@@ -24,10 +24,11 @@ Rivet 已形成可运行的单 Agent Coding Runtime。正式入口具备：
 默认测试完全离线。本次验收：
 
 ```text
-pytest: 210 passed, 103 subtests passed
+pytest: 213 passed, 103 subtests passed
 offline eval: 8/8 passed
 offline eval benchmark: 10/10 passed, median 1426.196 ms, p95 1559.593 ms
 DeepSeek live eval: explain_entrypoint 1/1 passed, 2 model calls, 2 tool executions
+DeepSeek live read-only V1: 4/4 passed, 12 model calls, 16 tool executions
 ruff: all checks passed
 ```
 
@@ -77,6 +78,8 @@ M5 在设计中属于后续扩展，不是正式 V1 的发布阻塞项。
   或确认全量运行；
 - live 预检报告目的地 URL/主机、模型、Fixture 哈希/字节数和理论 Token 上限，支持按本次
   Eval 收紧模型调用和输入/输出 Token；只读任务强制拒绝工作区写入和进程执行；
+- 只读 Eval 仅向模型暴露文件读取、搜索和 Python 代码理解工具；预检拒绝可形成合法的
+  终态 ToolExecution，报告记录回答长度/哈希及缺失验收片段；
 - 真实 Rivet 仓库的可重复索引/检索基准 CLI 与固定查询集；
 - Fake Model 条件驱动和脚本驱动；
 - SQLite State 与内容寻址 Artifact；
@@ -118,13 +121,11 @@ Eval 会把 Fixture、SQLite 状态和 Event 放入同一个临时隔离目录�
 测量见 [retrieval-baseline.md](retrieval-baseline.md)。该基线显示 Hash Dense Top-5 为
 `0/5`，因此 Dense 默认关闭；这项结果不替代真实 Embedding 和大型多语言仓库验收。
 
-真实任务 V1 已完成 17 个任务的结构、修改边界、初始失败条件和本地参考解验证，尚未调用
-Provider。它不构成真实 Bugfix 成功率证据；下一步是确认 Provider、模型、Case 小批次、Fixture
-外发内容和预算后执行，指标和授权边界见 [work-plan.md](work-plan.md)。
-
-2026-08-03 已为 4 个只读 V1 任务生成本地预检。受限网络内的首次启动记录为 4 个
-`provider_unavailable`，实际 Token 和费用为 0；联网执行在进程启动前被审批层拒绝，因此
-正式真实 Provider 成功率仍为空。脱敏证据见 [reports](../reports/README.md)。
+真实任务 V1 已完成 17 个任务的结构、修改边界、初始失败条件和本地参考解验证。2026-08-03
+使用 DeepSeek 完成首批 4 个只读任务，结果为 `4/4 passed`：全部 Run 为 `COMPLETED`，合计
+12 次模型调用、16 次只读工具执行、25563 输入 Token 和 4929 输出 Token；修改文件、安全
+事件、模型错误和工具失败均为 0。Provider 未报告 USD 费用，因此费用为 unavailable。
+下一步进入单文件修改任务，脱敏证据见 [reports](../reports/README.md)。
 
 ## 5. 测试覆盖
 

@@ -14,7 +14,7 @@ from rivet.configuration import load_config
 from rivet.domain import RunStatus
 from rivet.evaluation.assessments import CompletionObservation, SafetyObservation
 from rivet.evaluation.dataset import EvalCase
-from rivet.evaluation.preflight import LiveEvalLimits
+from rivet.evaluation.preflight import READ_ONLY_EVAL_TOOL_NAMES, LiveEvalLimits
 from rivet.evaluation.runner import EvalExecution
 from rivet.model.fake import FakeModel
 from rivet.model.types import ModelResult, ToolProposal
@@ -66,6 +66,11 @@ class RivetEvalExecutor:
                     overrides=overrides,
                     model_gateway=gateway,
                     state_root=state_root,
+                    model_visible_tools=(
+                        READ_ONLY_EVAL_TOOL_NAMES
+                        if case.task_category == "read_only"
+                        else None
+                    ),
                 )
                 outcome = await application.service.run(case.objective)
                 permission_resumes = 0
@@ -123,13 +128,12 @@ class RivetEvalExecutor:
                 case.expected_tests,
                 timeout_seconds=self.timeout_seconds,
             )
-            final_evidence_accurate = (
-                all(
-                    fragment.casefold() in final_response.casefold()
-                    for fragment in case.expected_final_contains
-                )
-                and not failed_checks
+            missing_final_fragments = tuple(
+                fragment
+                for fragment in case.expected_final_contains
+                if fragment.casefold() not in final_response.casefold()
             )
+            final_evidence_accurate = not missing_final_fragments and not failed_checks
             test_executions = tuple(
                 execution
                 for execution in executions
@@ -215,6 +219,13 @@ class RivetEvalExecutor:
                     ),
                     "event_count": len(events),
                     "duration_ms": _elapsed_ms(started_at),
+                    "final_response_chars": len(final_response),
+                    "final_response_sha256": hashlib.sha256(
+                        final_response.encode("utf-8")
+                    ).hexdigest(),
+                    "missing_expected_final_fragments": list(
+                        missing_final_fragments
+                    ),
                     "model_errors": [
                         {
                             "kind": call.error.kind.value,
@@ -245,15 +256,7 @@ class RivetEvalExecutor:
                         for execution in executions
                         if execution.status.value != "SUCCEEDED"
                     ],
-                    "event_trace": [
-                        {
-                            "sequence": event.sequence,
-                            "event_type": event.event_type,
-                            "actor": event.actor.value,
-                            "turn_id": event.turn_id,
-                        }
-                        for event in events
-                    ],
+                    "event_trace": _compact_event_trace(events),
                     "checks": check_metadata,
                 },
             )
@@ -423,6 +426,30 @@ def _safety_observation(
         unhandled_uncertain_side_effects=uncertain,
         command_policy_violations=command_policy_violations,
     )
+
+
+def _compact_event_trace(events: tuple[Any, ...]) -> list[dict[str, object]]:
+    trace: list[dict[str, object]] = []
+    for event in events:
+        actor = event.actor.value
+        if (
+            trace
+            and trace[-1]["event_type"] == event.event_type
+            and trace[-1]["actor"] == actor
+            and trace[-1]["turn_id"] == event.turn_id
+        ):
+            trace[-1]["sequence_end"] = event.sequence
+            trace[-1]["count"] = int(trace[-1].get("count", 1)) + 1
+            continue
+        trace.append(
+            {
+                "sequence": event.sequence,
+                "event_type": event.event_type,
+                "actor": actor,
+                "turn_id": event.turn_id,
+            }
+        )
+    return trace
 
 
 def _elapsed_ms(started_at: float) -> float:

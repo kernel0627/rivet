@@ -1817,6 +1817,7 @@ class RuntimeEngine:
             if result.status is ToolResultStatus.DENIED
             else ToolExecutionStatus.FAILED
         )
+        finished_at = self.clock.now()
         terminal = replace(
             execution,
             status=status,
@@ -1826,7 +1827,10 @@ class RuntimeEngine:
                 else execution.permission_decision
             ),
             error=None if status is ToolExecutionStatus.DENIED else _tool_error_info(result),
-            ended_at=self.clock.now(),
+            # Preflight failures happen before the tool emits a tool.started event,
+            # but terminal execution records still require a bounded time interval.
+            started_at=execution.started_at or finished_at,
+            ended_at=finished_at,
         )
         message = Message(
             role=MessageRole.TOOL,

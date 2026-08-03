@@ -3,11 +3,11 @@
   "limits": {
     "cost_status": "unavailable_before_provider_response",
     "cost_usd": null,
-    "max_input_tokens_for_batch": 96000,
+    "max_input_tokens_for_batch": 160000,
     "max_input_tokens_per_call": 8000,
-    "max_model_calls_for_batch": 12,
-    "max_model_calls_per_case": 3,
-    "max_output_tokens_for_batch": 12288,
+    "max_model_calls_for_batch": 20,
+    "max_model_calls_per_case": 5,
+    "max_output_tokens_for_batch": 20480,
     "max_output_tokens_per_call": 1024
   },
   "provider": {
@@ -72,6 +72,15 @@
           "test_checkout.py"
         ],
         "id": "live_explain_checkout_failure",
+        "model_visible_tools": [
+          "list_files",
+          "read_file",
+          "search_text",
+          "python_outline",
+          "find_python_symbol",
+          "read_python_symbol",
+          "find_python_imports"
+        ],
         "objective": "阅读失败测试及相关实现，说明 total_with_fee 的计算为什么错误、问题位于哪个函数，以及 rate 参数应如何解释。不要修改文件。",
         "objective_bytes": 169,
         "objective_sha256": "ebe9ae51f993436c92e040259601dfb9d872afedfc27ba1c59a3e20aceb1708d",
@@ -102,6 +111,15 @@
           "test_sessions.py"
         ],
         "id": "live_explain_session_expiry",
+        "model_visible_tools": [
+          "list_files",
+          "read_file",
+          "search_text",
+          "python_outline",
+          "find_python_symbol",
+          "read_python_symbol",
+          "find_python_imports"
+        ],
         "objective": "阅读会话过期逻辑和失败测试，说明边界时刻为什么被错误地视为有效，并指出应修改的判断条件。不要修改文件。",
         "objective_bytes": 153,
         "objective_sha256": "d2249657f2be651414637afe8db12f956e75f0adac4edfaee7abe93d13fb5824",
@@ -132,6 +150,15 @@
           "test_backoff.py"
         ],
         "id": "live_explain_retry_delay",
+        "model_visible_tools": [
+          "list_files",
+          "read_file",
+          "search_text",
+          "python_outline",
+          "find_python_symbol",
+          "read_python_symbol",
+          "find_python_imports"
+        ],
         "objective": "分析 retry_delay 的失败测试，解释 attempt 的编号约定、当前公式产生的序列，以及正确的指数退避公式。不要修改文件。",
         "objective_bytes": 157,
         "objective_sha256": "10d46f900bf7c64a764b5996b844d11ea195a2770bdf5634deb5b0129c3a2303",
@@ -162,6 +189,15 @@
           "test_config.py"
         ],
         "id": "live_explain_config_precedence",
+        "model_visible_tools": [
+          "list_files",
+          "read_file",
+          "search_text",
+          "python_outline",
+          "find_python_symbol",
+          "read_python_symbol",
+          "find_python_imports"
+        ],
         "objective": "阅读配置合并实现和失败测试，说明为什么环境覆盖值没有生效、字典展开顺序代表什么，并给出最小修复建议。不要修改文件。",
         "objective_bytes": 171,
         "objective_sha256": "82ee337cad7c588c9d4aefe028ef15bb70c9793f8cd29a59dc09b22a45236ad6",

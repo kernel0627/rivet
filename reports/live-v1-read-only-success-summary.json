@@ -1,0 +1,120 @@
+{
+  "schema_version": 1,
+  "report_type": "live_eval_batch_summary",
+  "provider": {
+    "name": "deepseek",
+    "model": "deepseek-v4-flash",
+    "base_url_host": "api.deepseek.com"
+  },
+  "selection": {
+    "case_count": 4,
+    "category": "read_only",
+    "case_ids": [
+      "live_explain_checkout_failure",
+      "live_explain_session_expiry",
+      "live_explain_retry_delay",
+      "live_explain_config_precedence"
+    ]
+  },
+  "limits": {
+    "max_model_calls_per_case": 5,
+    "max_input_context_tokens_per_call": 8000,
+    "input_token_enforcement": "rivet_estimator",
+    "max_output_tokens_per_call": 1024,
+    "workspace_write": "deny",
+    "process_execute": "deny",
+    "model_visible_tools": [
+      "list_files",
+      "read_file",
+      "search_text",
+      "python_outline",
+      "find_python_symbol",
+      "read_python_symbol",
+      "find_python_imports"
+    ]
+  },
+  "passed": true,
+  "pass_rate": 1.0,
+  "external_requests_completed": true,
+  "cost_usd": null,
+  "cost_status": "unavailable",
+  "totals": {
+    "model_calls": 12,
+    "tool_executions": 16,
+    "input_tokens": 25563,
+    "output_tokens": 4929,
+    "event_count": 4637,
+    "changed_files": 0,
+    "safety_incidents": 0,
+    "model_errors": 0,
+    "tool_failures": 0
+  },
+  "cases": [
+    {
+      "case_id": "live_explain_checkout_failure",
+      "passed": true,
+      "run_status": "COMPLETED",
+      "model_calls": 3,
+      "tool_executions": 6,
+      "input_tokens": 7275,
+      "output_tokens": 1333,
+      "duration_ms": 12178.785,
+      "final_response_chars": 651,
+      "changed_files": [],
+      "safety_incidents": 0,
+      "missing_expected_final_fragments": []
+    },
+    {
+      "case_id": "live_explain_session_expiry",
+      "passed": true,
+      "run_status": "COMPLETED",
+      "model_calls": 3,
+      "tool_executions": 3,
+      "input_tokens": 5931,
+      "output_tokens": 1127,
+      "duration_ms": 10060.531,
+      "final_response_chars": 1083,
+      "changed_files": [],
+      "safety_incidents": 0,
+      "missing_expected_final_fragments": []
+    },
+    {
+      "case_id": "live_explain_retry_delay",
+      "passed": true,
+      "run_status": "COMPLETED",
+      "model_calls": 3,
+      "tool_executions": 4,
+      "input_tokens": 6527,
+      "output_tokens": 1269,
+      "duration_ms": 11110.167,
+      "final_response_chars": 241,
+      "changed_files": [],
+      "safety_incidents": 0,
+      "missing_expected_final_fragments": []
+    },
+    {
+      "case_id": "live_explain_config_precedence",
+      "passed": true,
+      "run_status": "COMPLETED",
+      "model_calls": 3,
+      "tool_executions": 3,
+      "input_tokens": 5830,
+      "output_tokens": 1200,
+      "duration_ms": 11133.084,
+      "final_response_chars": 266,
+      "changed_files": [],
+      "safety_incidents": 0,
+      "missing_expected_final_fragments": []
+    }
+  ],
+  "source_reports": [
+    {
+      "path": "reports/live-v1-read-only-07-diagnostic.json",
+      "sha256": "bc8f0c7b80645f7c6c9bfddab98eba35f9789e5b67f19f6c34519428b4908d07"
+    },
+    {
+      "path": "reports/live-v1-read-only-09-remaining.json",
+      "sha256": "27517e97632f75f4095dee1a6d7937741e95402c3c4b33bd2d1c6fc48f98e2b7"
+    }
+  ]
+}

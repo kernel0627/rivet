@@ -4,6 +4,7 @@ import inspect
 import os
 import shutil
 import sys
+from collections.abc import Collection
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -85,6 +86,7 @@ def build_application(
     overrides: dict[str, Any] | None = None,
     model_gateway: Any | None = None,
     state_root: Path | None = None,
+    model_visible_tools: Collection[str] | None = None,
 ) -> ApplicationHarness:
     root = workspace.expanduser().resolve()
     loaded = load_config(root, overrides=overrides)
@@ -114,7 +116,8 @@ def build_application(
             RunCommandTool(),
             RunTestsTool(),
             *code_intelligence_tools(),
-        ]
+        ],
+        model_visible_names=model_visible_tools,
     )
     executor = ToolExecutor(
         catalog,

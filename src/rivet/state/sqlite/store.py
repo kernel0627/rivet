@@ -457,6 +457,7 @@ class SQLiteStateStore:
                 ToolExecutionStatus.PREPARED: {
                     ToolExecutionStatus.WAITING_PERMISSION,
                     ToolExecutionStatus.READY,
+                    ToolExecutionStatus.DENIED,
                     ToolExecutionStatus.FAILED,
                     ToolExecutionStatus.CANCELLED,
                 },

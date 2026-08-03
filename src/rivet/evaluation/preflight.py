@@ -7,6 +7,16 @@ from rivet.configuration import RivetConfig
 from rivet.evaluation.dataset import EvalCase
 from rivet.model.providers import resolve_provider
 
+READ_ONLY_EVAL_TOOL_NAMES = (
+    "list_files",
+    "read_file",
+    "search_text",
+    "python_outline",
+    "find_python_symbol",
+    "read_python_symbol",
+    "find_python_imports",
+)
+
 
 @dataclass(frozen=True, slots=True)
 class LiveEvalLimits:
@@ -154,6 +164,11 @@ def _case_payload(case: EvalCase) -> dict[str, object]:
         ),
         "process_execute_mode": (
             "deny" if case.task_category == "read_only" else "allow_or_resume"
+        ),
+        "model_visible_tools": (
+            list(READ_ONLY_EVAL_TOOL_NAMES)
+            if case.task_category == "read_only"
+            else None
         ),
     }
 

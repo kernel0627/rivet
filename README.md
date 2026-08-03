@@ -10,7 +10,7 @@ Checkpoint/Rewind、验证、代码智能、Trace 和终端交互。
 工具适配与可选 Reviewer 基线。2026-08-01 的本地离线验收结果为：
 
 ```text
-210 passed, 103 subtests passed
+213 passed, 103 subtests passed
 Ruff: all checks passed
 ```
 
@@ -332,8 +332,8 @@ rivet eval --mode offline --dataset benchmarks/live_tasks_seed.jsonl
 
 可以使用 `--list-cases` 完全离线地查看 V1 任务契约。live 模式要求使用 `--case` 选择
 小批任务，或使用 `--category` 选择四类中的一个执行批次；只有明确准备运行完整数据集时才
-传入 `--all-cases`。V1 任务尚未形成真实成功率证据。执行前必须确认 Provider、模型、
-Case、Fixture 外发内容和预算，具体边界见 [评估数据集说明](benchmarks/README.md)。
+传入 `--all-cases`。V1 只读任务已形成 `4/4` 的首批真实成功证据，写任务尚未执行。
+具体边界和报告见 [评估数据集说明](benchmarks/README.md)。
 
 使用 `--preflight` 可以在不发送请求的情况下生成目的地主机、模型、Case、Fixture 文件哈希、
 字节数和理论 Token 上限。live 执行可临时收紧每个 Case 的边界：
@@ -344,7 +344,7 @@ rivet eval --mode live \
   --category read_only \
   --config-workspace . \
   --preflight \
-  --max-model-calls 3 \
+  --max-model-calls 5 \
   --max-input-tokens 8000 \
   --max-output-tokens 1024 \
   --output reports/live-v1-read-only-preflight.json \
@@ -355,6 +355,8 @@ rivet eval --mode live \
 Rivet 的 Token 估算器执行，可能与 Provider 最终报告的用量有差异。没有 Provider 定价时
 不会伪造 USD 上限。只读 Case 的 `workspace_write` 和 `process_execute` 权限均由 Eval
 Runtime 直接设为 `deny`。
+只读 Eval 还会把模型可见工具收窄为文件读取、搜索和 Python 代码理解工具，避免模型在
+被禁止的写入、进程和 Git 工具上浪费调用。
 
 需要观察本地 Runtime 和 Eval 基础设施的性能回退时，可以重复执行同一套离线场景：
 

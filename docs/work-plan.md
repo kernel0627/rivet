@@ -89,12 +89,13 @@ rivet chat --workspace /path/to/repo
 
 ## 3. 当前证据基线
 
-截至 2026-08-01：
+截至 2026-08-03：
 
-- 全量离线测试：`210 passed, 103 subtests passed`；
+- 全量离线测试：`213 passed, 103 subtests passed`；
 - 固定离线 Eval：`8/8 passed`，这些结果来自脚本化 Fake Model；
 - DeepSeek live Eval：仅 `explain_entrypoint 1/1 passed`，Fixture 是一个打印 `hello` 的
   5 行文件，不能代表真实 Bugfix；
+- DeepSeek V1 只读任务：`4/4 passed`，全部 Run 为 `COMPLETED`，修改文件和安全事件为 0；
 - 完整 live Bugfix、跨文件修改、失败后继续修复尚无正式真实 Provider 证据；
 - Rivet 仓库检索基线已证明 Sparse Top-5 `5/5`，Hash Dense Top-5 `0/5`，因此 Hash
   Dense 默认关闭；
@@ -111,7 +112,7 @@ rivet chat --workspace /path/to/repo
 
 ### 4.1 真实任务集
 
-当前状态：本地任务集与首批预检已完成，等待明确外发授权。
+当前状态：首批 4 个只读任务已完成，下一批进入单文件修改任务。
 
 先完成以下本地工作，再申请一次边界明确的 live 执行授权：
 
@@ -124,7 +125,7 @@ rivet chat --workspace /path/to/repo
 
 ### 4.2 根据真实失败调 Prompt、工具和 Loop
 
-当前状态：等待真实任务数据。
+当前状态：已根据首批只读任务修复 Runtime 拒绝链路并收窄只读工具面。
 
 所有改动必须对应已观察到的失败类别：
 
@@ -224,25 +225,25 @@ Fixture 内容、Provider、预算上限和外发授权。
 - 种子中的三个写任务也继续保留初始失败检查，作为快速结构冒烟；
 - Eval 报告已补 Token、费用可用状态、测试次数、首次测试结果、修改文件、非预期修改、
   权限干预、工具失败和不含 Payload 的 Event 序列；未知费用不会伪装成零费用；
-- 当前全量回归为 `210 passed, 103 subtests passed`，固定离线 Eval 仍为 `8/8 passed`；
-- 尚未调用真实 Provider，正式成功率仍为空。
+- 当前全量回归为 `213 passed, 103 subtests passed`，固定离线 Eval 仍为 `8/8 passed`；
+- 首批 4 个只读任务的正式真实 Provider 结果为 `4/4 passed`。
 
-下一步：先选择 2～4 个只读任务作为首批 live 执行，固定 Provider、模型、Fixture 外发
-范围和预算上限；验证报告与 Trace 后，再进入单文件和跨文件任务。
+下一步：从 4 个单文件修改任务中选择小批次，先预检修改边界、测试命令和写权限恢复流程，
+再执行并验证 Checkpoint、Diff、测试与非预期修改。
 
 ### 2026-08-03：首批只读 live 预检
 
 - 已选择 4 个只读任务，目标为 `api.deepseek.com`，模型为 `deepseek-v4-flash`；
 - 外发范围为 650 字节目标文本和 2000 字节 inline Fixture，不包含当前 Rivet 仓库源码；
-- 每任务最多 3 次模型调用，每次最多 8000 输入 Token 和 1024 输出 Token；
+- 最终执行上限为每任务最多 5 次模型调用，每次最多 8000 输入 Token 和 1024 输出 Token；
 - Eval Runtime 对只读 Case 强制 `workspace_write = deny` 和 `process_execute = deny`；
+- 模型可见工具收窄为文件读取、搜索和 Python 代码理解工具；
 - 预检没有启动外部请求；
 - 受限网络内的首次启动形成 4 个 `provider_unavailable`，实际 Token 和费用为 0；
-- 联网执行在进程启动前被审批层拒绝，正式真实 Provider 成功率仍为空；
+- 首次真实执行暴露并推动修复了终态时间字段与 `PREPARED -> DENIED` 状态转移缺陷；
+- 最终真实结果为 `4/4 passed`，12 次模型调用、16 次只读工具执行，修改文件和安全事件为 0；
+- 合计输入 25563 Token、输出 4929 Token，USD 费用因 Provider 未报告而 unavailable；
 - 预检与阻断报告保存在 [reports](../reports/README.md)。
-
-下一动作需要用户明确授权：将上述 4 个任务目标和 2000 字节 Fixture 发送到
-`api.deepseek.com`，使用 `deepseek-v4-flash`，接受可能费用，并保持上述调用与 Token 上限。
 
 ## 10. 完成与维护规则
 

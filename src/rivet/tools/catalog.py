@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Iterator
+from collections.abc import Collection, Iterator
 from typing import Any
 
 from rivet.model.types import ToolSchema
@@ -12,10 +12,26 @@ class DuplicateToolError(ValueError):
 
 
 class ToolCatalog:
-    def __init__(self, tools: tuple[Tool, ...] | list[Tool] = ()) -> None:
+    def __init__(
+        self,
+        tools: tuple[Tool, ...] | list[Tool] = (),
+        *,
+        model_visible_names: Collection[str] | None = None,
+    ) -> None:
         self._tools: dict[str, Tool] = {}
+        self._model_visible_names = (
+            frozenset(model_visible_names)
+            if model_visible_names is not None
+            else None
+        )
         for tool in tools:
             self.register(tool)
+        if self._model_visible_names is not None:
+            unknown = self._model_visible_names - self._tools.keys()
+            if unknown:
+                raise ValueError(
+                    "unknown model-visible tool(s): " + ", ".join(sorted(unknown))
+                )
 
     def register(self, tool: Tool) -> None:
         name = tool.spec.name
@@ -35,7 +51,15 @@ class ToolCatalog:
     def specs(self, *, model_visible_only: bool = False) -> tuple[ToolSpec, ...]:
         specs = tuple(tool.spec for tool in self._tools.values())
         if model_visible_only:
-            return tuple(spec for spec in specs if spec.model_visible)
+            return tuple(
+                spec
+                for spec in specs
+                if spec.model_visible
+                and (
+                    self._model_visible_names is None
+                    or spec.name in self._model_visible_names
+                )
+            )
         return specs
 
     def model_schemas(self) -> tuple[ToolSchema, ...]:
