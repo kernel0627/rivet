@@ -209,6 +209,7 @@ class RuntimeEngine:
             self.owner_id,
             ttl_seconds=self.settings.lease_ttl_seconds,
         )
+        heartbeat = self._start_lease_heartbeat(run_id, lease.token)
         published_after = self._last_sequence(run_id)
         try:
             run = self.state.load_run(run_id)
@@ -239,6 +240,7 @@ class RuntimeEngine:
                 run = await self._run_new_turn(run, lease.token)
             return self._outcome(run, after_sequence=published_after)
         finally:
+            await self._stop_lease_heartbeat(heartbeat)
             self.state.release_run_lease(run_id, lease.token)
 
     async def resume_run(self, command: ResumeRun) -> RunOutcome:
@@ -252,6 +254,7 @@ class RuntimeEngine:
             self.owner_id,
             ttl_seconds=self.settings.lease_ttl_seconds,
         )
+        heartbeat = self._start_lease_heartbeat(run.run_id, lease.token)
         published_after = self._last_sequence(run.run_id)
         try:
             cursor = decode_cursor(run.resume_cursor)
@@ -324,6 +327,7 @@ class RuntimeEngine:
                     resumed = await self._run_new_turn(resumed, lease.token)
             return self._outcome(resumed, after_sequence=published_after)
         finally:
+            await self._stop_lease_heartbeat(heartbeat)
             self.state.release_run_lease(run.run_id, lease.token)
 
     async def cancel_run(self, command: CancelRun) -> RunSnapshot:
@@ -335,6 +339,7 @@ class RuntimeEngine:
             self.owner_id,
             ttl_seconds=self.settings.lease_ttl_seconds,
         )
+        heartbeat = self._start_lease_heartbeat(run.run_id, lease.token)
         try:
             turn = self._active_turn(run)
             turn_update = None
@@ -377,6 +382,7 @@ class RuntimeEngine:
             )
             return self._snapshot(cancelled)
         finally:
+            await self._stop_lease_heartbeat(heartbeat)
             self.state.release_run_lease(run.run_id, lease.token)
 
     async def recover_run(self, run_id: str) -> RunSnapshot:
@@ -388,6 +394,7 @@ class RuntimeEngine:
             self.owner_id,
             ttl_seconds=self.settings.lease_ttl_seconds,
         )
+        heartbeat = self._start_lease_heartbeat(run_id, lease.token)
         try:
             recovering = replace(
                 run,
@@ -532,7 +539,39 @@ class RuntimeEngine:
             )
             return self._snapshot(paused)
         finally:
+            await self._stop_lease_heartbeat(heartbeat)
             self.state.release_run_lease(run_id, lease.token)
+
+    def _start_lease_heartbeat(
+        self,
+        run_id: str,
+        lease_token: str,
+    ) -> asyncio.Task[None]:
+        return asyncio.create_task(
+            self._maintain_run_lease(run_id, lease_token),
+            name=f"rivet-lease-heartbeat-{run_id}",
+        )
+
+    async def _stop_lease_heartbeat(
+        self,
+        heartbeat: asyncio.Task[None],
+    ) -> None:
+        heartbeat.cancel()
+        await asyncio.gather(heartbeat, return_exceptions=True)
+
+    async def _maintain_run_lease(
+        self,
+        run_id: str,
+        lease_token: str,
+    ) -> None:
+        interval = max(min(self.settings.lease_ttl_seconds / 3, 30.0), 0.01)
+        while True:
+            await asyncio.sleep(interval)
+            self.state.renew_run_lease(
+                run_id,
+                lease_token,
+                ttl_seconds=self.settings.lease_ttl_seconds,
+            )
 
     async def _run_new_turn(self, run: Run, lease_token: str) -> Run:
         now = self.clock.now()

@@ -105,15 +105,14 @@ class RivetEvalExecutor:
                 )
                 final_response = outcome.run.final_response or ""
             except Exception as error:
-                return EvalExecution(
-                    completion=CompletionObservation(
-                        failed_checks=("runtime",),
-                    ),
-                    metadata={
-                        "mode": self.mode,
-                        "error": Redactor().exception_summary(error),
-                        "duration_ms": _elapsed_ms(started_at),
-                    },
+                return _failed_eval_execution(
+                    application=application,
+                    workspace=workspace,
+                    before=before,
+                    case=case,
+                    mode=self.mode,
+                    error=error,
+                    started_at=started_at,
                 )
             finally:
                 if application is not None:
@@ -184,6 +183,7 @@ class RivetEvalExecutor:
                     ),
                     "turns": outcome.run.usage.turns,
                     "model_calls": outcome.run.usage.model_calls,
+                    "provider_requests_started": len(model_calls),
                     "tool_executions": outcome.run.usage.tool_executions,
                     "test_runs": len(test_executions),
                     "failed_test_runs": failed_test_runs,
@@ -298,6 +298,84 @@ class RivetEvalExecutor:
         overrides["runtime"] = loaded.config.runtime.model_dump(mode="json")
         overrides["context"] = loaded.config.context.model_dump(mode="json")
         return None, overrides
+
+
+def _failed_eval_execution(
+    *,
+    application: Any,
+    workspace: Path,
+    before: Mapping[str, str],
+    case: EvalCase,
+    mode: EvalMode,
+    error: Exception,
+    started_at: float,
+) -> EvalExecution:
+    redactor = Redactor()
+    metadata: dict[str, object] = {
+        "mode": mode,
+        "error": redactor.exception_summary(error),
+        "duration_ms": _elapsed_ms(started_at),
+    }
+    changed_paths = _changed_paths(before, _workspace_snapshot(workspace))
+    executions: tuple[Any, ...] = ()
+    if application is not None:
+        try:
+            runs = tuple(
+                run
+                for session in application.service.sessions()
+                for run in application.service.runs(session.session_id)
+            )
+            if runs:
+                run = runs[-1]
+                events = application.service.events(run.run_id)
+                model_calls = tuple(
+                    application.service.state.list_model_calls(run.run_id)
+                )
+                executions = tuple(
+                    application.service.state.list_tool_executions(run.run_id)
+                )
+                checkpoints = tuple(
+                    application.service.state.list_checkpoints(run.run_id)
+                )
+                metadata.update(
+                    {
+                        "run_id": run.run_id,
+                        "run_status": run.status.value,
+                        "completed": run.status is RunStatus.COMPLETED,
+                        "turns": run.usage.turns,
+                        "model_calls": run.usage.model_calls,
+                        "provider_requests_started": len(model_calls),
+                        "tool_executions": run.usage.tool_executions,
+                        "tool_execution_records": len(executions),
+                        "input_tokens": run.usage.input_tokens,
+                        "output_tokens": run.usage.output_tokens,
+                        "changed_files": list(changed_paths),
+                        "unexpected_changed_files": [
+                            path
+                            for path in changed_paths
+                            if path not in set(case.expected_files)
+                        ],
+                        "checkpoint_count": len(checkpoints),
+                        "provider": model_calls[-1].provider if model_calls else None,
+                        "model": model_calls[-1].model if model_calls else None,
+                        "event_count": len(events),
+                        "event_trace": _compact_event_trace(events),
+                    }
+                )
+        except Exception as diagnostic_error:
+            metadata["diagnostic_error"] = redactor.exception_summary(
+                diagnostic_error
+            )
+    return EvalExecution(
+        completion=CompletionObservation(
+            changed_paths=changed_paths,
+            failed_checks=("runtime",),
+            diff_present=bool(changed_paths),
+            workspace_valid=True,
+        ),
+        safety=_safety_observation(executions, changed_paths),
+        metadata=metadata,
+    )
 
 
 def _scripted_results(case: EvalCase) -> tuple[ModelResult, ...]:

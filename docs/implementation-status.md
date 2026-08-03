@@ -24,7 +24,7 @@ Rivet 已形成可运行的单 Agent Coding Runtime。正式入口具备：
 默认测试完全离线。本次验收：
 
 ```text
-pytest: 215 passed, 103 subtests passed
+pytest: 217 passed, 103 subtests passed
 offline eval: 8/8 passed
 offline eval benchmark: 10/10 passed, median 1426.196 ms, p95 1559.593 ms
 DeepSeek live eval: explain_entrypoint 1/1 passed, 2 model calls, 2 tool executions
@@ -125,7 +125,14 @@ Eval 会把 Fixture、SQLite 状态和 Event 放入同一个临时隔离目录�
 使用 DeepSeek 完成首批 4 个只读任务，结果为 `4/4 passed`：全部 Run 为 `COMPLETED`，合计
 12 次模型调用、16 次只读工具执行、25563 输入 Token 和 4929 输出 Token；修改文件、安全
 事件、模型错误和工具失败均为 0。Provider 未报告 USD 费用，因此费用为 unavailable。
-下一步进入单文件修改任务，脱敏证据见 [reports](../reports/README.md)。
+
+2026-08-04 完成首个单文件任务 `live_fix_inventory_boundary`。首次执行暴露长模型流期间
+60 秒 lease 过期，Runtime 已增加运行期 heartbeat，并用短 TTL 慢流测试覆盖。修复后的正式
+结果为 `1/1 passed`：Run 为 `COMPLETED`，5 次模型调用、6 次工具执行、17576 输入 Token、
+1002 输出 Token；仅修改 `inventory.py`，验收测试首次通过，1 个 Checkpoint，非预期修改、
+模型错误、工具失败和安全事件均为 0。失败 Eval 现在也会保留 Provider 请求数、Event、工具、
+Checkpoint 和 changed files 摘要。下一步扩展其余单文件任务，脱敏证据见
+[reports](../reports/README.md)。
 
 ## 5. 测试覆盖
 

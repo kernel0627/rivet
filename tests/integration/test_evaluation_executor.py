@@ -1,11 +1,74 @@
 from __future__ import annotations
 
+import tempfile
+import time
 import unittest
+from pathlib import Path
+from types import SimpleNamespace
 
-from rivet.evaluation import EvaluationRunner, RivetEvalExecutor, load_baseline
+from rivet.domain import RunStatus
+from rivet.evaluation import EvalCase, EvaluationRunner, RivetEvalExecutor, load_baseline
+from rivet.evaluation.executor import _failed_eval_execution, _workspace_snapshot
 
 
 class EvaluationExecutorTests(unittest.IsolatedAsyncioTestCase):
+    def test_runtime_failure_preserves_started_provider_request_count(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            (workspace / "inventory.py").write_text("stock = 1\n", encoding="utf-8")
+            before = _workspace_snapshot(workspace)
+            usage = SimpleNamespace(
+                turns=1,
+                model_calls=0,
+                tool_executions=0,
+                input_tokens=0,
+                output_tokens=0,
+            )
+            run = SimpleNamespace(
+                run_id="run_failed_diagnostic",
+                status=RunStatus.RUNNING,
+                usage=usage,
+            )
+            model_call = SimpleNamespace(
+                provider="deepseek",
+                model="deepseek-v4-flash",
+            )
+            state = SimpleNamespace(
+                list_model_calls=lambda _run_id: (model_call,),
+                list_tool_executions=lambda _run_id: (),
+                list_checkpoints=lambda _run_id: (),
+            )
+            service = SimpleNamespace(
+                sessions=lambda: (SimpleNamespace(session_id="session_eval"),),
+                runs=lambda _session_id: (run,),
+                events=lambda _run_id: (),
+                state=state,
+            )
+            case = EvalCase(
+                id="failed-diagnostic",
+                objective="Preserve failure evidence.",
+                fixture="inline",
+                task_category="single_file",
+                expected_files=("inventory.py",),
+                fixture_files={"inventory.py": "stock = 1\n"},
+                offline_model=({"text": "unused"},),
+            )
+
+            result = _failed_eval_execution(
+                application=SimpleNamespace(service=service),
+                workspace=workspace,
+                before=before,
+                case=case,
+                mode="live",
+                error=RuntimeError("lease expired"),
+                started_at=time.perf_counter(),
+            )
+
+        self.assertEqual(result.metadata["model_calls"], 0)
+        self.assertEqual(result.metadata["provider_requests_started"], 1)
+        self.assertEqual(result.metadata["provider"], "deepseek")
+        self.assertEqual(result.metadata["changed_files"], [])
+
     async def test_offline_baseline_runs_through_runtime_and_acceptance_checks(
         self,
     ) -> None:
@@ -47,6 +110,7 @@ class EvaluationExecutorTests(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(fixed["recovered_after_failed_test"])
         self.assertEqual(fixed["input_tokens"], 0)
         self.assertEqual(fixed["output_tokens"], 0)
+        self.assertEqual(fixed["provider_requests_started"], fixed["model_calls"])
         self.assertEqual(fixed["cost_usd"], 0.0)
         self.assertEqual(fixed["cost_status"], "not_applicable")
         self.assertEqual(fixed["changed_files"], ["pricing.py"])

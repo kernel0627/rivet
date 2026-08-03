@@ -91,12 +91,13 @@ rivet chat --workspace /path/to/repo
 
 截至 2026-08-03：
 
-- 全量离线测试：`215 passed, 103 subtests passed`；
+- 全量离线测试：`217 passed, 103 subtests passed`；
 - 固定离线 Eval：`8/8 passed`，这些结果来自脚本化 Fake Model；
-- DeepSeek live Eval：仅 `explain_entrypoint 1/1 passed`，Fixture 是一个打印 `hello` 的
-  5 行文件，不能代表真实 Bugfix；
+- DeepSeek live Eval：最小 `explain_entrypoint 1/1 passed`，另有首个单文件 Bugfix
+  `live_fix_inventory_boundary 1/1 passed`；
 - DeepSeek V1 只读任务：`4/4 passed`，全部 Run 为 `COMPLETED`，修改文件和安全事件为 0；
-- 完整 live Bugfix、跨文件修改、失败后继续修复尚无正式真实 Provider 证据；
+- 单文件 Bugfix 已有 1 个正式真实 Provider 结果；更多单文件、跨文件修改和失败后继续修复
+  尚无批次证据；
 - Rivet 仓库检索基线已证明 Sparse Top-5 `5/5`，Hash Dense Top-5 `0/5`，因此 Hash
   Dense 默认关闭；
 - GitHub Actions 已在提交 `51da519` 上验证 Python 3.10/3.12/3.14、Ruff 和 Wheel 全部
@@ -112,7 +113,7 @@ rivet chat --workspace /path/to/repo
 
 ### 4.1 真实任务集
 
-当前状态：首批 4 个只读任务已完成，下一批进入单文件修改任务。
+当前状态：首批 4 个只读任务与首个单文件修改任务已完成，下一步扩展单文件样本。
 
 先完成以下本地工作，再申请一次边界明确的 live 执行授权：
 
@@ -225,20 +226,26 @@ Fixture 内容、Provider、预算上限和外发授权。
 - 种子中的三个写任务也继续保留初始失败检查，作为快速结构冒烟；
 - Eval 报告已补 Token、费用可用状态、测试次数、首次测试结果、修改文件、非预期修改、
   权限干预、工具失败和不含 Payload 的 Event 序列；未知费用不会伪装成零费用；
-- 当前全量回归为 `215 passed, 103 subtests passed`，固定离线 Eval 仍为 `8/8 passed`；
+- 当前全量回归为 `217 passed, 103 subtests passed`，固定离线 Eval 仍为 `8/8 passed`；
 - 首批 4 个只读任务的正式真实 Provider 结果为 `4/4 passed`。
 
-下一步：从 4 个单文件修改任务中选择小批次，先预检修改边界、测试命令和写权限恢复流程，
-再执行并验证 Checkpoint、Diff、测试与非预期修改。
+下一步：对其余 3 个单文件任务逐一做本地预检，按小批次执行并比较 Checkpoint、Diff、测试、
+非预期修改和调用预算；达到稳定门槛后再进入跨文件任务。
 
-### 2026-08-03：首个单文件任务预检
+### 2026-08-04：首个单文件任务结果
 
 - 已选择 `live_fix_inventory_boundary`，只允许修改 `inventory.py`，保护 `test_inventory.py`；
 - 外发边界为 185 字节目标文本和 821 字节固定 Fixture，不包含 Rivet 仓库源码；
 - 模型工具面已收窄为读取、Python 代码理解、`apply_patch` 和 `run_tests`；
 - Eval 会把“出现文件变化但没有成功 WRITE 工具”记为安全事件，防止进程工具绕过 Checkpoint；
-- 联网执行被平台执行策略在进程启动前拒绝，DeepSeek 未收到请求，Token 和费用未增加；
-- 下一步仍是执行该任务并验证 Checkpoint、Diff、测试和非预期修改。
+- 首次真实执行暴露 60 秒 lease 在长模型流期间过期的问题，外层最终表现为 revision 冲突；
+- Runtime 已增加 lease heartbeat，并加入短 TTL、慢流式响应的回归测试；
+- 失败报告当时没有保留 Provider 调用数和临时工作区证据，后续失败路径已补
+  `provider_requests_started`、Event、工具、Checkpoint 和 changed files 摘要；
+- 修复后结果为 `1/1 passed`，Run 为 `COMPLETED`，5 次模型调用、6 次工具执行；
+- 17576 输入 Token、1002 输出 Token，费用因 Provider 未报告而 unavailable；
+- 仅修改 `inventory.py`，测试首次通过，1 个 Checkpoint，非预期修改和安全事件为 0；
+- 下一步对其余 3 个单文件任务做本地预检，先观察样本间稳定性，再进入跨文件任务。
 
 ### 2026-08-03：首批只读 live 预检
 

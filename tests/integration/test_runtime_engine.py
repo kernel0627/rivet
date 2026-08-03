@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import json
 import sys
 import tempfile
@@ -132,6 +133,7 @@ class RuntimeEngineTests(unittest.IsolatedAsyncioTestCase):
         repeat_limit: int = 2,
         reviewer: object | None = None,
         model_retries: int = 0,
+        lease_ttl_seconds: float = 60.0,
         extra_tools: tuple[object, ...] = (),
     ):
         store = SQLiteStateStore(self.state_root / f"{id(model)}.sqlite3")
@@ -185,9 +187,39 @@ class RuntimeEngineTests(unittest.IsolatedAsyncioTestCase):
                 context_input_tokens_per_call=8_000,
                 output_tokens_per_call=512,
                 model_max_retries=model_retries,
+                lease_ttl_seconds=lease_ttl_seconds,
             ),
         )
         return engine, store, budget or RunBudget(max_turns=5)
+
+    async def test_drive_renews_lease_during_slow_model_stream(self) -> None:
+        class SlowStreamingModel(FakeModel):
+            async def stream(self, request):
+                await asyncio.sleep(0.12)
+                async for event in super().stream(request):
+                    yield event
+
+        model = SlowStreamingModel.scripted(
+            [ModelResult(text="completed after a slow provider response")]
+        )
+        engine, store, budget = self.engine(model, lease_ttl_seconds=0.06)
+        started = await engine.start_run(
+            StartRun(
+                workspace=self.workspace,
+                session=self.session,
+                objective="wait for a slow streamed response",
+                budget=budget,
+            )
+        )
+
+        outcome = await engine.drive(started.run.run_id)
+
+        self.assertEqual(outcome.run.status, RunStatus.COMPLETED)
+        self.assertEqual(
+            outcome.run.final_response,
+            "completed after a slow provider response",
+        )
+        store.close()
 
     async def test_partial_write_failure_pauses_for_workspace_review(self) -> None:
         target = self.workspace_root / "main.py"

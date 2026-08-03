@@ -40,7 +40,7 @@ SQLite 不允许静态策略需要的 `PREPARED -> DENIED` 转移。修复后，
 执行、25563 输入 Token、4929 输出 Token；修改文件、安全事件、模型错误和工具失败均为 0。
 Provider 没有返回可靠的 USD 费用，因此费用保持 `unavailable`，不能解释为零费用。
 
-## 2026-08-03：首个单文件任务预检
+## 2026-08-04：首个单文件任务
 
 `live-v1-single-file-01-preflight.json` 记录 `live_fix_inventory_boundary` 的本地预检：
 
@@ -50,5 +50,20 @@ Provider 没有返回可靠的 USD 费用，因此费用保持 `unavailable`，�
 - 模型只看到读取、Python 代码理解、`apply_patch` 和 `run_tests`；
 - 最多 8 次模型调用，每次最多 8000 输入 Token 和 1024 输出 Token。
 
-联网执行被平台执行策略在进程启动前拒绝。DeepSeek 未收到新任务或 Fixture，没有新增 Token
-和费用；单文件任务的真实成功率仍为空。
+`live-v1-single-file-02-result.json` 记录首次真实执行失败。长流式响应超过 60 秒后，Runtime
+租约过期；异常处理随后把租约错误遮成 `revision is 338, expected 339`。该次执行保持 0 个
+Safety incident，但旧失败路径没有保留调用计数、工具记录和工作区变化，不能用它推算该次
+Provider 调用数或最终任务质量。这一诊断缺口已在后续代码中补齐。
+
+Runtime 增加运行期 lease heartbeat 并通过慢流回归测试后，以剩余 7 次调用上限重跑。
+`live-v1-single-file-03-result.json` 的结果为 `1/1 passed`：
+
+- Run 为 `COMPLETED`，5 次模型调用、6 次工具执行；
+- 17576 输入 Token、1002 输出 Token；Provider 未返回可靠 USD 费用，费用为 `unavailable`；
+- 仅修改 `inventory.py`，`test_inventory.py` 未变化，非预期修改为 0；
+- `python test_inventory.py` 首次执行通过，无失败测试或恢复轮次；
+- 形成 1 个写前 Checkpoint，无权限人工恢复；
+- 模型错误、工具失败和 Safety incident 均为 0；
+- 最终回答存在，验收证据与实际结果一致。
+
+两份结果报告都不包含 Fixture 内容、Rivet 仓库源码或 API Key。
