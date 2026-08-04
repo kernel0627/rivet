@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from dataclasses import replace
+
 from pydantic import Field
 
 from rivet.tools.contracts import (
@@ -48,6 +50,17 @@ class ApplyPatchTool:
         parallel_safe=False,
     )
 
+    def __init__(self, *, checkpoint_required: bool = True) -> None:
+        self.checkpoint_required = checkpoint_required
+        if not checkpoint_required:
+            self.spec = replace(
+                type(self).spec,
+                description=(
+                    "Apply exact text replacements using atomic file writes "
+                    "without a recovery snapshot."
+                ),
+            )
+
     def prepare(
         self,
         arguments: ApplyPatchArguments,
@@ -80,7 +93,7 @@ class ApplyPatchTool:
         prepared: PreparedTool,
         context: ToolExecutionContext,
     ) -> ToolResult:
-        if context.checkpoint is None:
+        if self.checkpoint_required and context.checkpoint is None:
             return ToolResult.error(
                 ErrorKind.CHECKPOINT_ERROR,
                 "apply_patch requires a valid checkpoint",

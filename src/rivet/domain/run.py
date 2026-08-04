@@ -105,6 +105,7 @@ class StopDecision:
 class RunBudget:
     max_turns: int | None = 64
     max_model_calls: int | None = 128
+    max_reviewer_calls: int | None = 16
     max_tool_executions: int | None = 256
     max_input_tokens: int | None = 1_000_000
     max_output_tokens: int | None = 250_000
@@ -118,6 +119,7 @@ class RunBudget:
         for field_name in (
             "max_turns",
             "max_model_calls",
+            "max_reviewer_calls",
             "max_tool_executions",
             "max_input_tokens",
             "max_output_tokens",
@@ -140,6 +142,7 @@ class RunBudget:
         return {
             "max_turns": self.max_turns,
             "max_model_calls": self.max_model_calls,
+            "max_reviewer_calls": self.max_reviewer_calls,
             "max_tool_executions": self.max_tool_executions,
             "max_input_tokens": self.max_input_tokens,
             "max_output_tokens": self.max_output_tokens,
@@ -163,6 +166,7 @@ class RunBudget:
         return cls(
             max_turns=optional_int("max_turns", 64),
             max_model_calls=optional_int("max_model_calls", 128),
+            max_reviewer_calls=optional_int("max_reviewer_calls", 16),
             max_tool_executions=optional_int("max_tool_executions", 256),
             max_input_tokens=optional_int("max_input_tokens", 1_000_000),
             max_output_tokens=optional_int("max_output_tokens", 250_000),
@@ -178,9 +182,12 @@ class RunBudget:
 class RunUsage:
     turns: int = 0
     model_calls: int = 0
+    reviewer_calls: int = 0
     tool_executions: int = 0
     input_tokens: int = 0
     output_tokens: int = 0
+    reviewer_input_tokens: int = 0
+    reviewer_output_tokens: int = 0
     cost_usd: float = 0.0
     wall_time_seconds: float = 0.0
     artifact_bytes: int = 0
@@ -190,9 +197,12 @@ class RunUsage:
         for field_name in (
             "turns",
             "model_calls",
+            "reviewer_calls",
             "tool_executions",
             "input_tokens",
             "output_tokens",
+            "reviewer_input_tokens",
+            "reviewer_output_tokens",
             "cost_usd",
             "wall_time_seconds",
             "artifact_bytes",
@@ -206,9 +216,12 @@ class RunUsage:
         return {
             "turns": self.turns,
             "model_calls": self.model_calls,
+            "reviewer_calls": self.reviewer_calls,
             "tool_executions": self.tool_executions,
             "input_tokens": self.input_tokens,
             "output_tokens": self.output_tokens,
+            "reviewer_input_tokens": self.reviewer_input_tokens,
+            "reviewer_output_tokens": self.reviewer_output_tokens,
             "cost_usd": self.cost_usd,
             "wall_time_seconds": self.wall_time_seconds,
             "artifact_bytes": self.artifact_bytes,
@@ -220,9 +233,12 @@ class RunUsage:
         return cls(
             turns=int(value.get("turns", 0)),
             model_calls=int(value.get("model_calls", 0)),
+            reviewer_calls=int(value.get("reviewer_calls", 0)),
             tool_executions=int(value.get("tool_executions", 0)),
             input_tokens=int(value.get("input_tokens", 0)),
             output_tokens=int(value.get("output_tokens", 0)),
+            reviewer_input_tokens=int(value.get("reviewer_input_tokens", 0)),
+            reviewer_output_tokens=int(value.get("reviewer_output_tokens", 0)),
             cost_usd=float(value.get("cost_usd", 0.0)),
             wall_time_seconds=float(value.get("wall_time_seconds", 0.0)),
             artifact_bytes=int(value.get("artifact_bytes", 0)),
@@ -253,6 +269,7 @@ class Run:
     status: RunStatus = RunStatus.CREATED
     active_turn_id: str | None = None
     config_snapshot: Mapping[str, Any] = field(default_factory=dict)
+    permission_grants: tuple[str, ...] = ()
     budget: RunBudget = field(default_factory=RunBudget)
     usage: RunUsage = field(default_factory=RunUsage)
     working_memory_ref: str | None = None
@@ -281,6 +298,10 @@ class Run:
             "config_snapshot",
             freeze_json_object(self.config_snapshot, "config_snapshot"),
         )
+        if any(not grant.strip() for grant in self.permission_grants):
+            raise ValueError("permission_grants must not contain blank values")
+        if len(set(self.permission_grants)) != len(self.permission_grants):
+            raise ValueError("permission_grants must be unique")
         if self.revision < 0:
             raise ValueError("revision must be non-negative")
         require_aware(self.created_at, "created_at")
@@ -331,6 +352,7 @@ class Run:
             "status": self.status.value,
             "active_turn_id": self.active_turn_id,
             "config_snapshot": dict(self.config_snapshot),
+            "permission_grants": list(self.permission_grants),
             "budget": self.budget.to_dict(),
             "usage": self.usage.to_dict(),
             "working_memory_ref": self.working_memory_ref,
@@ -361,6 +383,7 @@ class Run:
                 str(value["active_turn_id"]) if value.get("active_turn_id") is not None else None
             ),
             config_snapshot=dict(value.get("config_snapshot", {})),
+            permission_grants=tuple(str(item) for item in value.get("permission_grants", [])),
             budget=RunBudget.from_dict(dict(value.get("budget", {}))),
             usage=RunUsage.from_dict(dict(value.get("usage", {}))),
             working_memory_ref=(
@@ -426,6 +449,8 @@ def validate_run_transition(previous: Run, current: Run) -> None:
     for field_name in immutable_fields:
         if getattr(previous, field_name) != getattr(current, field_name):
             raise ValueError(f"run transition must keep {field_name}")
+    if not set(previous.permission_grants).issubset(current.permission_grants):
+        raise ValueError("run transition cannot revoke permission_grants")
     if current.revision != previous.revision + 1:
         raise ValueError("run revision must increase by exactly one")
     if current.status is previous.status:

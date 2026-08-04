@@ -10,10 +10,13 @@ from unittest.mock import patch
 from rivet.configuration import RivetConfig
 from rivet.configuration.models import ContextConfig, ModelConfig, RuntimeConfig
 from rivet.evaluation import (
+    EVAL_TOOL_PROFILES,
     EvalCase,
+    EvalModelStep,
     LiveEvalLimits,
     RivetEvalExecutor,
     build_live_preflight,
+    model_visible_tool_names,
 )
 from rivet.evaluation.executor import _compact_event_trace, _safety_observation
 
@@ -59,6 +62,97 @@ class LiveEvalPreflightTests(unittest.TestCase):
             LiveEvalLimits(max_output_tokens=255)
         with self.assertRaisesRegex(ValueError, "between 1 and 5000"):
             LiveEvalLimits(max_model_calls=5_001)
+
+    def test_tool_profiles_expand_one_module_at_a_time(self) -> None:
+        basic = model_visible_tool_names("single_file", "basic")
+        ast = model_visible_tool_names("single_file", "ast")
+        sparse = model_visible_tool_names("single_file", "sparse")
+        lsp = model_visible_tool_names("single_file", "lsp")
+
+        self.assertEqual(
+            basic,
+            ("list_files", "read_file", "search_text", "apply_patch", "run_tests"),
+        )
+        self.assertEqual(
+            set(ast or ()) - set(basic or ()),
+            {
+                "python_outline",
+                "find_python_symbol",
+                "read_python_symbol",
+                "find_python_imports",
+            },
+        )
+        self.assertEqual(
+            set(sparse or ()) - set(ast or ()),
+            {
+                "retrieve_code",
+                "index_status",
+                "refresh_index",
+            },
+        )
+        self.assertEqual(
+            set(lsp or ()) - set(sparse or ()),
+            {
+                "lsp_definition",
+                "lsp_references",
+                "lsp_hover",
+                "lsp_diagnostics",
+            },
+        )
+
+    def test_all_profile_preflight_multiplies_execution_and_payload_boundaries(self) -> None:
+        config = RivetConfig(
+            model=ModelConfig(provider="deepseek", model="deepseek-chat"),
+            runtime=RuntimeConfig(max_model_calls=3),
+        )
+
+        payload = build_live_preflight(
+            [self.case()],
+            config=config,
+            repeat=2,
+            api_key_configured=True,
+            tool_profiles=EVAL_TOOL_PROFILES,
+        )
+
+        self.assertEqual(payload["selection"]["tool_profiles"], list(EVAL_TOOL_PROFILES))
+        self.assertEqual(payload["selection"]["profile_case_executions"], 8)
+        self.assertEqual(payload["limits"]["max_model_calls_for_batch"], 24)
+        self.assertFalse(payload["runtime_modules"]["dense_retrieval_enabled"])
+        self.assertEqual(payload["runtime_modules"]["reviewer_modes"], ["off"])
+        self.assertFalse(payload["runtime_modules"]["reviewer_budget_included"])
+        transmission = payload["transmission"]
+        self.assertEqual(
+            transmission["objective_bytes_for_all_profiles"],
+            transmission["objective_bytes"] * 4,
+        )
+        by_profile = transmission["cases"][0]["model_visible_tools_by_profile"]
+        self.assertNotIn("retrieve_code", by_profile["ast"])
+        self.assertIn("retrieve_code", by_profile["sparse"])
+        self.assertIn("lsp_definition", by_profile["lsp"])
+
+    def test_reviewer_preflight_counts_agent_and_reviewer_requests_separately(self) -> None:
+        config = RivetConfig(
+            model=ModelConfig(provider="deepseek", model="deepseek-chat"),
+            runtime=RuntimeConfig(max_model_calls=3),
+        ).model_copy(
+            update={"reviewer": RivetConfig().reviewer.model_copy(update={"max_calls": 2})}
+        )
+
+        payload = build_live_preflight(
+            [self.case()],
+            config=config,
+            repeat=1,
+            api_key_configured=True,
+            reviewer_modes=("off", "on"),
+        )
+
+        self.assertEqual(payload["selection"]["variant_case_executions"], 2)
+        self.assertEqual(payload["limits"]["max_model_calls_for_batch"], 6)
+        self.assertEqual(payload["limits"]["max_reviewer_calls_for_batch"], 2)
+        self.assertEqual(payload["limits"]["max_external_requests_for_batch"], 8)
+        self.assertEqual(payload["runtime_modules"]["reviewer_modes"], ["off", "on"])
+        self.assertTrue(payload["runtime_modules"]["reviewer_budget_included"])
+        self.assertTrue(payload["transmission"]["reviewer_includes_diff"])
 
     def test_preflight_reports_destination_payload_hashes_and_hard_ceilings(
         self,
@@ -112,7 +206,7 @@ class LiveEvalPreflightTests(unittest.TestCase):
             project = root / ".rivet"
             project.mkdir()
             (project / "config.toml").write_text(
-                "[model]\nprovider = \"deepseek\"\nmodel = \"deepseek-chat\"\n",
+                '[model]\nprovider = "deepseek"\nmodel = "deepseek-chat"\n',
                 encoding="utf-8",
             )
             limits = LiveEvalLimits(
@@ -135,6 +229,23 @@ class LiveEvalPreflightTests(unittest.TestCase):
             self.assertEqual(overrides["context"]["reserve_output_tokens"], 512)
             self.assertEqual(overrides["permissions"]["workspace_write"], "deny")
             self.assertEqual(overrides["permissions"]["process_execute"], "deny")
+
+    def test_sparse_profile_enables_only_local_sparse_retrieval(self) -> None:
+        executor = RivetEvalExecutor(mode="offline", tool_profile="sparse")
+
+        _gateway, overrides = executor._runtime_inputs(
+            self.case().model_copy(
+                update={
+                    "execution_mode": "both",
+                    "offline_model": (EvalModelStep(text="done"),),
+                }
+            )
+        )
+
+        self.assertTrue(overrides["retrieval"]["enabled"])
+        self.assertTrue(overrides["retrieval"]["sparse"])
+        self.assertFalse(overrides["retrieval"]["dense"])
+        self.assertFalse(overrides["reviewer"]["enabled"])
 
     def test_write_case_preflight_hides_generic_process_and_git_tools(self) -> None:
         config = RivetConfig(

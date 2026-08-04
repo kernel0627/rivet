@@ -1,38 +1,85 @@
 from __future__ import annotations
 
 import hashlib
+from collections.abc import Sequence
 from dataclasses import dataclass
+from typing import Literal
 
 from rivet.configuration import RivetConfig
 from rivet.evaluation.dataset import EvalCase
 from rivet.model.providers import resolve_provider
 
-READ_ONLY_EVAL_TOOL_NAMES = (
+EvalToolProfile = Literal["basic", "ast", "sparse", "lsp"]
+EvalReviewerMode = Literal["off", "on"]
+EVAL_TOOL_PROFILES: tuple[EvalToolProfile, ...] = (
+    "basic",
+    "ast",
+    "sparse",
+    "lsp",
+)
+
+_BASIC_READ_ONLY_TOOL_NAMES = (
     "list_files",
     "read_file",
     "search_text",
+)
+_AST_TOOL_NAMES = (
     "python_outline",
     "find_python_symbol",
     "read_python_symbol",
     "find_python_imports",
 )
-WRITE_EVAL_TOOL_NAMES = (
-    *READ_ONLY_EVAL_TOOL_NAMES,
+_SPARSE_TOOL_NAMES = (
+    "retrieve_code",
+    "index_status",
+    "refresh_index",
+)
+_LSP_TOOL_NAMES = (
+    "lsp_definition",
+    "lsp_references",
+    "lsp_hover",
+    "lsp_diagnostics",
+)
+_WRITE_TOOL_NAMES = (
     "apply_patch",
     "run_tests",
 )
 
 
-def model_visible_tool_names(task_category: str | None) -> tuple[str, ...] | None:
-    if task_category == "read_only":
-        return READ_ONLY_EVAL_TOOL_NAMES
-    if task_category in {"single_file", "cross_file", "iterative"}:
-        return WRITE_EVAL_TOOL_NAMES
-    return None
+def model_visible_tool_names(
+    task_category: str | None,
+    tool_profile: EvalToolProfile = "ast",
+) -> tuple[str, ...] | None:
+    if tool_profile not in EVAL_TOOL_PROFILES:
+        raise ValueError(f"unsupported Eval tool profile: {tool_profile}")
+    if task_category not in {"read_only", "single_file", "cross_file", "iterative"}:
+        return None
+    names = [*_BASIC_READ_ONLY_TOOL_NAMES]
+    if tool_profile in {"ast", "sparse", "lsp"}:
+        names.extend(_AST_TOOL_NAMES)
+    if tool_profile in {"sparse", "lsp"}:
+        names.extend(_SPARSE_TOOL_NAMES)
+    if tool_profile == "lsp":
+        names.extend(_LSP_TOOL_NAMES)
+    if task_category != "read_only":
+        names.extend(_WRITE_TOOL_NAMES)
+    return tuple(names)
+
+
+def eval_task_category(case: EvalCase) -> str:
+    if case.task_category is not None:
+        return case.task_category
+    if "pause_resume" in case.tags:
+        return "iterative"
+    if not case.expected_files or "read_only" in case.tags:
+        return "read_only"
+    if len(case.expected_files) > 1 or "cross_file" in case.tags:
+        return "cross_file"
+    return "single_file"
 
 
 def _permission_mode(case: EvalCase, permission: str) -> str:
-    if case.task_category == "read_only" and permission in {
+    if eval_task_category(case) == "read_only" and permission in {
         "workspace_write",
         "process_execute",
     }:
@@ -45,12 +92,15 @@ def _permission_mode(case: EvalCase, permission: str) -> str:
 @dataclass(frozen=True, slots=True)
 class LiveEvalLimits:
     max_model_calls: int | None = None
+    max_reviewer_calls: int | None = None
     max_input_tokens: int | None = None
     max_output_tokens: int | None = None
 
     def __post_init__(self) -> None:
         if self.max_model_calls is not None and not 1 <= self.max_model_calls <= 5000:
             raise ValueError("max_model_calls must be between 1 and 5000")
+        if self.max_reviewer_calls is not None and not 1 <= self.max_reviewer_calls <= 1000:
+            raise ValueError("max_reviewer_calls must be between 1 and 1000")
         if self.max_input_tokens is not None and self.max_input_tokens < 1_000:
             raise ValueError("max_input_tokens must be at least 1000")
         if self.max_output_tokens is not None and self.max_output_tokens < 256:
@@ -62,6 +112,7 @@ class LiveEvalLimits:
             value is not None
             for value in (
                 self.max_model_calls,
+                self.max_reviewer_calls,
                 self.max_input_tokens,
                 self.max_output_tokens,
             )
@@ -71,6 +122,8 @@ class LiveEvalLimits:
         overrides: dict[str, dict[str, int]] = {}
         if self.max_model_calls is not None:
             overrides["runtime"] = {"max_model_calls": self.max_model_calls}
+        if self.max_reviewer_calls is not None:
+            overrides["reviewer"] = {"max_calls": self.max_reviewer_calls}
         context: dict[str, int] = {}
         if self.max_input_tokens is not None:
             context["max_input_tokens"] = self.max_input_tokens
@@ -87,16 +140,34 @@ def build_live_preflight(
     config: RivetConfig,
     repeat: int,
     api_key_configured: bool,
+    tool_profiles: Sequence[EvalToolProfile] = ("ast",),
+    reviewer_modes: Sequence[EvalReviewerMode] = ("off",),
 ) -> dict[str, object]:
     if repeat < 1:
         raise ValueError("live eval repeat must be positive")
+    profiles = tuple(tool_profiles)
+    if not profiles or len(set(profiles)) != len(profiles):
+        raise ValueError("live Eval tool profiles must be non-empty and unique")
+    if any(profile not in EVAL_TOOL_PROFILES for profile in profiles):
+        raise ValueError("live Eval contains an unsupported tool profile")
+    modes = tuple(reviewer_modes)
+    if not modes or len(set(modes)) != len(modes):
+        raise ValueError("live Eval reviewer modes must be non-empty and unique")
+    if any(mode not in {"off", "on"} for mode in modes):
+        raise ValueError("live Eval contains an unsupported reviewer mode")
     provider = resolve_provider(
         config.model.provider,
         base_url=config.model.base_url,
     )
-    case_payloads = [_case_payload(case) for case in cases]
+    case_payloads = [_case_payload(case, profiles) for case in cases]
     max_model_calls = config.runtime.max_model_calls
-    batch_max_model_calls = max_model_calls * len(cases) * repeat
+    variant_multiplier = len(profiles) * len(modes)
+    batch_max_model_calls = max_model_calls * len(cases) * repeat * variant_multiplier
+    reviewer_enabled_variants = len(profiles) * int("on" in modes)
+    batch_max_reviewer_calls = (
+        config.reviewer.max_calls * len(cases) * repeat * reviewer_enabled_variants
+    )
+    batch_max_external_requests = batch_max_model_calls + batch_max_reviewer_calls
     max_input_tokens = config.context.max_input_tokens
     max_output_tokens = config.context.reserve_output_tokens
     return {
@@ -112,27 +183,31 @@ def build_live_preflight(
             "api_key_env": config.model.api_key_env,
             "api_key_configured": api_key_configured,
         },
+        "runtime_modules": {
+            "dense_retrieval_enabled": False,
+            "reviewer_modes": list(modes),
+            "reviewer_budget_included": "on" in modes,
+        },
         "selection": {
             "case_count": len(cases),
             "repeat": repeat,
+            "tool_profiles": list(profiles),
+            "reviewer_modes": list(modes),
+            "variant_case_executions": len(cases) * repeat * variant_multiplier,
+            "profile_case_executions": len(cases) * repeat * len(profiles),
             "case_ids": [case.id for case in cases],
-            "categories": sorted(
-                {
-                    case.task_category
-                    for case in cases
-                    if case.task_category is not None
-                }
-            ),
+            "categories": sorted({eval_task_category(case) for case in cases}),
         },
         "limits": {
             "max_model_calls_per_case": max_model_calls,
             "max_model_calls_for_batch": batch_max_model_calls,
+            "max_reviewer_calls_per_case": config.reviewer.max_calls,
+            "max_reviewer_calls_for_batch": batch_max_reviewer_calls,
+            "max_external_requests_for_batch": batch_max_external_requests,
             "max_input_tokens_per_call": max_input_tokens,
             "max_output_tokens_per_call": max_output_tokens,
-            "max_input_tokens_for_batch": batch_max_model_calls
-            * max_input_tokens,
-            "max_output_tokens_for_batch": batch_max_model_calls
-            * max_output_tokens,
+            "max_input_tokens_for_batch": batch_max_external_requests * max_input_tokens,
+            "max_output_tokens_for_batch": batch_max_external_requests * max_output_tokens,
             "cost_usd": None,
             "cost_status": "unavailable_before_provider_response",
         },
@@ -140,12 +215,29 @@ def build_live_preflight(
             "includes_objectives": True,
             "includes_fixture_files": True,
             "includes_config_workspace_source": False,
-            "objective_bytes": sum(
+            "objective_bytes": sum(int(payload["objective_bytes"]) for payload in case_payloads),
+            "fixture_bytes": sum(int(payload["fixture_bytes"]) for payload in case_payloads),
+            "objective_bytes_for_all_profiles": sum(
                 int(payload["objective_bytes"]) for payload in case_payloads
-            ),
-            "fixture_bytes": sum(
+            )
+            * len(profiles),
+            "fixture_bytes_for_all_profiles": sum(
                 int(payload["fixture_bytes"]) for payload in case_payloads
-            ),
+            )
+            * len(profiles),
+            "objective_bytes_for_all_variants": sum(
+                int(payload["objective_bytes"]) for payload in case_payloads
+            )
+            * variant_multiplier,
+            "fixture_bytes_for_all_variants": sum(
+                int(payload["fixture_bytes"]) for payload in case_payloads
+            )
+            * variant_multiplier,
+            "reviewer_includes_objective": "on" in modes,
+            "reviewer_includes_proposed_answer": "on" in modes,
+            "reviewer_includes_changed_paths": "on" in modes,
+            "reviewer_includes_diff": "on" in modes,
+            "reviewer_includes_verification": "on" in modes,
             "cases": case_payloads,
         },
         "warnings": [
@@ -156,11 +248,16 @@ def build_live_preflight(
             "Payload byte counts exclude the runtime system prompt, tool schemas, "
             "and later tool results.",
             "Provider price is not inferred; the report cannot guarantee a USD ceiling.",
+            "Dense retrieval is disabled for Eval ablation profiles.",
+            "Reviewer payload bytes after tool execution cannot be known at preflight time.",
         ],
     }
 
 
-def _case_payload(case: EvalCase) -> dict[str, object]:
+def _case_payload(
+    case: EvalCase,
+    tool_profiles: tuple[EvalToolProfile, ...],
+) -> dict[str, object]:
     objective_bytes = case.objective.encode("utf-8")
     files = [
         {
@@ -170,9 +267,17 @@ def _case_payload(case: EvalCase) -> dict[str, object]:
         }
         for path, content in sorted(case.fixture_files.items())
     ]
+    tools_by_profile = {
+        profile: (
+            list(names)
+            if (names := model_visible_tool_names(eval_task_category(case), profile)) is not None
+            else None
+        )
+        for profile in tool_profiles
+    }
     return {
         "id": case.id,
-        "category": case.task_category,
+        "category": eval_task_category(case),
         "difficulty": case.difficulty,
         "objective": case.objective,
         "objective_bytes": len(objective_bytes),
@@ -186,11 +291,8 @@ def _case_payload(case: EvalCase) -> dict[str, object]:
         "automatic_resume_permissions": list(case.resume_permissions),
         "workspace_write_mode": _permission_mode(case, "workspace_write"),
         "process_execute_mode": _permission_mode(case, "process_execute"),
-        "model_visible_tools": (
-            list(names)
-            if (names := model_visible_tool_names(case.task_category)) is not None
-            else None
-        ),
+        "model_visible_tools": tools_by_profile[tool_profiles[0]],
+        "model_visible_tools_by_profile": tools_by_profile,
     }
 
 

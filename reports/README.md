@@ -1,7 +1,51 @@
-# Live Eval 证据
+# Eval 证据
 
 本目录保存需要在任务工作区清理后继续复查的脱敏结构化报告。报告不得包含 API Key、`.env`
 内容或当前 Rivet 仓库源码。
+
+## 2026-08-04：Reviewer 计量与 off/on 对照
+
+`offline-reviewer-comparison.json` 在 8 个固定 Case 上比较 Reviewer off/on。两侧均为
+`8/8 passed`、28 次 Agent 模型调用和 23 次工具执行；on 侧对 4 个写任务各增加 1 次脚本化
+Reviewer 调用，外部请求计数由 28 增至 32，并增加 8 个 Reviewer Event。Reviewer Token 为
+0，因为 Fake Model 不生成 Usage。
+
+离线 Reviewer 固定返回批准，只验证独立调用计数、预算、状态和报告结构，不能证明 Reviewer
+能发现真实问题。`live-v1-iterative-reviewer-preflight.json` 为 5 个迭代任务生成 off/on
+边界：共 10 个 Variant-Case，Agent 最多 100 次调用、Reviewer 最多 10 次，合计外部请求上限
+110 次；两侧合计目标文本 2286 字节、Fixture 9580 字节。Reviewer 还会在运行后看到候选回答、
+修改路径、Diff 和验证证据，其字节数在预检时未知并已明确披露。该报告未启动外部请求。
+
+## 2026-08-04：离线工具消融合同与 live 预检
+
+`offline-tool-ablation.json` 在同一组 8 个固定 Case 上依次运行 `basic`、`ast`、`sparse` 和
+`lsp` 四档。每档均为 `8/8 passed`、28 次模型调用、23 次工具执行，且报告逐 Case 保存实际
+模型可见工具名。Sparse/LSP 档各比前两档多 4 个索引刷新 Event，这是本地索引启用证据。
+
+四档复用同一套预编排 Fake Model 轨迹，模型不会根据新增工具重新选择行动，所以这份报告只
+证明 Profile 隔离、Fixture、预算和评分合同可比，不能证明新增模块有效。耗时差异同样只是
+本机离线基础设施数据。
+
+`live-v1-iterative-tool-ablation-preflight.json` 为 5 个迭代任务计算四档 live 边界：共 20 个
+Profile-Case 执行，理论最多 200 次模型调用；四档合计目标文本 4572 字节、Fixture 19160
+字节。每次调用上限为 8000 输入 Token 和 1024 输出 Token。该报告
+`external_request_started` 为 `false`，没有向 Provider 发送请求，也没有产生费用。
+
+## 2026-08-04：离线 Rivet / Simple Agent 对照
+
+`offline-agent-comparison.json` 在 8 个固定脚本化 Case 上分别运行完整 Rivet Runtime 和最小
+四工具 Simple Agent。两侧均为 `8/8 passed`、28 次模型调用、23 次工具执行，修改范围和安全
+评分一致。Rivet 形成 4 个 Checkpoint、365 个 Event 和 1 次权限恢复；Simple Agent 明确没有
+权限代理、Checkpoint、恢复、Event Trace 和 Rewind，相应指标均为 0。
+
+两侧使用完全相同的预编排 Fake Model 轨迹，因而这份结果用于验证公平执行合同和报告结构，
+不能证明真实模型下完成率相同。报告中的本机耗时也只反映离线基础设施开销。真实能力差异要
+等 live 基础设施恢复后，以 `--agent both` 在相同 Case、模型和预算下测量。
+
+`live-v1-iterative-both-preflight.json` 将 5 个迭代任务扩展为 Rivet 与 Simple Agent 各执行
+一次，共 10 个 Agent-Case 执行。每个 Agent-Case 最多 10 次模型调用，整批理论上限为 100
+次；两侧合计目标文本 2286 字节、Fixture 9580 字节。该文件的
+`external_request_started` 为 `false`，没有产生 Provider 请求、Token 或费用。
 
 ## 2026-08-03：V1 只读批次
 
@@ -179,3 +223,11 @@ incident。
   为 50 次调用、400000 输入 Token 和 51200 输出 Token；
 - 模型工具面限制为读取、Python 代码理解、`apply_patch` 和 `run_tests`；
 - 不包含 Rivet 仓库源码，尚未产生 Provider 请求、Token 或费用。
+
+`live-v1-iterative-02-approval-service-blocked.json` 记录了预检后的三次正式启动尝试。三次都
+在 Rivet 进程启动前被外部审批服务拒绝，错误为 `input[6].namespace` 未知参数。因此：
+
+- `external_request_started` 和 `process_started` 均为 `false`；
+- DeepSeek 请求数、输入 Token、输出 Token 和费用均为 0；
+- 用户授权、Provider 配置和任务 Payload 边界没有变化；
+- 这份报告只证明外部审批基础设施阻断，不能作为 Provider 或 Rivet 任务执行结果。

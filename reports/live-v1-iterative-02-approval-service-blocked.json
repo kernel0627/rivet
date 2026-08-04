@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "report_type": "live_eval_startup_blocked",
+  "external_request_started": false,
+  "attempt_count": 3,
+  "selection": {
+    "case_count": 5,
+    "category": "iterative",
+    "preflight_report": "live-v1-iterative-01-preflight.json"
+  },
+  "provider": {
+    "name": "deepseek",
+    "model": "deepseek-v4-flash",
+    "base_url": "https://api.deepseek.com"
+  },
+  "transmission": {
+    "objective_bytes": 1143,
+    "fixture_bytes": 4790,
+    "includes_config_workspace_source": false
+  },
+  "limits": {
+    "max_model_calls_per_case": 10,
+    "max_model_calls_for_batch": 50,
+    "max_input_tokens_per_call": 8000,
+    "max_output_tokens_per_call": 1024
+  },
+  "failure": {
+    "layer": "external_approval_service",
+    "process_started": false,
+    "kind": "invalid_request_error",
+    "message": "[ObjectParam] [input[6].namespace] [unknown_parameter] Unknown parameter: 'input[6].namespace'"
+  },
+  "usage": {
+    "provider_requests_started": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cost_usd": 0.0,
+    "cost_status": "not_incurred"
+  }
+}

@@ -273,6 +273,26 @@ class ContextEngineTests(unittest.IsolatedAsyncioTestCase):
                 )
             )
 
+    async def test_follow_up_user_message_comes_after_original_objective(self) -> None:
+        follow_up = Message(
+            role=MessageRole.USER,
+            content="Also preserve the public API.",
+        )
+        envelope = await self.engine.build(
+            ContextRequest(
+                objective="Repair the parser.",
+                budget=ContextBudget(max_input_tokens=1_500),
+                recent_messages=(follow_up,),
+            )
+        )
+
+        objective_index = next(
+            index
+            for index, message in enumerate(envelope.messages)
+            if message.content == "Repair the parser."
+        )
+        self.assertGreater(envelope.messages.index(follow_up), objective_index)
+
     async def test_working_memory_is_compacted_and_labeled(self) -> None:
         memory = WorkingMemory(
             objective="Repair parser",

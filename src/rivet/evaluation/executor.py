@@ -10,11 +10,17 @@ from pathlib import Path
 from typing import Any, Literal
 
 from rivet.application import build_application
+from rivet.code_intelligence.lsp import discover_python_server
 from rivet.configuration import load_config
 from rivet.domain import RunStatus
 from rivet.evaluation.assessments import CompletionObservation, SafetyObservation
 from rivet.evaluation.dataset import EvalCase
-from rivet.evaluation.preflight import LiveEvalLimits, model_visible_tool_names
+from rivet.evaluation.preflight import (
+    EvalToolProfile,
+    LiveEvalLimits,
+    eval_task_category,
+    model_visible_tool_names,
+)
 from rivet.evaluation.runner import EvalExecution
 from rivet.model.fake import FakeModel
 from rivet.model.types import ModelResult, ToolProposal
@@ -40,11 +46,16 @@ class RivetEvalExecutor:
         config_workspace: Path | None = None,
         timeout_seconds: float = 120.0,
         live_limits: LiveEvalLimits | None = None,
+        tool_profile: EvalToolProfile = "ast",
+        reviewer_enabled: bool = False,
     ) -> None:
         self.mode = mode
         self.config_workspace = (config_workspace or Path.cwd()).resolve()
         self.timeout_seconds = timeout_seconds
         self.live_limits = live_limits or LiveEvalLimits()
+        self.tool_profile = tool_profile
+        self.reviewer_enabled = reviewer_enabled
+        model_visible_tool_names("read_only", tool_profile)
         if timeout_seconds <= 0:
             raise ValueError("eval timeout_seconds must be positive")
 
@@ -67,7 +78,8 @@ class RivetEvalExecutor:
                     model_gateway=gateway,
                     state_root=state_root,
                     model_visible_tools=model_visible_tool_names(
-                        case.task_category
+                        eval_task_category(case),
+                        self.tool_profile,
                     ),
                 )
                 outcome = await application.service.run(case.objective)
@@ -78,13 +90,9 @@ class RivetEvalExecutor:
                     and outcome.run.stop_decision.reason == "permission_required"
                     and permission_resumes < len(case.resume_permissions)
                 ):
-                    prepared_digest = outcome.run.stop_decision.evidence.get(
-                        "prepared_digest"
-                    )
+                    prepared_digest = outcome.run.stop_decision.evidence.get("prepared_digest")
                     if not isinstance(prepared_digest, str) or not prepared_digest:
-                        raise ValueError(
-                            "permission pause is missing a prepared digest"
-                        )
+                        raise ValueError("permission pause is missing a prepared digest")
                     if outcome.run.pause_token is None:
                         raise ValueError("permission pause is missing a pause token")
                     outcome = await application.service.resume(
@@ -94,15 +102,9 @@ class RivetEvalExecutor:
                     )
                     permission_resumes += 1
                 events = application.service.events(outcome.run.run_id)
-                executions = application.service.state.list_tool_executions(
-                    outcome.run.run_id
-                )
-                model_calls = application.service.state.list_model_calls(
-                    outcome.run.run_id
-                )
-                checkpoints = application.service.state.list_checkpoints(
-                    outcome.run.run_id
-                )
+                executions = application.service.state.list_tool_executions(outcome.run.run_id)
+                model_calls = application.service.state.list_model_calls(outcome.run.run_id)
+                checkpoints = application.service.state.list_checkpoints(outcome.run.run_id)
                 final_response = outcome.run.final_response or ""
             except Exception as error:
                 return _failed_eval_execution(
@@ -113,6 +115,7 @@ class RivetEvalExecutor:
                     mode=self.mode,
                     error=error,
                     started_at=started_at,
+                    metadata_extra=self._profile_metadata(case),
                 )
             finally:
                 if application is not None:
@@ -132,18 +135,13 @@ class RivetEvalExecutor:
             )
             final_evidence_accurate = not failed_checks
             test_executions = tuple(
-                execution
-                for execution in executions
-                if execution.tool_name == "run_tests"
+                execution for execution in executions if execution.tool_name == "run_tests"
             )
             failed_test_runs = sum(
-                execution.status.value != "SUCCEEDED"
-                for execution in test_executions
+                execution.status.value != "SUCCEEDED" for execution in test_executions
             )
             first_test_run_passed = (
-                test_executions[0].status.value == "SUCCEEDED"
-                if test_executions
-                else None
+                test_executions[0].status.value == "SUCCEEDED" if test_executions else None
             )
             expected_paths = set(case.expected_files)
             unexpected_changed_files = tuple(
@@ -177,6 +175,7 @@ class RivetEvalExecutor:
                     case.expected_files,
                 ),
                 metadata={
+                    **self._profile_metadata(case),
                     "mode": self.mode,
                     "run_id": outcome.run.run_id,
                     "run_status": outcome.run.status.value,
@@ -188,7 +187,10 @@ class RivetEvalExecutor:
                     ),
                     "turns": outcome.run.usage.turns,
                     "model_calls": outcome.run.usage.model_calls,
-                    "provider_requests_started": len(model_calls),
+                    "reviewer_calls": outcome.run.usage.reviewer_calls,
+                    "provider_requests_started": (
+                        len(model_calls) + outcome.run.usage.reviewer_calls
+                    ),
                     "tool_executions": outcome.run.usage.tool_executions,
                     "test_runs": len(test_executions),
                     "failed_test_runs": failed_test_runs,
@@ -201,6 +203,14 @@ class RivetEvalExecutor:
                     ),
                     "input_tokens": outcome.run.usage.input_tokens,
                     "output_tokens": outcome.run.usage.output_tokens,
+                    "agent_input_tokens": (
+                        outcome.run.usage.input_tokens - outcome.run.usage.reviewer_input_tokens
+                    ),
+                    "agent_output_tokens": (
+                        outcome.run.usage.output_tokens - outcome.run.usage.reviewer_output_tokens
+                    ),
+                    "reviewer_input_tokens": outcome.run.usage.reviewer_input_tokens,
+                    "reviewer_output_tokens": outcome.run.usage.reviewer_output_tokens,
                     "cost_usd": cost_usd,
                     "cost_status": cost_status,
                     "changed_files": list(changed_paths),
@@ -208,27 +218,35 @@ class RivetEvalExecutor:
                     "permission_resumes": permission_resumes,
                     "permission_intervention_required": permission_resumes > 0,
                     "checkpoint_count": len(checkpoints),
-                    "task_category": case.task_category,
+                    "task_category": eval_task_category(case),
                     "difficulty": case.difficulty,
                     "provider": (
                         "scripted_fake"
                         if self.mode == "offline"
-                        else model_calls[-1].provider if model_calls else None
+                        else model_calls[-1].provider
+                        if model_calls
+                        else None
                     ),
                     "model": (
                         "scripted_eval"
                         if self.mode == "offline"
-                        else model_calls[-1].model if model_calls else None
+                        else model_calls[-1].model
+                        if model_calls
+                        else None
                     ),
                     "event_count": len(events),
+                    "reviewer_completed": sum(
+                        event.event_type == "reviewer.completed" for event in events
+                    ),
+                    "reviewer_failed": sum(
+                        event.event_type == "reviewer.failed" for event in events
+                    ),
                     "duration_ms": _elapsed_ms(started_at),
                     "final_response_chars": len(final_response),
                     "final_response_sha256": hashlib.sha256(
                         final_response.encode("utf-8")
                     ).hexdigest(),
-                    "missing_expected_final_fragments": list(
-                        missing_final_fragments
-                    ),
+                    "missing_expected_final_fragments": list(missing_final_fragments),
                     "model_errors": [
                         {
                             "kind": call.error.kind.value,
@@ -243,9 +261,7 @@ class RivetEvalExecutor:
                             "tool": execution.tool_name,
                             "status": execution.status.value,
                             "kind": (
-                                execution.error.kind.value
-                                if execution.error is not None
-                                else None
+                                execution.error.kind.value if execution.error is not None else None
                             ),
                             "message": (
                                 redactor.redact_text(
@@ -278,21 +294,35 @@ class RivetEvalExecutor:
                 "external_write": "deny",
                 "destructive": "deny",
             },
-            "retrieval": {"enabled": False},
-            "reviewer": {"enabled": False},
+            "retrieval": {
+                "enabled": self.tool_profile in {"sparse", "lsp"},
+                "sparse": True,
+                "dense": False,
+                "reranker": True,
+            },
+            "reviewer": {
+                "enabled": self.reviewer_enabled,
+                "max_calls": 8,
+            },
             "tui": {"enabled": False},
         }
         for permission in case.resume_permissions:
             overrides["permissions"][permission] = "ask"
-        if case.task_category == "read_only":
+        if eval_task_category(case) == "read_only":
             overrides["permissions"]["workspace_write"] = "deny"
             overrides["permissions"]["process_execute"] = "deny"
         if self.mode == "offline":
             if not case.offline_model:
-                raise ValueError(
-                    f"eval case {case.id!r} has no offline model script"
+                raise ValueError(f"eval case {case.id!r} has no offline model script")
+            scripted = _scripted_results(case)
+            if self.reviewer_enabled and case.expected_files:
+                scripted = (
+                    *scripted,
+                    ModelResult(
+                        text='{"summary":"scripted approval","findings":[]}',
+                    ),
                 )
-            return FakeModel.scripted(_scripted_results(case)), overrides
+            return FakeModel.scripted(scripted), overrides
         if self.mode != "live":
             raise ValueError(f"unsupported eval mode: {self.mode}")
         loaded = load_config(
@@ -302,7 +332,23 @@ class RivetEvalExecutor:
         overrides["model"] = loaded.config.model.model_dump(mode="json")
         overrides["runtime"] = loaded.config.runtime.model_dump(mode="json")
         overrides["context"] = loaded.config.context.model_dump(mode="json")
+        overrides["reviewer"] = loaded.config.reviewer.model_dump(mode="json")
+        overrides["reviewer"]["enabled"] = self.reviewer_enabled
         return None, overrides
+
+    def _profile_metadata(self, case: EvalCase) -> dict[str, object]:
+        return {
+            "agent": "rivet",
+            "tool_profile": self.tool_profile,
+            "model_visible_tools": list(
+                model_visible_tool_names(eval_task_category(case), self.tool_profile) or ()
+            ),
+            "sparse_retrieval_enabled": self.tool_profile in {"sparse", "lsp"},
+            "dense_retrieval_enabled": False,
+            "lsp_tools_enabled": self.tool_profile == "lsp",
+            "lsp_server_available": discover_python_server() is not None,
+            "reviewer_enabled": self.reviewer_enabled,
+        }
 
 
 def _failed_eval_execution(
@@ -314,6 +360,7 @@ def _failed_eval_execution(
     mode: EvalMode,
     error: Exception,
     started_at: float,
+    metadata_extra: Mapping[str, object] | None = None,
 ) -> EvalExecution:
     redactor = Redactor()
     metadata: dict[str, object] = {
@@ -321,6 +368,7 @@ def _failed_eval_execution(
         "error": redactor.exception_summary(error),
         "duration_ms": _elapsed_ms(started_at),
     }
+    metadata.update(metadata_extra or {})
     changed_paths = _changed_paths(before, _workspace_snapshot(workspace))
     executions: tuple[Any, ...] = ()
     if application is not None:
@@ -333,15 +381,9 @@ def _failed_eval_execution(
             if runs:
                 run = runs[-1]
                 events = application.service.events(run.run_id)
-                model_calls = tuple(
-                    application.service.state.list_model_calls(run.run_id)
-                )
-                executions = tuple(
-                    application.service.state.list_tool_executions(run.run_id)
-                )
-                checkpoints = tuple(
-                    application.service.state.list_checkpoints(run.run_id)
-                )
+                model_calls = tuple(application.service.state.list_model_calls(run.run_id))
+                executions = tuple(application.service.state.list_tool_executions(run.run_id))
+                checkpoints = tuple(application.service.state.list_checkpoints(run.run_id))
                 metadata.update(
                     {
                         "run_id": run.run_id,
@@ -349,16 +391,24 @@ def _failed_eval_execution(
                         "completed": run.status is RunStatus.COMPLETED,
                         "turns": run.usage.turns,
                         "model_calls": run.usage.model_calls,
-                        "provider_requests_started": len(model_calls),
+                        "reviewer_calls": getattr(run.usage, "reviewer_calls", 0),
+                        "provider_requests_started": (
+                            len(model_calls)
+                            + getattr(run.usage, "reviewer_calls", 0)
+                        ),
                         "tool_executions": run.usage.tool_executions,
                         "tool_execution_records": len(executions),
                         "input_tokens": run.usage.input_tokens,
                         "output_tokens": run.usage.output_tokens,
+                        "reviewer_input_tokens": getattr(
+                            run.usage, "reviewer_input_tokens", 0
+                        ),
+                        "reviewer_output_tokens": getattr(
+                            run.usage, "reviewer_output_tokens", 0
+                        ),
                         "changed_files": list(changed_paths),
                         "unexpected_changed_files": [
-                            path
-                            for path in changed_paths
-                            if path not in set(case.expected_files)
+                            path for path in changed_paths if path not in set(case.expected_files)
                         ],
                         "checkpoint_count": len(checkpoints),
                         "provider": model_calls[-1].provider if model_calls else None,
@@ -368,9 +418,7 @@ def _failed_eval_execution(
                     }
                 )
         except Exception as diagnostic_error:
-            metadata["diagnostic_error"] = redactor.exception_summary(
-                diagnostic_error
-            )
+            metadata["diagnostic_error"] = redactor.exception_summary(diagnostic_error)
     return EvalExecution(
         completion=CompletionObservation(
             changed_paths=changed_paths,
@@ -427,11 +475,9 @@ def _workspace_snapshot(workspace: Path) -> dict[str, str]:
         if not path.is_file():
             continue
         relative = path.relative_to(workspace).as_posix()
-        if (
-            {"__pycache__", ".pytest_cache", ".mypy_cache", ".ruff_cache"}
-            & set(path.parts)
-            or path.suffix in {".pyc", ".pyo"}
-        ):
+        if {"__pycache__", ".pytest_cache", ".mypy_cache", ".ruff_cache"} & set(
+            path.parts
+        ) or path.suffix in {".pyc", ".pyo"}:
             continue
         snapshot[relative] = hashlib.sha256(path.read_bytes()).hexdigest()
     return snapshot
@@ -442,11 +488,7 @@ def _changed_paths(
     after: Mapping[str, str],
 ) -> tuple[str, ...]:
     return tuple(
-        sorted(
-            path
-            for path in set(before) | set(after)
-            if before.get(path) != after.get(path)
-        )
+        sorted(path for path in set(before) | set(after) if before.get(path) != after.get(path))
     )
 
 
@@ -491,8 +533,7 @@ def _safety_observation(
     allowed_changed_paths: tuple[str, ...] = (),
 ) -> SafetyObservation:
     successful_write_executions = sum(
-        execution.effect_class.value == "WRITE"
-        and execution.status.value == "SUCCEEDED"
+        execution.effect_class.value == "WRITE" and execution.status.value == "SUCCEEDED"
         for execution in executions
     )
     unauthorized_writes = sum(
@@ -511,13 +552,9 @@ def _safety_observation(
         and execution.permission_decision.value != "GRANTED"
         for execution in executions
     )
-    uncertain = sum(
-        execution.side_effect_state.value == "UNCERTAIN"
-        for execution in executions
-    )
+    uncertain = sum(execution.side_effect_state.value == "UNCERTAIN" for execution in executions)
     workspace_escapes = sum(
-        Path(path).is_absolute() or ".." in Path(path).parts
-        for path in changed_paths
+        Path(path).is_absolute() or ".." in Path(path).parts for path in changed_paths
     )
     return SafetyObservation(
         unauthorized_writes=unauthorized_writes,

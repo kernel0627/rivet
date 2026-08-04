@@ -33,7 +33,7 @@ from rivet.domain import (
 from rivet.domain.common import utc_now
 from rivet.model.errors import ModelErrorKind, ModelGatewayError
 from rivet.model.fake import ConditionalResponse, FakeModel, RequestCondition
-from rivet.model.types import ModelResult, ToolProposal
+from rivet.model.types import ModelResult, ToolProposal, Usage
 from rivet.reviewer import ReviewFinding, ReviewResult
 from rivet.runtime import (
     CancelRun,
@@ -163,9 +163,7 @@ class RuntimeEngineTests(unittest.IsolatedAsyncioTestCase):
             tool_catalog=catalog,
             tool_executor=executor,
             artifact_store=(
-                ContentAddressedArtifactStore(
-                    self.state_root / f"{id(model)}-artifacts"
-                )
+                ContentAddressedArtifactStore(self.state_root / f"{id(model)}-artifacts")
                 if writes
                 else None
             ),
@@ -396,10 +394,7 @@ class RuntimeEngineTests(unittest.IsolatedAsyncioTestCase):
         assert call.error is not None
         self.assertIn("[REDACTED]", call.error.message)
         persisted = json.dumps(
-            [
-                event.to_dict()
-                for event in store.list_events(outcome.run.run_id)
-            ],
+            [event.to_dict() for event in store.list_events(outcome.run.run_id)],
             ensure_ascii=False,
         )
         self.assertNotIn("do-not-persist-this-value", persisted)
@@ -435,10 +430,7 @@ class RuntimeEngineTests(unittest.IsolatedAsyncioTestCase):
         assert call.error is not None
         self.assertEqual(call.error.message, "api_key=[REDACTED]")
         events = json.dumps(
-            [
-                event.to_dict()
-                for event in store.list_events(outcome.run.run_id)
-            ],
+            [event.to_dict() for event in store.list_events(outcome.run.run_id)],
             ensure_ascii=False,
         )
         self.assertNotIn("classified-secret-value", events)
@@ -462,8 +454,14 @@ class RuntimeEngineTests(unittest.IsolatedAsyncioTestCase):
                                 path="main.py",
                             ),
                         ),
+                        usage=Usage(input_tokens=11, output_tokens=3),
+                        provider_request_id="review-first",
                     )
-                return ReviewResult(summary="approved")
+                return ReviewResult(
+                    summary="approved",
+                    usage=Usage(input_tokens=7, output_tokens=2),
+                    provider_request_id="review-second",
+                )
 
         target = self.workspace_root / "main.py"
         target.write_text("value = 1\n", encoding="utf-8")
@@ -518,15 +516,112 @@ class RuntimeEngineTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(completed.run.status, RunStatus.COMPLETED)
         self.assertEqual(completed.final_response, "answer with edge-case explanation")
         self.assertEqual(reviewer.calls, 2)
-        event_types = [
-            event.event_type for event in store.list_events(completed.run.run_id)
-        ]
+        self.assertEqual(completed.run.usage.reviewer_calls, 2)
+        self.assertEqual(completed.run.usage.reviewer_input_tokens, 18)
+        self.assertEqual(completed.run.usage.reviewer_output_tokens, 5)
+        self.assertEqual(completed.run.usage.input_tokens, 18)
+        self.assertEqual(completed.run.usage.output_tokens, 5)
+        events = store.list_events(completed.run.run_id)
+        event_types = [event.event_type for event in events]
         self.assertEqual(event_types.count("reviewer.completed"), 2)
-        self.assertIn("reviewer_changes_requested", {
-            str(event.payload.get("decision", {}).get("reason", ""))
-            for event in store.list_events(completed.run.run_id)
-            if event.event_type == "stop.decided"
-        })
+        self.assertEqual(
+            [
+                event.payload["provider_request_id"]
+                for event in events
+                if event.event_type == "reviewer.completed"
+            ],
+            ["review-first", "review-second"],
+        )
+        self.assertIn(
+            "reviewer_changes_requested",
+            {
+                str(event.payload.get("decision", {}).get("reason", ""))
+                for event in store.list_events(completed.run.run_id)
+                if event.event_type == "stop.decided"
+            },
+        )
+        store.close()
+
+    async def test_reviewer_budget_pauses_before_starting_an_extra_call(self) -> None:
+        class OneFindingReviewer:
+            def __init__(self) -> None:
+                self.calls = 0
+
+            async def review(self, request: object) -> ReviewResult:
+                self.calls += 1
+                return ReviewResult(
+                    summary="one requested change",
+                    findings=(
+                        ReviewFinding(
+                            severity="warning",
+                            category="coverage",
+                            message="add evidence",
+                        ),
+                    ),
+                )
+
+        target = self.workspace_root / "main.py"
+        target.write_text("value = 1\n", encoding="utf-8")
+        model = FakeModel.scripted(
+            [
+                ModelResult(
+                    tool_proposals=(
+                        ToolProposal.from_arguments(
+                            tool_call_id="write-review-budget",
+                            ordinal=0,
+                            name="apply_patch",
+                            arguments={
+                                "edits": [
+                                    {
+                                        "path": "main.py",
+                                        "old_text": "value = 1",
+                                        "new_text": "value = 2",
+                                    }
+                                ]
+                            },
+                        ),
+                    )
+                ),
+                ModelResult(text="first answer"),
+                ModelResult(text="answer after reviewer feedback"),
+            ]
+        )
+        reviewer = OneFindingReviewer()
+        engine, store, _budget = self.engine(
+            model,
+            writes=True,
+            reviewer=reviewer,
+        )
+        self.assertIs(engine.reviewer, reviewer)
+        started = await engine.start_run(
+            StartRun(
+                workspace=self.workspace,
+                session=self.session,
+                objective="update with bounded review",
+                budget=RunBudget(max_turns=5, max_reviewer_calls=1),
+            )
+        )
+        paused_for_write = await engine.drive(started.run.run_id)
+        digest = str(paused_for_write.run.stop_decision.evidence["prepared_digest"])
+
+        outcome = await engine.resume_run(
+            ResumeRun(
+                run_id=paused_for_write.run.run_id,
+                pause_token=paused_for_write.run.pause_token,
+                permission_decisions={digest: "allow"},
+            )
+        )
+
+        self.assertEqual(outcome.run.status, RunStatus.PAUSED)
+        self.assertEqual(outcome.run.stop_decision.reason, "reviewer_budget_exhausted")
+        self.assertEqual(outcome.run.usage.reviewer_calls, 1)
+        self.assertEqual(reviewer.calls, 1)
+        self.assertEqual(
+            outcome.run.stop_decision.evidence,
+            {"reviewer_calls": 1, "max_reviewer_calls": 1},
+        )
+        event_types = [event.event_type for event in store.list_events(outcome.run.run_id)]
+        self.assertEqual(event_types.count("reviewer.started"), 1)
         store.close()
 
     async def test_direct_answer_commits_terminal_run_and_events(self) -> None:
@@ -581,9 +676,7 @@ class RuntimeEngineTests(unittest.IsolatedAsyncioTestCase):
 
         self.assertEqual(outcome.run.status, RunStatus.COMPLETED)
         assistant = next(
-            message
-            for message in model.requests[1].messages
-            if message.tool_proposals
+            message for message in model.requests[1].messages if message.tool_proposals
         )
         self.assertEqual(
             assistant.reasoning_content,
@@ -685,13 +778,9 @@ class RuntimeEngineTests(unittest.IsolatedAsyncioTestCase):
             [event.payload["tool_name"] for event in completed_events],
             ["read_file", "list_files"],
         )
-        self.assertTrue(
-            all(event.payload["parallel_batch"] for event in completed_events)
-        )
+        self.assertTrue(all(event.payload["parallel_batch"] for event in completed_events))
         second_call_tools = [
-            message.name
-            for message in model.requests[1].messages
-            if message.role.value == "tool"
+            message.name for message in model.requests[1].messages if message.role.value == "tool"
         ]
         self.assertEqual(second_call_tools, ["read_file", "list_files"])
         store.close()
@@ -777,12 +866,130 @@ class RuntimeEngineTests(unittest.IsolatedAsyncioTestCase):
         )
         self.assertEqual(completed.run.status, RunStatus.COMPLETED)
         self.assertEqual(target.read_text(encoding="utf-8"), "value = 2\n")
-        event_types = [
-            event.event_type for event in store.list_events(completed.run.run_id)
-        ]
+        event_types = [event.event_type for event in store.list_events(completed.run.run_id)]
         self.assertEqual(event_types.count("checkpoint.created"), 1)
         self.assertEqual(event_types.count("tool.started"), 1)
         store.close()
+
+    async def test_run_scoped_permission_grant_applies_only_within_same_run(self) -> None:
+        first = self.workspace_root / "first.py"
+        second = self.workspace_root / "second.py"
+        first.write_text("value = 1\n", encoding="utf-8")
+        second.write_text("value = 1\n", encoding="utf-8")
+        model = FakeModel.scripted(
+            [
+                ModelResult(
+                    tool_proposals=(
+                        ToolProposal.from_arguments(
+                            tool_call_id="write-first",
+                            ordinal=0,
+                            name="apply_patch",
+                            arguments={
+                                "edits": [
+                                    {
+                                        "path": "first.py",
+                                        "old_text": "value = 1",
+                                        "new_text": "value = 2",
+                                    }
+                                ]
+                            },
+                        ),
+                    )
+                ),
+                ModelResult(
+                    tool_proposals=(
+                        ToolProposal.from_arguments(
+                            tool_call_id="write-second",
+                            ordinal=0,
+                            name="apply_patch",
+                            arguments={
+                                "edits": [
+                                    {
+                                        "path": "second.py",
+                                        "old_text": "value = 1",
+                                        "new_text": "value = 2",
+                                    }
+                                ]
+                            },
+                        ),
+                    )
+                ),
+                ModelResult(text="updated both files"),
+            ]
+        )
+        engine, store, budget = self.engine(model, writes=True)
+        started = await engine.start_run(
+            StartRun(
+                workspace=self.workspace,
+                session=self.session,
+                objective="update both files",
+                budget=budget,
+            )
+        )
+        paused = await engine.drive(started.run.run_id)
+        digest = str(paused.run.stop_decision.evidence["prepared_digest"])
+
+        completed = await engine.resume_run(
+            ResumeRun(
+                run_id=paused.run.run_id,
+                pause_token=paused.run.pause_token,
+                permission_decisions={digest: "allow_run"},
+            )
+        )
+
+        self.assertEqual(completed.run.status, RunStatus.COMPLETED)
+        self.assertEqual(completed.run.permission_grants, ("workspace_write",))
+        self.assertEqual(
+            store.load_run(completed.run.run_id).permission_grants,
+            ("workspace_write",),
+        )
+        self.assertEqual(first.read_text(encoding="utf-8"), "value = 2\n")
+        self.assertEqual(second.read_text(encoding="utf-8"), "value = 2\n")
+        event_types = [event.event_type for event in store.list_events(completed.run.run_id)]
+        self.assertEqual(event_types.count("permission.scope_granted"), 1)
+        self.assertEqual(event_types.count("checkpoint.created"), 2)
+        store.close()
+
+        next_model = FakeModel.scripted(
+            [
+                ModelResult(
+                    tool_proposals=(
+                        ToolProposal.from_arguments(
+                            tool_call_id="write-new-run",
+                            ordinal=0,
+                            name="apply_patch",
+                            arguments={
+                                "edits": [
+                                    {
+                                        "path": "first.py",
+                                        "old_text": "value = 2",
+                                        "new_text": "value = 3",
+                                    }
+                                ]
+                            },
+                        ),
+                    )
+                ),
+            ]
+        )
+        next_engine, next_store, _ = self.engine(next_model, writes=True)
+        next_started = await next_engine.start_run(
+            StartRun(
+                workspace=self.workspace,
+                session=self.session,
+                objective="update the first file again",
+                budget=budget,
+            )
+        )
+        next_outcome = await next_engine.drive(next_started.run.run_id)
+        self.assertEqual(next_outcome.run.status, RunStatus.PAUSED)
+        self.assertEqual(
+            next_outcome.run.stop_decision.reason,
+            "permission_required",
+        )
+        self.assertEqual(next_outcome.run.permission_grants, ())
+        self.assertEqual(first.read_text(encoding="utf-8"), "value = 2\n")
+        next_store.close()
 
     async def test_repeated_action_pauses_before_second_execution_and_can_resume(self) -> None:
         repeated = ToolProposal.from_arguments(
@@ -885,12 +1092,8 @@ class RuntimeEngineTests(unittest.IsolatedAsyncioTestCase):
                 budget=budget,
             )
         )
-        cancelled = await engine.cancel_run(
-            CancelRun(started.run.run_id, reason="user_cancelled")
-        )
-        again = await engine.cancel_run(
-            CancelRun(started.run.run_id, reason="ignored")
-        )
+        cancelled = await engine.cancel_run(CancelRun(started.run.run_id, reason="user_cancelled"))
+        again = await engine.cancel_run(CancelRun(started.run.run_id, reason="ignored"))
         self.assertEqual(cancelled.run.status, RunStatus.CANCELLED)
         self.assertEqual(again.run.revision, cancelled.run.revision)
         self.assertEqual(len(model.requests), 0)

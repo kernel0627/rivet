@@ -84,6 +84,7 @@ class DefaultStopPolicy:
         *,
         tool_name: str,
         prepared_digest: str,
+        permission_class: str,
     ) -> StopDecision:
         return StopDecision(
             action=StopAction.PAUSE,
@@ -94,6 +95,7 @@ class DefaultStopPolicy:
             evidence={
                 "tool_name": tool_name,
                 "prepared_digest": prepared_digest,
+                "permission_class": permission_class,
             },
             user_message=f"Tool {tool_name!r} requires explicit approval.",
         )

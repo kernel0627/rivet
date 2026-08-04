@@ -2390,6 +2390,10 @@ Reviewer 的第一种实现：
 ```
 
 Reviewer 可以是同进程第二次模型调用，不需要引入完整 Agent 间通信。
+这类调用必须使用独立的 `max_reviewer_calls` 预算，并在 Run 中分别记录 Reviewer 调用数和
+Token，同时计入总外部请求与总 Token。预算耗尽要在发起下一次 Reviewer 请求前暂停；失败、
+无效响应和 Provider request ID 进入 Reviewer Event，不能混入或冒充主 Agent 的
+`model_calls` 记录。
 
 Multi-Agent 后续考虑：
 
@@ -2943,4 +2947,3 @@ Eval 负责衡量系统
 ```
 
 后续实现、测试和验收都以本文档为准。
-

@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from collections.abc import Mapping
 
-from rivet.model import Message, MessageRole, ModelGateway, ModelRequest
+from rivet.model import Message, MessageRole, ModelGateway, ModelRequest, Usage
 from rivet.model.errors import ModelGatewayError
 from rivet.reviewer.protocol import (
     ReviewFinding,
@@ -13,7 +13,16 @@ from rivet.reviewer.protocol import (
 
 
 class ReviewerError(RuntimeError):
-    pass
+    def __init__(
+        self,
+        message: str,
+        *,
+        usage: Usage | None = None,
+        provider_request_id: str | None = None,
+    ) -> None:
+        super().__init__(message)
+        self.usage = usage or Usage()
+        self.provider_request_id = provider_request_id
 
 
 class ModelReviewer:
@@ -61,15 +70,30 @@ class ModelReviewer:
                 )
             )
         except ModelGatewayError as error:
-            raise ReviewerError(f"reviewer model failed: {error}") from error
+            raise ReviewerError(
+                f"reviewer model failed: {error}",
+                provider_request_id=error.provider_request_id,
+            ) from error
         if result.text is None:
-            raise ReviewerError("reviewer returned no text")
+            raise ReviewerError(
+                "reviewer returned no text",
+                usage=result.usage,
+                provider_request_id=result.provider_request_id,
+            )
         try:
             value = json.loads(_strip_json_fence(result.text))
         except json.JSONDecodeError as error:
-            raise ReviewerError("reviewer returned invalid JSON") from error
+            raise ReviewerError(
+                "reviewer returned invalid JSON",
+                usage=result.usage,
+                provider_request_id=result.provider_request_id,
+            ) from error
         if not isinstance(value, Mapping):
-            raise ReviewerError("reviewer response must be a JSON object")
+            raise ReviewerError(
+                "reviewer response must be a JSON object",
+                usage=result.usage,
+                provider_request_id=result.provider_request_id,
+            )
         try:
             summary = str(value["summary"])
             raw_findings = value.get("findings", [])
@@ -80,20 +104,25 @@ class ModelReviewer:
                     severity=str(item["severity"]),
                     category=str(item["category"]),
                     message=str(item["message"]),
-                    path=(
-                        str(item["path"])
-                        if item.get("path") is not None
-                        else None
-                    ),
+                    path=(str(item["path"]) if item.get("path") is not None else None),
                 )
                 for item in raw_findings
                 if isinstance(item, Mapping)
             )
             if len(findings) != len(raw_findings):
                 raise TypeError("each finding must be an object")
-            return ReviewResult(summary=summary, findings=findings)
+            return ReviewResult(
+                summary=summary,
+                findings=findings,
+                usage=result.usage,
+                provider_request_id=result.provider_request_id,
+            )
         except (KeyError, TypeError, ValueError) as error:
-            raise ReviewerError("reviewer response does not match the schema") from error
+            raise ReviewerError(
+                "reviewer response does not match the schema",
+                usage=result.usage,
+                provider_request_id=result.provider_request_id,
+            ) from error
 
 
 def _strip_json_fence(text: str) -> str:

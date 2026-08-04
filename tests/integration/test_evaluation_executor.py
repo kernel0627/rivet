@@ -7,7 +7,13 @@ from pathlib import Path
 from types import SimpleNamespace
 
 from rivet.domain import RunStatus
-from rivet.evaluation import EvalCase, EvaluationRunner, RivetEvalExecutor, load_baseline
+from rivet.evaluation import (
+    EvalCase,
+    EvaluationRunner,
+    RivetEvalExecutor,
+    SimpleAgentEvalExecutor,
+    load_baseline,
+)
 from rivet.evaluation.executor import _failed_eval_execution, _workspace_snapshot
 
 
@@ -86,34 +92,24 @@ class EvaluationExecutorTests(unittest.IsolatedAsyncioTestCase):
     ) -> None:
         cases = load_baseline()
 
-        result = await EvaluationRunner(
-            RivetEvalExecutor(mode="offline")
-        ).run(cases)
+        result = await EvaluationRunner(RivetEvalExecutor(mode="offline")).run(cases)
 
         self.assertTrue(result.passed)
         self.assertEqual(result.pass_rate, 1.0)
         by_id = {case.case_id: case for case in result.cases}
-        self.assertTrue(
-            by_id["fix_discount"].completion.expected_tests_passed
-        )
+        self.assertTrue(by_id["fix_discount"].completion.expected_tests_passed)
         self.assertEqual(by_id["fix_discount"].safety.incidents, 0)
         self.assertEqual(
             by_id["reject_workspace_escape"].metadata["run_status"],
             "COMPLETED",
         )
-        self.assertTrue(
-            by_id["locate_invoice_symbol"].completion.final_evidence_accurate
-        )
+        self.assertTrue(by_id["locate_invoice_symbol"].completion.final_evidence_accurate)
         self.assertEqual(
             by_id["locate_invoice_symbol"].metadata["tool_executions"],
             3,
         )
-        self.assertTrue(
-            by_id["fix_cross_file_total"].completion.expected_paths_present
-        )
-        self.assertTrue(
-            by_id["fix_cross_file_total"].completion.expected_tests_passed
-        )
+        self.assertTrue(by_id["fix_cross_file_total"].completion.expected_paths_present)
+        self.assertTrue(by_id["fix_cross_file_total"].completion.expected_tests_passed)
         self.assertEqual(by_id["fix_cross_file_total"].safety.incidents, 0)
         fixed = by_id["fix_discount"].metadata
         self.assertEqual(fixed["test_runs"], 1)
@@ -128,18 +124,73 @@ class EvaluationExecutorTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(fixed["changed_files"], ["pricing.py"])
         self.assertEqual(fixed["unexpected_changed_files"], [])
         self.assertTrue(fixed["event_trace"])
-        self.assertTrue(
-            by_id["trace_order_call_chain"].completion.final_evidence_accurate
-        )
-        self.assertTrue(
-            by_id["add_slug_regression_test"].completion.expected_tests_passed
-        )
+        self.assertTrue(by_id["trace_order_call_chain"].completion.final_evidence_accurate)
+        self.assertTrue(by_id["add_slug_regression_test"].completion.expected_tests_passed)
         resumed = by_id["resume_permission_write"]
         self.assertTrue(resumed.passed)
         self.assertEqual(resumed.metadata["permission_resumes"], 1)
         self.assertTrue(resumed.metadata["permission_intervention_required"])
         self.assertEqual(resumed.metadata["checkpoint_count"], 1)
         self.assertEqual(resumed.metadata["tool_executions"], 3)
+
+    async def test_same_offline_cases_run_through_simple_agent_baseline(self) -> None:
+        result = await EvaluationRunner(SimpleAgentEvalExecutor(mode="offline")).run(
+            load_baseline()
+        )
+
+        self.assertTrue(result.passed)
+        self.assertEqual(result.pass_rate, 1.0)
+        by_id = {case.case_id: case for case in result.cases}
+        fixed = by_id["fix_discount"].metadata
+        self.assertEqual(fixed["agent"], "simple")
+        self.assertEqual(fixed["changed_files"], ["pricing.py"])
+        self.assertEqual(fixed["test_runs"], 1)
+        self.assertEqual(fixed["checkpoint_count"], 0)
+        self.assertEqual(fixed["event_count"], 0)
+        self.assertFalse(fixed["architecture"]["permission_broker"])
+        self.assertFalse(fixed["architecture"]["recovery"])
+        self.assertFalse(fixed["architecture"]["rewind"])
+        resumed = by_id["resume_permission_write"].metadata
+        self.assertEqual(resumed["permission_resumes"], 0)
+        self.assertFalse(resumed["permission_intervention_required"])
+        self.assertEqual(resumed["checkpoint_count"], 0)
+
+    async def test_offline_reviewer_is_counted_as_a_separate_provider_request(self) -> None:
+        case = next(case for case in load_baseline() if case.id == "fix_discount")
+
+        result = await RivetEvalExecutor(
+            mode="offline",
+            reviewer_enabled=True,
+        ).execute(case)
+
+        self.assertTrue(result.metadata["completed"])
+        self.assertEqual(result.metadata["reviewer_calls"], 1)
+        self.assertEqual(result.metadata["reviewer_completed"], 1)
+        self.assertEqual(result.metadata["reviewer_failed"], 0)
+        self.assertEqual(
+            result.metadata["provider_requests_started"],
+            result.metadata["model_calls"] + 1,
+        )
+        self.assertTrue(result.metadata["reviewer_enabled"])
+
+    async def test_simple_offline_baseline_ignores_local_runtime_config(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            config = root / ".rivet"
+            config.mkdir()
+            (config / "config.toml").write_text(
+                "[runtime]\nmax_model_calls = 1\n",
+                encoding="utf-8",
+            )
+            case = next(case for case in load_baseline() if case.id == "fix_discount")
+
+            result = await SimpleAgentEvalExecutor(
+                mode="offline",
+                config_workspace=root,
+            ).execute(case)
+
+        self.assertTrue(result.metadata["completed"])
+        self.assertEqual(result.metadata["model_calls"], 4)
 
 
 if __name__ == "__main__":

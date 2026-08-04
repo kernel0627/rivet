@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Protocol, runtime_checkable
 
 from rivet.domain import VerificationResult
+from rivet.model.types import Usage
 
 
 @dataclass(frozen=True)
@@ -42,15 +43,15 @@ class ReviewFinding:
 class ReviewResult:
     summary: str
     findings: tuple[ReviewFinding, ...] = ()
+    usage: Usage = field(default_factory=Usage)
+    provider_request_id: str | None = None
 
     def __post_init__(self) -> None:
         if not self.summary.strip():
             raise ValueError("review summary cannot be empty")
 
     def approved(self, blocking_severities: tuple[str, ...]) -> bool:
-        return not any(
-            finding.severity in blocking_severities for finding in self.findings
-        )
+        return not any(finding.severity in blocking_severities for finding in self.findings)
 
     def to_dict(self) -> dict[str, object]:
         return {

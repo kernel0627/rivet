@@ -20,9 +20,7 @@ class CliTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             output = io.StringIO()
             with redirect_stdout(output):
-                code = cli_main(
-                    ["doctor", "--workspace", directory, "--json"]
-                )
+                code = cli_main(["doctor", "--workspace", directory, "--json"])
             payload = json.loads(output.getvalue())
             self.assertEqual(code, 0)
             self.assertTrue(payload["workspace_exists"])
@@ -47,9 +45,7 @@ class CliTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             output = io.StringIO()
             with redirect_stdout(output), redirect_stderr(io.StringIO()):
-                code = headless_main(
-                    ["work", "--workspace", str(Path(directory))]
-                )
+                code = headless_main(["work", "--workspace", str(Path(directory))])
             payload = json.loads(output.getvalue())
             self.assertEqual(code, 2)
             self.assertEqual(payload["schema_version"], 1)
@@ -87,6 +83,64 @@ class CliTests(unittest.TestCase):
                 "scripted_eval",
             )
             self.assertEqual(json.loads(report.read_text(encoding="utf-8")), payload)
+
+    def test_offline_eval_can_select_simple_agent_baseline(self) -> None:
+        output = io.StringIO()
+        with redirect_stdout(output):
+            code = cli_main(
+                [
+                    "eval",
+                    "--mode",
+                    "offline",
+                    "--agent",
+                    "simple",
+                    "--case",
+                    "fix_discount",
+                    "--json",
+                ]
+            )
+
+        payload = json.loads(output.getvalue())
+        self.assertEqual(code, 0)
+        self.assertTrue(payload["passed"])
+        metadata = payload["cases"][0]["metadata"]
+        self.assertEqual(metadata["agent"], "simple")
+        self.assertEqual(metadata["checkpoint_count"], 0)
+        self.assertEqual(metadata["event_count"], 0)
+        self.assertEqual(
+            metadata["architecture"]["tools"],
+            ["read_file", "search_text", "apply_patch", "run_tests"],
+        )
+
+    def test_offline_eval_can_compare_both_agents_on_same_case(self) -> None:
+        output = io.StringIO()
+        with redirect_stdout(output):
+            code = cli_main(
+                [
+                    "eval",
+                    "--mode",
+                    "offline",
+                    "--agent",
+                    "both",
+                    "--case",
+                    "fix_discount",
+                    "--json",
+                ]
+            )
+
+        payload = json.loads(output.getvalue())
+        self.assertEqual(code, 0)
+        self.assertEqual(payload["report_type"], "agent_comparison")
+        self.assertTrue(payload["passed"])
+        aggregate = payload["comparison"]["aggregate"]
+        self.assertEqual(aggregate["rivet"]["passed"], 1)
+        self.assertEqual(aggregate["simple"]["passed"], 1)
+        self.assertEqual(aggregate["rivet"]["checkpoint_count"], 1)
+        self.assertEqual(aggregate["simple"]["checkpoint_count"], 0)
+        self.assertEqual(
+            aggregate["simple_minus_rivet"]["checkpoint_count"],
+            -1,
+        )
 
     def test_offline_eval_can_report_repeated_performance_baseline(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -175,6 +229,8 @@ class CliTests(unittest.TestCase):
                         "eval",
                         "--mode",
                         "live",
+                        "--agent",
+                        "both",
                         "--dataset",
                         str(dataset),
                     ]
@@ -221,11 +277,7 @@ class CliTests(unittest.TestCase):
             self.assertEqual(payload["cases"][0]["task_category"], "read_only")
 
     def test_live_v1_dataset_can_be_listed_by_category(self) -> None:
-        dataset = (
-            Path(__file__).resolve().parents[2]
-            / "benchmarks"
-            / "live_tasks_v1.jsonl"
-        )
+        dataset = Path(__file__).resolve().parents[2] / "benchmarks" / "live_tasks_v1.jsonl"
         output = io.StringIO()
 
         with redirect_stdout(output):
@@ -244,9 +296,7 @@ class CliTests(unittest.TestCase):
         payload = json.loads(output.getvalue())
         self.assertEqual(code, 0)
         self.assertEqual(payload["case_count"], 4)
-        self.assertTrue(
-            all(case["task_category"] == "read_only" for case in payload["cases"])
-        )
+        self.assertTrue(all(case["task_category"] == "read_only" for case in payload["cases"]))
 
     def test_live_preflight_reports_boundary_without_sending_request(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -283,16 +333,21 @@ class CliTests(unittest.TestCase):
             report = root / "preflight.json"
             output = io.StringIO()
 
-            with patch.dict(
-                os.environ,
-                {"RIVET_TEST_KEY": "top-secret"},
-                clear=True,
-            ), redirect_stdout(output):
+            with (
+                patch.dict(
+                    os.environ,
+                    {"RIVET_TEST_KEY": "top-secret"},
+                    clear=True,
+                ),
+                redirect_stdout(output),
+            ):
                 code = cli_main(
                     [
                         "eval",
                         "--mode",
                         "live",
+                        "--agent",
+                        "both",
                         "--dataset",
                         str(dataset),
                         "--case",
@@ -315,12 +370,137 @@ class CliTests(unittest.TestCase):
             payload = json.loads(output.getvalue())
             self.assertEqual(code, 0)
             self.assertFalse(payload["external_request_started"])
+            self.assertEqual(payload["agent"], "both")
+            self.assertEqual(payload["agents"], ["rivet", "simple"])
             self.assertEqual(payload["provider"]["name"], "deepseek")
             self.assertTrue(payload["provider"]["api_key_configured"])
-            self.assertEqual(payload["limits"]["max_model_calls_for_batch"], 3)
+            self.assertEqual(payload["limits"]["max_model_calls_for_batch"], 6)
+            self.assertEqual(payload["selection"]["agent_case_executions"], 2)
+            self.assertEqual(
+                payload["transmission"]["objective_bytes_for_all_agents"],
+                payload["transmission"]["objective_bytes"] * 2,
+            )
             self.assertEqual(payload["selection"]["case_ids"], ["live-only"])
             self.assertEqual(json.loads(report.read_text(encoding="utf-8")), payload)
             self.assertNotIn("top-secret", output.getvalue())
+
+    def test_offline_tool_profile_comparison_runs_same_case_four_times(self) -> None:
+        output = io.StringIO()
+
+        with redirect_stdout(output):
+            code = cli_main(
+                [
+                    "eval",
+                    "--agent",
+                    "rivet",
+                    "--tool-profile",
+                    "all",
+                    "--case",
+                    "locate_invoice_symbol",
+                    "--json",
+                ]
+            )
+
+        payload = json.loads(output.getvalue())
+        self.assertEqual(code, 0)
+        self.assertEqual(payload["report_type"], "tool_profile_comparison")
+        self.assertEqual(payload["baseline_profile"], "basic")
+        self.assertEqual(payload["profile_order"], ["basic", "ast", "sparse", "lsp"])
+        self.assertTrue(payload["interpretation"]["offline_scripted_model"])
+        for profile in payload["profile_order"]:
+            suite = payload["profiles"][profile]
+            self.assertEqual(suite["case_count"], 1)
+            self.assertEqual(
+                suite["cases"][0]["metadata"]["tool_profile"],
+                profile,
+            )
+
+    def test_offline_reviewer_comparison_reports_extra_request(self) -> None:
+        output = io.StringIO()
+
+        with redirect_stdout(output):
+            code = cli_main(
+                [
+                    "eval",
+                    "--reviewer",
+                    "both",
+                    "--case",
+                    "fix_discount",
+                    "--json",
+                ]
+            )
+
+        payload = json.loads(output.getvalue())
+        self.assertEqual(code, 0)
+        self.assertEqual(payload["report_type"], "reviewer_comparison")
+        aggregate = payload["comparison"]["aggregate"]
+        self.assertEqual(aggregate["off"]["reviewer_calls"], 0)
+        self.assertEqual(aggregate["on"]["reviewer_calls"], 1)
+        self.assertEqual(aggregate["on_minus_off"]["provider_requests_started"], 1)
+        self.assertTrue(payload["interpretation"]["offline_scripted_reviewer"])
+
+    def test_all_tool_profile_live_preflight_reports_four_profile_boundary(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            project = root / ".rivet"
+            project.mkdir()
+            (project / "config.toml").write_text(
+                '[model]\nprovider = "deepseek"\nmodel = "deepseek-chat"\n',
+                encoding="utf-8",
+            )
+            dataset = root / "live.jsonl"
+            dataset.write_text(
+                json.dumps(
+                    {
+                        "id": "live-only",
+                        "objective": "inspect main.py",
+                        "fixture": "inline",
+                        "execution_mode": "live_only",
+                        "task_category": "read_only",
+                        "fixture_files": {"main.py": "print('hello')\n"},
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            output = io.StringIO()
+
+            with redirect_stdout(output):
+                code = cli_main(
+                    [
+                        "eval",
+                        "--mode",
+                        "live",
+                        "--tool-profile",
+                        "all",
+                        "--dataset",
+                        str(dataset),
+                        "--case",
+                        "live-only",
+                        "--config-workspace",
+                        str(root),
+                        "--max-model-calls",
+                        "3",
+                        "--preflight",
+                        "--json",
+                    ]
+                )
+
+        payload = json.loads(output.getvalue())
+        self.assertEqual(code, 0)
+        self.assertFalse(payload["external_request_started"])
+        self.assertIsInstance(payload["local_capabilities"]["lsp_server_available"], bool)
+        self.assertEqual(payload["selection"]["profile_case_executions"], 4)
+        self.assertEqual(payload["limits"]["max_model_calls_for_batch"], 12)
+        self.assertEqual(
+            payload["selection"]["tool_profiles"],
+            [
+                "basic",
+                "ast",
+                "sparse",
+                "lsp",
+            ],
+        )
 
     def test_retrieval_benchmark_writes_structured_report(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

@@ -10,7 +10,7 @@ Checkpoint/Rewind、验证、代码智能、Trace 和终端交互。
 工具适配与可选 Reviewer 基线。2026-08-01 的本地离线验收结果为：
 
 ```text
-223 passed, 103 subtests passed
+246 passed, 103 subtests passed
 Ruff: all checks passed
 ```
 
@@ -123,6 +123,15 @@ rivet resume \
   --permission PREPARED_DIGEST=allow
 ```
 
+将该动作所属的权限类别在当前 Run 内持续放行，可使用
+`--permission PREPARED_DIGEST=allow_run`。这个授权会持久化到当前 Run，后续同类操作无需
+重复确认；新 Run 不会继承。交互终端提供 Once、Run 和 Deny 三种选择。
+
+交互终端中的写任务完成后会提供 Keep、List 和 Rewind latest：可以保留修改、查看当前
+Run 的可用 Checkpoint，或通过已有冲突检测回退最新一次写入。运行期间按 Ctrl-C 会取消
+当前请求，并把 Run 持久化为 `CANCELLED`。普通可恢复暂停还可以直接输入补充要求，在同一
+Run 内继续；补充要求会出现在原始目标之后，传给下一轮模型。
+
 同一 Session 内连续工作：
 
 ```bash
@@ -195,6 +204,7 @@ reranker = true
 
 [reviewer]
 enabled = false
+max_calls = 8
 blocking_severities = ["error", "warning"]
 ```
 
@@ -305,6 +315,48 @@ Bugfix、新增测试、权限暂停恢复，以及工作区逃逸拒绝。默�
 rivet eval --mode offline --json
 ```
 
+同一批 Case 可以同时运行完整 Rivet Runtime 和只有 Model、`read_file`、`search_text`、
+`apply_patch`、`run_tests` 的 Simple Agent，并输出逐 Case 与汇总差异：
+
+```bash
+rivet eval --mode offline \
+  --agent both \
+  --output reports/offline-agent-comparison.json \
+  --json
+```
+
+离线两侧复用同一套脚本化模型轨迹，因此它只验证工具契约、验收口径和报告可比性，不能证明
+两套 Agent 的真实模型能力相同。真实质量对照仍需在同一 live Case、同一模型和相同预算下
+运行 `--agent both`。
+
+Rivet 还可以在同一批 Case 上依次运行四档模型可见工具面：基础 Read/Search、AST、Sparse
+Retrieval、LSP。`sparse` 档会启用本地 SQLite Sparse 索引，`lsp` 档在此基础上暴露语言服务器
+工具；Dense 和 Reviewer 不会被这条命令暗中启用：
+
+```bash
+rivet eval --mode offline \
+  --agent rivet \
+  --tool-profile all \
+  --output reports/offline-tool-ablation.json \
+  --json
+```
+
+脚本化离线结果只验证四档隔离、执行合同和评分口径。判断 AST、Sparse 或 LSP 是否提升真实
+成功率，仍需对 live Case 使用相同模型和预算运行 `--tool-profile all`。
+
+Reviewer 使用独立调用预算，也可以在相同 Case 上执行 off/on 对照：
+
+```bash
+rivet eval --mode offline \
+  --reviewer both \
+  --output reports/offline-reviewer-comparison.json \
+  --json
+```
+
+Run 会分别持久化 Agent 与 Reviewer 调用数、Reviewer Token，并在总 Token 中计入 Reviewer
+消耗。`--max-reviewer-calls` 可收紧 live 单 Case 的 Reviewer 上限；达到上限会以
+`reviewer_budget_exhausted` 暂停，不会启动下一次 Reviewer 请求。
+
 真实 Provider 模式复用同一批 Fixture 和验收条件，会产生网络请求和模型费用，需显式
 选择 Case 后执行：
 
@@ -332,7 +384,8 @@ rivet eval --mode offline --dataset benchmarks/live_tasks_seed.jsonl
 
 可以使用 `--list-cases` 完全离线地查看 V1 任务契约。live 模式要求使用 `--case` 选择
 小批任务，或使用 `--category` 选择四类中的一个执行批次；只有明确准备运行完整数据集时才
-传入 `--all-cases`。V1 只读任务已形成 `4/4` 的首批真实成功证据，写任务尚未执行。
+传入 `--all-cases`。V1 的只读、单文件和跨文件任务已形成真实成功证据；迭代与权限恢复批次
+仍待执行。
 具体边界和报告见 [评估数据集说明](benchmarks/README.md)。
 
 使用 `--preflight` 可以在不发送请求的情况下生成目的地主机、模型、Case、Fixture 文件哈希、

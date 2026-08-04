@@ -81,6 +81,7 @@ class TuiConfig(StrictModel):
 
 class ReviewerConfig(StrictModel):
     enabled: bool = False
+    max_calls: int = Field(default=8, ge=1, le=1000)
     blocking_severities: tuple[Literal["error", "warning", "info"], ...] = (
         "error",
         "warning",

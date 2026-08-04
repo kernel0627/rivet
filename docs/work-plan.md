@@ -91,7 +91,7 @@ rivet chat --workspace /path/to/repo
 
 截至 2026-08-04：
 
-- 全量离线测试：`223 passed, 103 subtests passed`；
+- 全量离线测试：`246 passed, 103 subtests passed`；
 - 固定离线 Eval：`8/8 passed`，这些结果来自脚本化 Fake Model；
 - DeepSeek V1 live Eval：4 个只读、4 个单文件和 4 个跨文件任务最终均成功；另有最小
   `explain_entrypoint 1/1 passed`；
@@ -139,16 +139,20 @@ rivet chat --workspace /path/to/repo
 
 ## 5. 第二批：补完整终端使用闭环
 
-当前状态：底座存在，交互证据不足。
+当前状态：稳定阶段标签、写入 Diff、三种权限选择、Ctrl-C 取消、暂停后补充要求，以及完成后
+的 Checkpoint/Rewind 闭环已完成本地实现与直接回归。
 
 按用户价值顺序完成：
 
-1. 把 Event 映射为稳定、可读的 `[Plan]`、`[Read]`、`[Search]`、`[Edit]`、`[Test]`、
+1. [x] 把 Event 映射为稳定、可读的 `[Plan]`、`[Read]`、`[Search]`、`[Edit]`、`[Test]`、
    `[Result]`、`[Continue]` 状态；
-2. 写入前或写入后立即展示简洁 Diff；
-3. 权限选择支持 Allow、Deny、Allow for this run；
-4. 支持 Ctrl-C 停止、暂停后继续和补充要求；
-5. 在交互中查看 Diff、Checkpoint，并 Rewind 最近一次修改。
+2. [x] 写入后立即展示简洁 Diff；
+3. [x] 权限选择支持 Allow once、Deny、Allow for this run；运行级授权按权限类别持久化到
+   当前 Run，同一 Run 后续同类操作自动放行，新 Run 不继承；
+4. [x] 支持 Ctrl-C 停止、暂停后继续和补充要求；补充要求会写入原 Run 的 Event，并在原始
+   目标之后进入下一轮模型 Context；
+5. [x] 在交互中查看 Diff、Checkpoint，并 Rewind 最近一次修改；写任务完成后可 Keep、List
+   或 Rewind latest，回退继续使用已有的外部变化冲突检测。
 
 完成标准：不阅读内部架构文档的用户可以启动 Rivet、理解过程、批准修改、看到测试结果，
 并在必要时回退。
@@ -159,14 +163,43 @@ rivet chat --workspace /path/to/repo
 
 ### 6.1 Simple Agent Baseline
 
+当前状态：最小四工具循环、单/双 Agent Eval 入口和结构化差异报告已完成；固定脚本化 Case 的
+本地对照为两侧 `8/8 passed`。真实模型质量对照等待 live 执行基础设施恢复。
+
 实现只包含 Model、`read_file`、`search_text`、`apply_patch`、`run_tests` 和简单循环的基线，
 与 Rivet 使用同一任务、同一模型和相同预算，比较完成率、Token、耗时、无关修改、安全、
 恢复、Trace 和 Rewind。
 
+已完成的本地基线明确区分两类结论：脚本化模型让两侧得到相同的 28 次模型调用、23 次工具
+执行和 `8/8` 完成率，只证明任务、工具和评分口径可比；Rivet 额外形成 4 个 Checkpoint、
+365 个 Event 和 1 次权限恢复，Simple Agent 对应均为 0。耗时差异属于本机离线基础设施开销，
+不能当作真实 Provider 性能结论。脱敏报告为 `reports/offline-agent-comparison.json`。
+
+5 个迭代任务的双 Agent live 预检也已生成：共 10 个 Agent-Case 执行，理论最多 100 次模型
+调用；两侧合计目标文本 2286 字节、Fixture 9580 字节。预检没有启动外部请求，真实对照仍需
+等待外部审批服务恢复。
+
 ### 6.2 模块消融
 
-逐步比较基础 Search/Read、AST、Sparse Retrieval、LSP 和 Reviewer。没有提升成功率、明显
-增加 Token/延迟或模型很少正确使用的模块，应默认关闭或删除。
+当前状态：基础 Search/Read、AST、Sparse Retrieval、LSP 四档，以及 Reviewer off/on，均已
+形成可执行 Eval、同 Case 对比报告和 live 预检。Reviewer 的独立调用、Token、预算耗尽暂停
+与 Provider request ID Event 已落地，具体合同见
+[reviewer-ablation-contract.md](reviewer-ablation-contract.md)。
+
+四档采用逐级包含的工具面，Sparse 档会真正启用本地 SQLite 索引，LSP 档再暴露 Definition、
+References、Hover 和 Diagnostics。固定脚本化 Case 的四档结果均为 `8/8 passed`、28 次模型
+调用、23 次工具执行，只证明隔离和评分合同可比；脚本模型不会因新增工具改变行动，不能用来
+判断模块收益。脱敏报告为 `reports/offline-tool-ablation.json`。
+
+5 个迭代任务的四档 live 预检已生成：共 20 个 Profile-Case 执行，理论最多 200 次模型调用，
+四档合计目标文本 4572 字节、Fixture 19160 字节，尚未启动外部请求。真实对照完成后再根据
+成功率、Token、延迟和工具使用率决定模块默认值。没有提升成功率、明显增加 Token/延迟或
+模型很少正确使用的模块，应默认关闭或删除。
+
+Reviewer 固定离线对照两侧均为 `8/8 passed`；off 侧 28 次外部请求，on 侧增加 4 次 Reviewer
+请求和 8 个 Reviewer Event。脚本 Reviewer 永远批准，只能证明计量与报告结构。5 个迭代任务
+的 off/on live 预检共 10 个 Variant-Case：Agent 理论最多 100 次调用，Reviewer 最多 10 次，
+合计外部请求上限 110 次；两侧目标文本 2286 字节、Fixture 9580 字节，尚未启动外部请求。
 
 ### 6.3 安全与恢复场景
 
@@ -226,7 +259,7 @@ Fixture 内容、Provider、预算上限和外发授权。
 - 种子中的三个写任务也继续保留初始失败检查，作为快速结构冒烟；
 - Eval 报告已补 Token、费用可用状态、测试次数、首次测试结果、修改文件、非预期修改、
   权限干预、工具失败和不含 Payload 的 Event 序列；未知费用不会伪装成零费用；
-- 当前全量回归为 `223 passed, 103 subtests passed`，固定离线 Eval 仍为 `8/8 passed`；
+- 当前全量回归为 `246 passed, 103 subtests passed`，固定离线 Eval 仍为 `8/8 passed`；
 - 首批 4 个只读任务的正式真实 Provider 结果为 `4/4 passed`。
 
 下一步：执行已完成预检的 5 个迭代与权限恢复任务，优先验证首次测试失败后在同一个 Run 内
@@ -291,7 +324,26 @@ Fixture 内容、Provider、预算上限和外发授权。
 - 预检逐 Case 显式记录 `automatic_resume_permissions`，权限任务仅自动恢复
   `workspace_write`；
 - 预检 `external_request_started` 为 `false`，没有产生 Provider 请求、Token 或费用；
-- 下一步整批执行并保存逐任务 Trace，重点检查权限恢复次数、首次失败测试和同一 Run 恢复。
+- 已在既定授权边界内三次尝试启动整批执行；三次都在进程启动前被外部审批服务的
+  `input[6].namespace` 参数错误拒绝，没有向 DeepSeek 发送请求，也没有产生 Token 或费用；
+- 阻断证据保存在 `reports/live-v1-iterative-02-approval-service-blocked.json`；外部服务恢复后
+  直接整批执行并保存逐任务 Trace，重点检查权限恢复次数、首次失败测试和同一 Run 恢复。
+
+### 2026-08-04：终端闭环阶段一
+
+- Event 已映射为稳定的 Plan、Read、Search、Edit、Test、Continue 和 Result 阶段；
+- `apply_patch` 成功后直接显示修改路径和统一 Diff；
+- 权限提示支持 Allow once、Allow for this run 和 Deny，CLI resume 同样接受 `allow_run`；
+- Allow for this run 会在 Run 状态中持久化对应权限类别，并写入独立 Event；同一 Run 的后续
+  同类操作自动放行，另起 Run 仍重新询问；
+- 单元、集成和 TUI 端到端测试覆盖了阶段标签、Diff、运行级授权持久化、同 Run 复用和跨 Run
+  隔离；
+- 写任务完成后可保留修改、列出 Checkpoint 或回退最新修改，回退后会刷新 Run 的工作区
+  revision 并显示 Rewind 事件；
+- 取消正在等待模型的交互任务会形成 `CANCELLED` Run 和可见 Result 事件；普通可恢复暂停
+  可直接输入补充要求并继续原 Run；
+- 端到端测试由此发现并修复 Context 消息顺序：原始目标现在位于后续消息之前，新的用户要求
+  保持真正的后发优先级。
 
 ### 2026-08-03：首批只读 live 预检
 

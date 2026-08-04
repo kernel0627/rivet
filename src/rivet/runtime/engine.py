@@ -22,6 +22,7 @@ from rivet.domain import (
     ModelUsage,
     Run,
     RunStatus,
+    RunUsage,
     StopAction,
     StopDecision,
     StopScope,
@@ -93,6 +94,7 @@ from rivet.tools.contracts import (
     PermissionDecision,
     PermissionOutcome,
     PermissionScope,
+    PreparedTool,
 )
 from rivet.tools.executor import ToolExecutor
 from rivet.tools.results import (
@@ -449,10 +451,7 @@ class RuntimeEngine:
                 if execution.status.terminal:
                     continue
                 was_running = execution.status is ToolExecutionStatus.RUNNING
-                uncertain = (
-                    was_running
-                    and execution.effect_class is not DomainEffectClass.READ
-                )
+                uncertain = was_running and execution.effect_class is not DomainEffectClass.READ
                 if uncertain:
                     uncertain_execution_ids.append(execution.execution_id)
                 tool_updates.append(
@@ -488,9 +487,7 @@ class RuntimeEngine:
                     reason="uncertain_side_effect",
                     scope=StopScope.RUN,
                     resumable=True,
-                    resume_requirements=(
-                        "inspect_workspace_and_reconcile_interrupted_tools",
-                    ),
+                    resume_requirements=("inspect_workspace_and_reconcile_interrupted_tools",),
                     evidence={"execution_ids": uncertain_execution_ids},
                     user_message=(
                         "A tool was interrupted after execution started; "
@@ -726,8 +723,7 @@ class RuntimeEngine:
             assert error_run is not None
             model_call_limit = error_run.budget.max_model_calls
             budget_allows_retry = (
-                model_call_limit is None
-                or error_run.usage.model_calls + 1 < model_call_limit
+                model_call_limit is None or error_run.usage.model_calls + 1 < model_call_limit
             )
             if (
                 model_error.retryable
@@ -762,9 +758,7 @@ class RuntimeEngine:
             ),
             ended_at=self.clock.now(),
         )
-        next_phase = (
-            TurnPhase.PREPARE_TOOLS if result.tool_proposals else TurnPhase.DECIDE
-        )
+        next_phase = TurnPhase.PREPARE_TOOLS if result.tool_proposals else TurnPhase.DECIDE
         model_turn = replace(
             calling_turn,
             phase=next_phase,
@@ -1020,10 +1014,7 @@ class RuntimeEngine:
         current_turn = turn
         for index in range(start_index, len(proposals)):
             tool_limit = current_run.budget.max_tool_executions
-            if (
-                tool_limit is not None
-                and current_run.usage.tool_executions >= tool_limit
-            ):
+            if tool_limit is not None and current_run.usage.tool_executions >= tool_limit:
                 completed_turn = replace(
                     current_turn,
                     status=TurnStatus.COMPLETED,
@@ -1134,7 +1125,8 @@ class RuntimeEngine:
 
             preflight = await self.tool_executor.preflight(
                 prepared,
-                permission_decision=permission_decision if index == start_index else None,
+                permission_decision=(permission_decision if index == start_index else None)
+                or _run_permission_decision(current_run, prepared),
                 execution_metadata={
                     "run_id": current_run.run_id,
                     "turn_id": current_turn.turn_id,
@@ -1158,6 +1150,7 @@ class RuntimeEngine:
                     decision = self.stop_policy.permission_required(
                         tool_name=prepared.name,
                         prepared_digest=prepared.prepared_digest,
+                        permission_class=prepared.permission.value,
                     )
                     cursor = tool_cursor(
                         waiting_turn,
@@ -1273,16 +1266,11 @@ class RuntimeEngine:
     ) -> Run | None:
         ordered = tuple(sorted(proposals, key=lambda proposal: proposal.ordinal))
         tool_limit = run.budget.max_tool_executions
-        if (
-            tool_limit is not None
-            and run.usage.tool_executions + len(ordered) > tool_limit
-        ):
+        if tool_limit is not None and run.usage.tool_executions + len(ordered) > tool_limit:
             return None
         if len({proposal.ordinal for proposal in ordered}) != len(ordered):
             return None
-        prepared_items: list[
-            tuple[ToolProposal, Any, ToolExecutionRecord, str]
-        ] = []
+        prepared_items: list[tuple[ToolProposal, Any, ToolExecutionRecord, str]] = []
         action_keys: set[str] = set()
         projection_events = self._all_events(run.run_id)
         for proposal in ordered:
@@ -1325,9 +1313,7 @@ class RuntimeEngine:
                 prepared_digest=prepared.prepared_digest,
                 side_effect_state=DomainSideEffectState.NOT_STARTED,
             )
-            prepared_items.append(
-                (proposal, prepared, execution, fingerprint.action_key)
-            )
+            prepared_items.append((proposal, prepared, execution, fingerprint.action_key))
 
         preflights = await asyncio.gather(
             *(
@@ -1369,8 +1355,7 @@ class RuntimeEngine:
                 for _proposal, prepared, execution, _action_key in prepared_items
             ),
             tool_executions=tuple(
-                execution
-                for _proposal, _prepared, execution, _action_key in prepared_items
+                execution for _proposal, _prepared, execution, _action_key in prepared_items
             ),
         )
         ready_records = tuple(
@@ -1441,11 +1426,7 @@ class RuntimeEngine:
         grants = tuple(preflight.grant for preflight in preflights)
         assert all(grant is not None for grant in grants)
         results = await asyncio.gather(
-            *(
-                self._execute_parallel_grant(grant)
-                for grant in grants
-                if grant is not None
-            )
+            *(self._execute_parallel_grant(grant) for grant in grants if grant is not None)
         )
         ended_at = self.clock.now()
         terminal_records = tuple(
@@ -1460,9 +1441,7 @@ class RuntimeEngine:
             running_run,
             usage=replace(
                 running_run.usage,
-                tool_executions=(
-                    running_run.usage.tool_executions + len(results)
-                ),
+                tool_executions=(running_run.usage.tool_executions + len(results)),
             ),
             revision=running_run.revision + 1,
             updated_at=ended_at,
@@ -1548,7 +1527,7 @@ class RuntimeEngine:
                 ),
             ),
             turns=(completed_turn,),
-            )
+        )
 
     async def _cancel_after_tool(
         self,
@@ -1721,11 +1700,7 @@ class RuntimeEngine:
             current=completed_run,
             lease_token=lease_token,
             events=(
-                *(
-                    (index_event,)
-                    if index_event is not None
-                    else ()
-                ),
+                *((index_event,) if index_event is not None else ()),
                 (
                     "tool.completed",
                     EventActor.TOOL,
@@ -1922,11 +1897,7 @@ class RuntimeEngine:
         failed_call = replace(
             call,
             status=call_status,
-            error=(
-                None
-                if call_status is ModelCallStatus.CANCELLED
-                else _model_error_info(error)
-            ),
+            error=(None if call_status is ModelCallStatus.CANCELLED else _model_error_info(error)),
             ended_at=self.clock.now(),
         )
         accounted = replace(
@@ -1964,9 +1935,7 @@ class RuntimeEngine:
         failed_turn = replace(
             turn,
             status=(
-                TurnStatus.CANCELLED
-                if decision.action is StopAction.CANCEL
-                else TurnStatus.FAILED
+                TurnStatus.CANCELLED if decision.action is StopAction.CANCEL else TurnStatus.FAILED
             ),
             ended_at=self.clock.now(),
             revision=turn.revision + 1,
@@ -1981,9 +1950,7 @@ class RuntimeEngine:
                 clear_active_turn=True,
             )
         terminal_status = (
-            RunStatus.CANCELLED
-            if decision.action is StopAction.CANCEL
-            else RunStatus.FAILED
+            RunStatus.CANCELLED if decision.action is StopAction.CANCEL else RunStatus.FAILED
         )
         terminal = replace(
             accounted,
@@ -2039,9 +2006,7 @@ class RuntimeEngine:
                     resume_requirements=("configure_or_rerun_verification",),
                     evidence={
                         "changed_paths": list(changed_paths),
-                        "verification_id": (
-                            verification.verification_id if verification else None
-                        ),
+                        "verification_id": (verification.verification_id if verification else None),
                     },
                 )
                 return await self._pause(
@@ -2126,6 +2091,34 @@ class RuntimeEngine:
                     turns=(cancelled_turn,),
                 )
             if self.reviewer is not None:
+                reviewer_limit = run.budget.max_reviewer_calls
+                if reviewer_limit is not None and run.usage.reviewer_calls >= reviewer_limit:
+                    completed_turn = replace(
+                        turn,
+                        status=TurnStatus.COMPLETED,
+                        phase=TurnPhase.DECIDE,
+                        ended_at=self.clock.now(),
+                        revision=turn.revision + 1,
+                    )
+                    decision = StopDecision(
+                        action=StopAction.PAUSE,
+                        reason="reviewer_budget_exhausted",
+                        scope=StopScope.RUN,
+                        resumable=True,
+                        resume_requirements=("increase_reviewer_budget_or_disable_reviewer",),
+                        evidence={
+                            "reviewer_calls": run.usage.reviewer_calls,
+                            "max_reviewer_calls": reviewer_limit,
+                        },
+                    )
+                    return await self._pause(
+                        run,
+                        lease_token,
+                        decision,
+                        cursor={"kind": "new_turn"},
+                        active_turn=completed_turn,
+                        clear_active_turn=True,
+                    )
                 try:
                     run, review = await self._review_changes(
                         run,
@@ -2160,9 +2153,7 @@ class RuntimeEngine:
                         active_turn=completed_turn,
                         clear_active_turn=True,
                     )
-                if not review.approved(
-                    self.settings.reviewer_blocking_severities
-                ):
+                if not review.approved(self.settings.reviewer_blocking_severities):
                     completed_turn = replace(
                         turn,
                         status=TurnStatus.COMPLETED,
@@ -2174,11 +2165,7 @@ class RuntimeEngine:
                         action=StopAction.CONTINUE,
                         reason="reviewer_changes_requested",
                         scope=StopScope.RUN,
-                        evidence={
-                            "findings": [
-                                finding.to_dict() for finding in review.findings
-                            ]
-                        },
+                        evidence={"findings": [finding.to_dict() for finding in review.findings]},
                     )
                     continuing = replace(
                         run,
@@ -2201,9 +2188,7 @@ class RuntimeEngine:
                         ),
                         turns=(completed_turn,),
                     )
-        decision = self.stop_policy.after_turn(
-            _decision_context(result, (), run)
-        )
+        decision = self.stop_policy.after_turn(_decision_context(result, (), run))
         if decision.action is not StopAction.COMPLETE:
             raise RuntimeCommandError("final text did not produce a COMPLETE decision")
         completed_turn = replace(
@@ -2284,9 +2269,7 @@ class RuntimeEngine:
                 )
             )
             if not isinstance(plan, VerificationPlan):
-                raise TypeError(
-                    "verification_plan_factory must return VerificationPlan"
-                )
+                raise TypeError("verification_plan_factory must return VerificationPlan")
             result = await self.verifier.verify(
                 VerificationRequest(
                     run_id=run.run_id,
@@ -2330,9 +2313,7 @@ class RuntimeEngine:
                     },
                 ),
                 changed_paths=changed_paths,
-                retry_recommendation=(
-                    "repair verifier configuration and rerun verification"
-                ),
+                retry_recommendation=("repair verifier configuration and rerun verification"),
             )
         message = Message(
             role=MessageRole.USER,
@@ -2382,6 +2363,10 @@ class RuntimeEngine:
         assert self.reviewer is not None
         started = replace(
             run,
+            usage=replace(
+                run.usage,
+                reviewer_calls=run.usage.reviewer_calls + 1,
+            ),
             revision=run.revision + 1,
             updated_at=self.clock.now(),
         )
@@ -2393,7 +2378,10 @@ class RuntimeEngine:
                 (
                     "reviewer.started",
                     EventActor.RUNTIME,
-                    {"changed_paths": list(changed_paths)},
+                    {
+                        "changed_paths": list(changed_paths),
+                        "reviewer_call": started.usage.reviewer_calls,
+                    },
                     turn.turn_id,
                 ),
             ),
@@ -2413,6 +2401,7 @@ class RuntimeEngine:
             safe_error = _safe_exception_summary(error)
             failed = replace(
                 started,
+                usage=_usage_after_reviewer(started, error.usage),
                 revision=started.revision + 1,
                 updated_at=self.clock.now(),
             )
@@ -2424,7 +2413,11 @@ class RuntimeEngine:
                     (
                         "reviewer.failed",
                         EventActor.RUNTIME,
-                        {"error": safe_error},
+                        {
+                            "error": safe_error,
+                            "usage": error.usage.to_dict(),
+                            "provider_request_id": error.provider_request_id,
+                        },
                         turn.turn_id,
                     ),
                 ),
@@ -2436,9 +2429,7 @@ class RuntimeEngine:
         except asyncio.CancelledError:
             raise
         except Exception as error:
-            wrapped = ReviewerError(
-                "reviewer failed: " + _safe_exception_summary(error)
-            )
+            wrapped = ReviewerError("reviewer failed: " + _safe_exception_summary(error))
             failed = replace(
                 started,
                 revision=started.revision + 1,
@@ -2471,6 +2462,7 @@ class RuntimeEngine:
         )
         completed = replace(
             started,
+            usage=_usage_after_reviewer(started, review.usage),
             revision=started.revision + 1,
             updated_at=self.clock.now(),
         )
@@ -2483,10 +2475,10 @@ class RuntimeEngine:
                     "reviewer.completed",
                     EventActor.RUNTIME,
                     {
-                        "approved": review.approved(
-                            self.settings.reviewer_blocking_severities
-                        ),
+                        "approved": review.approved(self.settings.reviewer_blocking_severities),
                         "message": message.to_dict(),
+                        "usage": review.usage.to_dict(),
+                        "provider_request_id": review.provider_request_id,
                     },
                     turn.turn_id,
                 ),
@@ -2504,28 +2496,57 @@ class RuntimeEngine:
         turn = self.state.load_turn(str(cursor["turn_id"]))
         model_call = self.state.load_model_call(str(cursor["model_call_id"]))
         execution = self.state.load_tool_execution(str(cursor["execution_id"]))
-        proposals = tuple(
-            ToolProposal.from_dict(item) for item in cursor.get("proposals", [])
-        )
+        proposals = tuple(ToolProposal.from_dict(item) for item in cursor.get("proposals", []))
         index = int(cursor["next_index"])
         prepared_digest = str(cursor["prepared_digest"])
         raw_decision = command.permission_decisions.get(prepared_digest)
         decision = None
         if raw_decision:
-            try:
-                outcome = PermissionOutcome(raw_decision)
-            except ValueError as error:
-                raise RuntimeCommandError(
-                    f"invalid permission outcome: {raw_decision}"
-                ) from error
+            scope = PermissionScope.ONCE
+            if raw_decision == "allow_run":
+                outcome = PermissionOutcome.ALLOW
+                scope = PermissionScope.RUN
+                preparation = self.tool_executor.prepare(proposals[index])
+                prepared = preparation.prepared
+                if prepared is None or prepared.prepared_digest != prepared_digest:
+                    raise RuntimeCommandError(
+                        "cannot grant run permission for an invalid prepared action"
+                    )
+                permission_class = prepared.permission.value
+                if permission_class not in run.permission_grants:
+                    granted = replace(
+                        run,
+                        permission_grants=tuple(sorted((*run.permission_grants, permission_class))),
+                        revision=run.revision + 1,
+                        updated_at=self.clock.now(),
+                    )
+                    run = await self._commit(
+                        previous=run,
+                        current=granted,
+                        lease_token=lease_token,
+                        events=(
+                            (
+                                "permission.scope_granted",
+                                EventActor.USER,
+                                {
+                                    "permission_class": permission_class,
+                                    "scope": PermissionScope.RUN.value,
+                                },
+                                turn.turn_id,
+                            ),
+                        ),
+                    )
+            else:
+                try:
+                    outcome = PermissionOutcome(raw_decision)
+                except ValueError as error:
+                    raise RuntimeCommandError(
+                        f"invalid permission outcome: {raw_decision}"
+                    ) from error
             decision = PermissionDecision(
                 outcome=outcome,
                 prepared_digest=prepared_digest,
-                scope=(
-                    PermissionScope.DENY
-                    if outcome is PermissionOutcome.DENY
-                    else PermissionScope.ONCE
-                ),
+                scope=(PermissionScope.DENY if outcome is PermissionOutcome.DENY else scope),
                 reason="resume decision",
             )
         return await self._execute_tool_batch(
@@ -2618,9 +2639,7 @@ class RuntimeEngine:
         previous: Run,
         current: Run,
         lease_token: str,
-        events: Sequence[
-            tuple[str, EventActor, Mapping[str, Any], str | None]
-        ],
+        events: Sequence[tuple[str, EventActor, Mapping[str, Any], str | None]],
         turns: tuple[Turn, ...] = (),
         model_calls: tuple[ModelCallRecord, ...] = (),
         tool_executions: tuple[ToolExecutionRecord, ...] = (),
@@ -2710,18 +2729,12 @@ class RuntimeEngine:
             snapshot=self._snapshot(run),
             decision=run.stop_decision,
             events=tuple(
-                event
-                for event in self._all_events(run.run_id)
-                if event.sequence > after_sequence
+                event for event in self._all_events(run.run_id) if event.sequence > after_sequence
             ),
         )
 
     def _active_turn(self, run: Run) -> Turn | None:
-        return (
-            self.state.load_turn(run.active_turn_id)
-            if run.active_turn_id is not None
-            else None
-        )
+        return self.state.load_turn(run.active_turn_id) if run.active_turn_id is not None else None
 
     def _all_events(self, run_id: str) -> tuple[Event, ...]:
         events: list[Event] = []
@@ -2813,11 +2826,23 @@ class RuntimeEngine:
             except (TypeError, ValueError, json.JSONDecodeError):
                 continue
             diagnostics.extend(
-                item
-                for item in payload.get("diagnostics", ())
-                if isinstance(item, Mapping)
+                item for item in payload.get("diagnostics", ()) if isinstance(item, Mapping)
             )
         return tuple(diagnostics)
+
+
+def _run_permission_decision(
+    run: Run,
+    prepared: PreparedTool,
+) -> PermissionDecision | None:
+    if prepared.permission.value not in run.permission_grants:
+        return None
+    return PermissionDecision(
+        outcome=PermissionOutcome.ALLOW,
+        prepared_digest=prepared.prepared_digest,
+        scope=PermissionScope.RUN,
+        reason=f"{prepared.permission.value} allowed for this run",
+    )
 
 
 def _decision_context(
@@ -2882,6 +2907,16 @@ def _last_stream_usage(events: Sequence[ModelEvent]) -> Usage:
         if event.usage is not None:
             return event.usage
     return Usage()
+
+
+def _usage_after_reviewer(run: Run, usage: Usage) -> RunUsage:
+    return replace(
+        run.usage,
+        input_tokens=run.usage.input_tokens + usage.input_tokens,
+        output_tokens=run.usage.output_tokens + usage.output_tokens,
+        reviewer_input_tokens=(run.usage.reviewer_input_tokens + usage.input_tokens),
+        reviewer_output_tokens=(run.usage.reviewer_output_tokens + usage.output_tokens),
+    )
 
 
 def _tool_error_info(result: ToolResult) -> ErrorInfo:

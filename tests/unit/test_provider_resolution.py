@@ -5,8 +5,8 @@ import os
 import unittest
 from unittest.mock import patch
 
-from rivet.application.bootstrap import _build_model_gateway
 from rivet.configuration.models import ModelConfig, RivetConfig
+from rivet.model.factory import build_model_gateway
 from rivet.model.providers import resolve_provider
 
 
@@ -60,7 +60,7 @@ class ProviderResolutionTests(unittest.TestCase):
             )
         )
         with patch.dict(os.environ, {"RIVET_API_KEY": "test-key"}):
-            gateway = _build_model_gateway(config)
+            gateway = build_model_gateway(config)
         try:
             self.assertEqual(gateway.config.base_url, "https://api.deepseek.com")
             self.assertEqual(gateway.config.model, "deepseek-v4-flash")

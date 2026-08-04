@@ -24,8 +24,11 @@ Rivet 已形成可运行的单 Agent Coding Runtime。正式入口具备：
 默认测试完全离线。本次验收：
 
 ```text
-pytest: 223 passed, 103 subtests passed
+pytest: 246 passed, 103 subtests passed
 offline eval: 8/8 passed
+offline Rivet/Simple comparison: 8/8 passed on both scripted trajectories
+offline tool profiles: basic/ast/sparse/lsp each 8/8 passed on scripted trajectories
+offline Reviewer comparison: off/on both 8/8 passed; on adds 4 scripted calls
 offline eval benchmark: 10/10 passed, median 1426.196 ms, p95 1559.593 ms
 DeepSeek live eval: explain_entrypoint 1/1 passed, 2 model calls, 2 tool executions
 DeepSeek live read-only V1: 4/4 passed, 12 model calls, 16 tool executions
@@ -71,6 +74,11 @@ M5 在设计中属于后续扩展，不是正式 V1 的发布阻塞项。
 - DeepSeek V4 thinking `reasoning_content` 多轮回传与 Provider token 参数差异；
 - 本机 DeepSeek 固定只读 Fixture 的真实 API 两轮调用与工具闭环；
 - Eval Suite/Benchmark 的带版本脱敏 JSON 报告落盘入口；
+- 四工具 Simple Agent 基线、`--agent rivet|simple|both` 选择，以及同 Case 汇总/逐项差异报告；
+- `--tool-profile basic|ast|sparse|lsp|all` 工具消融入口；四档逐级暴露工具，Sparse 档真正
+  启用本地索引，同 Case 报告包含逐档汇总、逐项结果和精确工具面；
+- Reviewer 独立调用预算、调用/Token 持久化、Provider request ID Event、预算耗尽暂停，
+  以及 `--reviewer off|on|both` 同 Case 对照和 Reviewer-aware live 预检；
 - Eval 报告记录 Token、费用可用状态、测试尝试、修改范围、权限干预、错误分类和脱敏
   Event 序列；未知费用明确标为 unavailable；
 - 与 Fake 基线隔离的四类 live-only 任务种子，以及 17 任务 V1 数据集；

@@ -159,9 +159,7 @@ class ContextEnvelope:
             "context_id": self.context_id,
             "messages": [message.to_dict() for message in self.messages],
             "tool_schemas": [schema.to_dict() for schema in self.tool_schemas],
-            "included_sources": [
-                source.to_dict() for source in self.included_sources
-            ],
+            "included_sources": [source.to_dict() for source in self.included_sources],
             "omitted_sources": [source.to_dict() for source in self.omitted_sources],
             "compaction_report": self.compaction_report.to_dict(),
             "token_estimate": self.token_estimate.to_dict(),
@@ -224,9 +222,7 @@ class DefaultContextEngine:
             if message is not None
         )
         tool_tokens = self.estimator.estimate_tools(request.tool_schemas)
-        fixed_tokens = sum(
-            self.estimator.estimate_message(message) for message in fixed_messages
-        )
+        fixed_tokens = sum(self.estimator.estimate_message(message) for message in fixed_messages)
         minimum_tokens = fixed_tokens + tool_tokens
         capacity = request.budget.input_capacity
         if minimum_tokens > capacity:
@@ -310,10 +306,7 @@ class DefaultContextEngine:
                 group = candidate.message_group
                 if group is None:
                     raise AssertionError("recent candidate has no message group")
-                tokens = sum(
-                    self.estimator.estimate_message(message)
-                    for message in group.messages
-                )
+                tokens = sum(self.estimator.estimate_message(message) for message in group.messages)
                 if tokens <= remaining:
                     selected_group_indexes.add(group.index)
                     remaining -= tokens
@@ -340,9 +333,7 @@ class DefaultContextEngine:
                     available_tokens=capacity,
                     reason=f"required source {source.source.source_id!r} does not fit",
                 )
-            omitted_sources.append(
-                compactor.omitted(source, reason="insufficient_context_budget")
-            )
+            omitted_sources.append(compactor.omitted(source, reason="insufficient_context_budget"))
 
         selected_recent_messages = tuple(
             message
@@ -356,13 +347,11 @@ class DefaultContextEngine:
         messages = (
             (system_message,)
             + ((project_message,) if project_message is not None else ())
-            + selected_recent_messages
             + selected_source_messages
             + (objective_message,)
+            + selected_recent_messages
         )
-        message_tokens = sum(
-            self.estimator.estimate_message(message) for message in messages
-        )
+        message_tokens = sum(self.estimator.estimate_message(message) for message in messages)
         total_tokens = message_tokens + tool_tokens
         if total_tokens > capacity:
             raise AssertionError("context selection exceeded its token budget")
@@ -474,9 +463,7 @@ class DefaultContextEngine:
             if message.role is MessageRole.TOOL:
                 raise ValueError("recent_messages contains an orphaned tool result")
             if message.role is MessageRole.ASSISTANT and message.tool_proposals:
-                expected = {
-                    proposal.tool_call_id for proposal in message.tool_proposals
-                }
+                expected = {proposal.tool_call_id for proposal in message.tool_proposals}
                 batch = [message]
                 observed: set[str] = set()
                 cursor = index + 1
@@ -492,9 +479,7 @@ class DefaultContextEngine:
                     batch.append(tool_message)
                     cursor += 1
                 if observed != expected:
-                    raise ValueError(
-                        "recent_messages contains an incomplete assistant/tool batch"
-                    )
+                    raise ValueError("recent_messages contains an incomplete assistant/tool batch")
                 priority = 50
                 groups.append(
                     _MessageGroup(

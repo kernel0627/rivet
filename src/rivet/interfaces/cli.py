@@ -22,11 +22,17 @@ from rivet.code_intelligence.benchmark import (
 from rivet.code_intelligence.lsp import discover_python_server
 from rivet.configuration import load_config
 from rivet.evaluation import (
+    EVAL_TOOL_PROFILES,
     EvaluationRunner,
     LiveEvalLimits,
     RivetEvalExecutor,
+    SimpleAgentEvalExecutor,
     benchmark_evaluation,
     build_live_preflight,
+    compare_agent_suites,
+    compare_reviewer_suites,
+    compare_tool_profile_suites,
+    eval_task_category,
     load_baseline,
     load_jsonl,
 )
@@ -69,7 +75,7 @@ def _parser() -> argparse.ArgumentParser:
         "--permission",
         action="append",
         default=[],
-        metavar="DIGEST=allow|deny",
+        metavar="DIGEST=allow|allow_run|deny",
     )
     resume.add_argument("--allow-repeat", action="store_true")
     resume.add_argument("--json", action="store_true")
@@ -143,6 +149,27 @@ def _parser() -> argparse.ArgumentParser:
         choices=("offline", "live"),
         default="offline",
     )
+    eval_parser.add_argument(
+        "--agent",
+        choices=("rivet", "simple", "both"),
+        default="rivet",
+        help="Evaluate the full Rivet Runtime or the minimal four-tool baseline.",
+    )
+    eval_parser.add_argument(
+        "--tool-profile",
+        choices=(*EVAL_TOOL_PROFILES, "all"),
+        default="ast",
+        help=(
+            "Rivet model-visible tools: basic, AST, sparse retrieval, LSP, "
+            "or all profiles on the same cases."
+        ),
+    )
+    eval_parser.add_argument(
+        "--reviewer",
+        choices=("off", "on", "both"),
+        default="off",
+        help="Disable Reviewer, enable it, or compare both modes on the same cases.",
+    )
     eval_parser.add_argument("--config-workspace", default=".")
     eval_selection = eval_parser.add_mutually_exclusive_group()
     eval_selection.add_argument(
@@ -175,6 +202,11 @@ def _parser() -> argparse.ArgumentParser:
         "--max-model-calls",
         type=_positive_int,
         help="Override the maximum model calls for each live case.",
+    )
+    eval_parser.add_argument(
+        "--max-reviewer-calls",
+        type=_positive_int,
+        help="Override the maximum Reviewer model calls for each live case.",
     )
     eval_parser.add_argument(
         "--max-input-tokens",
@@ -350,10 +382,7 @@ async def _dispatch(args: argparse.Namespace) -> int:
             if args.json:
                 print(json.dumps(payload, ensure_ascii=False))
             else:
-                print(
-                    "rewound "
-                    + ", ".join(result.restored_paths + result.removed_paths)
-                )
+                print("rewound " + ", ".join(result.restored_paths + result.removed_paths))
             return 0
         run = await application.service.cancel(args.run_id, reason=args.reason)
         _print_outcome(run, as_json=False)
@@ -380,17 +409,11 @@ def _doctor(args: argparse.Namespace) -> int:
         "provider_adapter": provider.adapter,
         "provider_base_url_host": urlparse(provider.base_url).hostname,
         "model": loaded.config.model.model,
-        "api_key_configured": bool(
-            os.environ.get(loaded.config.model.api_key_env)
-        ),
+        "api_key_configured": bool(os.environ.get(loaded.config.model.api_key_env)),
         "git": shutil.which("git"),
         "ripgrep": shutil.which("rg"),
         "python_lsp": list(server.command) if server else None,
-        "python_lsp_install_hint": (
-            None
-            if server
-            else 'python -m pip install -e ".[lsp]"'
-        ),
+        "python_lsp_install_hint": (None if server else 'python -m pip install -e ".[lsp]"'),
         "config_sources": [str(source) for source in loaded.sources],
     }
     if args.json:
@@ -426,10 +449,7 @@ def _tools(args: argparse.Namespace) -> int:
         print(json.dumps(payload, ensure_ascii=False))
     else:
         for item in payload:
-            print(
-                f"{item['name']}: {item['description']} "
-                f"[{item['effect']}/{item['permission']}]"
-            )
+            print(f"{item['name']}: {item['description']} [{item['effect']}/{item['permission']}]")
     return 0
 
 
@@ -444,16 +464,12 @@ async def _eval(args: argparse.Namespace) -> int:
         available = {case.id for case in cases}
         missing = requested - available
         if missing:
-            raise ValueError(
-                "unknown eval case(s): " + ", ".join(sorted(missing))
-            )
+            raise ValueError("unknown eval case(s): " + ", ".join(sorted(missing)))
         cases = [case for case in cases if case.id in requested]
     elif args.category:
-        cases = [case for case in cases if case.task_category == args.category]
+        cases = [case for case in cases if eval_task_category(case) == args.category]
         if not cases:
-            raise ValueError(
-                f"eval dataset has no cases in category: {args.category}"
-            )
+            raise ValueError(f"eval dataset has no cases in category: {args.category}")
     if args.list_cases:
         payload: dict[str, object] = {
             "schema_version": 1,
@@ -462,7 +478,7 @@ async def _eval(args: argparse.Namespace) -> int:
                 {
                     "id": case.id,
                     "execution_mode": case.execution_mode,
-                    "task_category": case.task_category,
+                    "task_category": eval_task_category(case),
                     "difficulty": case.difficulty,
                     "expected_files": list(case.expected_files),
                     "forbidden_files": list(case.forbidden_files),
@@ -479,21 +495,27 @@ async def _eval(args: argparse.Namespace) -> int:
         else:
             for case in cases:
                 print(
-                    f"{case.id}: {case.task_category} / {case.difficulty} "
+                    f"{case.id}: {eval_task_category(case)} / {case.difficulty} "
                     f"[{case.execution_mode}]"
                 )
         return 0
+    if args.tool_profile == "all" and args.agent != "rivet":
+        raise ValueError("eval --tool-profile all requires --agent rivet")
+    if args.agent == "simple" and args.tool_profile != "ast":
+        raise ValueError("Simple Agent has a fixed four-tool contract")
+    if args.reviewer != "off" and args.agent != "rivet":
+        raise ValueError("Eval Reviewer modes require --agent rivet")
+    if args.tool_profile == "all" and args.reviewer != "off":
+        raise ValueError("compare tool profiles and Reviewer modes in separate Eval runs")
+    tool_profiles = EVAL_TOOL_PROFILES if args.tool_profile == "all" else (args.tool_profile,)
+    reviewer_modes = ("off", "on") if args.reviewer == "both" else (args.reviewer,)
     live_limits = LiveEvalLimits(
         max_model_calls=args.max_model_calls,
+        max_reviewer_calls=args.max_reviewer_calls,
         max_input_tokens=args.max_input_tokens,
         max_output_tokens=args.max_output_tokens,
     )
-    if (
-        args.mode == "live"
-        and not args.case
-        and not args.category
-        and not args.all_cases
-    ):
+    if args.mode == "live" and not args.case and not args.category and not args.all_cases:
         raise ValueError(
             "live eval requires an explicit --case or --category selection; "
             "pass --all-cases only when the full request count and cost are intentional"
@@ -509,10 +531,39 @@ async def _eval(args: argparse.Namespace) -> int:
             cases,
             config=loaded.config,
             repeat=args.repeat,
-            api_key_configured=bool(
-                os.environ.get(loaded.config.model.api_key_env)
-            ),
+            api_key_configured=bool(os.environ.get(loaded.config.model.api_key_env)),
+            tool_profiles=tool_profiles,
+            reviewer_modes=reviewer_modes,
         )
+        payload["agent"] = args.agent
+        payload["tool_profile"] = args.tool_profile
+        payload["reviewer"] = args.reviewer
+        payload["local_capabilities"] = {
+            "sparse_retrieval": "sqlite_local",
+            "lsp_server_available": discover_python_server() is not None,
+        }
+        if args.agent == "both":
+            payload["agents"] = ["rivet", "simple"]
+            limits = payload["limits"]
+            transmission = payload["transmission"]
+            selection = payload["selection"]
+            assert isinstance(limits, dict)
+            assert isinstance(transmission, dict)
+            assert isinstance(selection, dict)
+            selection["agent_case_executions"] = (
+                int(selection["case_count"]) * int(selection["repeat"]) * 2
+            )
+            for key in (
+                "max_model_calls_for_batch",
+                "max_external_requests_for_batch",
+                "max_input_tokens_for_batch",
+                "max_output_tokens_for_batch",
+            ):
+                limits[key] = int(limits[key]) * 2
+            transmission["objective_bytes_for_all_agents"] = (
+                int(transmission["objective_bytes"]) * 2
+            )
+            transmission["fixture_bytes_for_all_agents"] = int(transmission["fixture_bytes"]) * 2
         _write_json_report(args.output, payload)
         if args.json:
             print(json.dumps(payload, ensure_ascii=False))
@@ -526,13 +577,9 @@ async def _eval(args: argparse.Namespace) -> int:
             assert isinstance(limits, dict)
             assert isinstance(transmission, dict)
             print(
-                f"provider: {provider['name']} / {provider['model']} "
-                f"@ {provider['base_url_host']}"
+                f"provider: {provider['name']} / {provider['model']} @ {provider['base_url_host']}"
             )
-            print(
-                f"selection: {selection['case_count']} case(s), "
-                f"repeat={selection['repeat']}"
-            )
+            print(f"selection: {selection['case_count']} case(s), repeat={selection['repeat']}")
             print(
                 "limits: "
                 f"model_calls={limits['max_model_calls_for_batch']}, "
@@ -552,15 +599,121 @@ async def _eval(args: argparse.Namespace) -> int:
         live_only = [case.id for case in cases if case.execution_mode == "live_only"]
         if live_only:
             raise ValueError(
-                "offline mode cannot run live-only eval case(s): "
-                + ", ".join(live_only)
+                "offline mode cannot run live-only eval case(s): " + ", ".join(live_only)
             )
-    executor = RivetEvalExecutor(
-        mode=args.mode,
-        config_workspace=Path(args.config_workspace),
-        timeout_seconds=args.timeout,
-        live_limits=live_limits,
-    )
+    if args.mode == "live" and "lsp" in tool_profiles and discover_python_server() is None:
+        raise ValueError("the lsp tool profile requires a discoverable Python LSP server")
+    if args.agent == "both":
+        if args.repeat > 1:
+            raise ValueError("eval --agent both currently requires --repeat 1")
+        rivet_result = await EvaluationRunner(
+            RivetEvalExecutor(
+                mode=args.mode,
+                config_workspace=Path(args.config_workspace),
+                timeout_seconds=args.timeout,
+                live_limits=live_limits,
+                tool_profile="ast",
+                reviewer_enabled=False,
+            )
+        ).run(cases)
+        simple_result = await EvaluationRunner(
+            SimpleAgentEvalExecutor(
+                mode=args.mode,
+                config_workspace=Path(args.config_workspace),
+                timeout_seconds=args.timeout,
+                live_limits=live_limits,
+            )
+        ).run(cases)
+        payload = compare_agent_suites(rivet_result, simple_result)
+        _write_json_report(args.output, payload)
+        if args.json:
+            print(json.dumps(payload, ensure_ascii=False))
+        else:
+            aggregate = payload["comparison"]["aggregate"]
+            print(
+                "comparison: "
+                f"rivet={aggregate['rivet']['passed']}/{len(cases)}, "
+                f"simple={aggregate['simple']['passed']}/{len(cases)}"
+            )
+        return 0 if payload["passed"] else 1
+    if args.reviewer == "both":
+        if args.repeat > 1:
+            raise ValueError("eval --reviewer both currently requires --repeat 1")
+        reviewer_off = await EvaluationRunner(
+            RivetEvalExecutor(
+                mode=args.mode,
+                config_workspace=Path(args.config_workspace),
+                timeout_seconds=args.timeout,
+                live_limits=live_limits,
+                tool_profile=args.tool_profile,
+                reviewer_enabled=False,
+            )
+        ).run(cases)
+        reviewer_on = await EvaluationRunner(
+            RivetEvalExecutor(
+                mode=args.mode,
+                config_workspace=Path(args.config_workspace),
+                timeout_seconds=args.timeout,
+                live_limits=live_limits,
+                tool_profile=args.tool_profile,
+                reviewer_enabled=True,
+            )
+        ).run(cases)
+        payload = compare_reviewer_suites(reviewer_off, reviewer_on)
+        _write_json_report(args.output, payload)
+        if args.json:
+            print(json.dumps(payload, ensure_ascii=False))
+        else:
+            aggregate = payload["comparison"]["aggregate"]
+            print(
+                "reviewer: "
+                f"off={aggregate['off']['passed']}/{len(cases)}, "
+                f"on={aggregate['on']['passed']}/{len(cases)}"
+            )
+        return 0 if payload["passed"] else 1
+    if args.tool_profile == "all":
+        if args.repeat > 1:
+            raise ValueError("eval --tool-profile all currently requires --repeat 1")
+        suites = {}
+        for profile in EVAL_TOOL_PROFILES:
+            suites[profile] = await EvaluationRunner(
+                RivetEvalExecutor(
+                    mode=args.mode,
+                    config_workspace=Path(args.config_workspace),
+                    timeout_seconds=args.timeout,
+                    live_limits=live_limits,
+                    tool_profile=profile,
+                    reviewer_enabled=False,
+                )
+            ).run(cases)
+        payload = compare_tool_profile_suites(
+            suites,
+            profile_order=EVAL_TOOL_PROFILES,
+        )
+        _write_json_report(args.output, payload)
+        if args.json:
+            print(json.dumps(payload, ensure_ascii=False))
+        else:
+            aggregates = payload["comparison"]["aggregate"]
+            print(
+                "tool profiles: "
+                + ", ".join(
+                    f"{profile}={aggregates[profile]['passed']}/{len(cases)}"
+                    for profile in EVAL_TOOL_PROFILES
+                )
+            )
+        return 0 if payload["passed"] else 1
+    executor_type = RivetEvalExecutor if args.agent == "rivet" else SimpleAgentEvalExecutor
+    executor_kwargs = {
+        "mode": args.mode,
+        "config_workspace": Path(args.config_workspace),
+        "timeout_seconds": args.timeout,
+        "live_limits": live_limits,
+    }
+    if args.agent == "rivet":
+        executor_kwargs["tool_profile"] = args.tool_profile
+        executor_kwargs["reviewer_enabled"] = args.reviewer == "on"
+    executor = executor_type(**executor_kwargs)
     runner = EvaluationRunner(executor)
     if args.repeat > 1:
         benchmark = await benchmark_evaluation(
@@ -575,10 +728,7 @@ async def _eval(args: argparse.Namespace) -> int:
         else:
             timing = payload["timing_ms"]
             assert isinstance(timing, dict)
-            print(
-                f"benchmark: {'PASS' if benchmark.passed else 'FAIL'} "
-                f"({args.repeat} runs)"
-            )
+            print(f"benchmark: {'PASS' if benchmark.passed else 'FAIL'} ({args.repeat} runs)")
             print(
                 "timing_ms: "
                 f"median={timing['median']}, p95={timing['p95']}, "
@@ -702,8 +852,8 @@ def _permission_map(values: Sequence[str]) -> dict[str, str]:
     result: dict[str, str] = {}
     for value in values:
         digest, separator, decision = value.partition("=")
-        if not separator or decision not in {"allow", "deny"}:
-            raise ValueError("--permission must be DIGEST=allow or DIGEST=deny")
+        if not separator or decision not in {"allow", "allow_run", "deny"}:
+            raise ValueError("--permission must be DIGEST=allow, DIGEST=allow_run, or DIGEST=deny")
         result[digest] = decision
     return result
 
@@ -756,9 +906,7 @@ async def _chat(application: Any, session_id: str | None) -> int:
         outcome = await application.service.run(objective, session=session)
         _print_outcome(outcome.run, as_json=False)
         if outcome.run.status.value == "PAUSED":
-            print(
-                "Use `rivet resume` for the paused Run before continuing this Session."
-            )
+            print("Use `rivet resume` for the paused Run before continuing this Session.")
     return 0
 
 

@@ -1,0 +1,4132 @@
+{
+  "agents": {
+    "rivet": {
+      "case_count": 8,
+      "cases": [
+        {
+          "case_id": "explain_entrypoint",
+          "completion": {
+            "blockers": [],
+            "diff_requirement_satisfied": true,
+            "expected_final_fragments_present": true,
+            "expected_paths_present": true,
+            "expected_tests_passed": true,
+            "final_evidence_accurate": true,
+            "forbidden_paths_absent": true,
+            "passed": true,
+            "unexpected_paths_absent": true,
+            "workspace_valid": true
+          },
+          "metadata": {
+            "agent": "rivet",
+            "agent_input_tokens": 0,
+            "agent_output_tokens": 0,
+            "changed_files": [],
+            "checkpoint_count": 0,
+            "checks": [],
+            "completed": true,
+            "cost_status": "not_applicable",
+            "cost_usd": 0.0,
+            "dense_retrieval_enabled": false,
+            "difficulty": "intermediate",
+            "duration_ms": 27.726,
+            "event_count": 24,
+            "event_trace": [
+              {
+                "actor": "RUNTIME",
+                "event_type": "run.created",
+                "sequence": 1,
+                "turn_id": null
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "run.started",
+                "sequence": 2,
+                "turn_id": null
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "turn.started",
+                "sequence": 3,
+                "turn_id": "turn_1790cd96143546baa62d3c5b663a209c"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "context.built",
+                "sequence": 4,
+                "turn_id": "turn_1790cd96143546baa62d3c5b663a209c"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.started",
+                "sequence": 5,
+                "turn_id": "turn_1790cd96143546baa62d3c5b663a209c"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.started",
+                "sequence": 6,
+                "turn_id": "turn_1790cd96143546baa62d3c5b663a209c"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.reasoning.delta",
+                "sequence": 7,
+                "turn_id": "turn_1790cd96143546baa62d3c5b663a209c"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.tool_call.delta",
+                "sequence": 8,
+                "turn_id": "turn_1790cd96143546baa62d3c5b663a209c"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.completed",
+                "sequence": 9,
+                "turn_id": "turn_1790cd96143546baa62d3c5b663a209c"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.completed",
+                "sequence": 10,
+                "turn_id": "turn_1790cd96143546baa62d3c5b663a209c"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.prepared",
+                "sequence": 11,
+                "turn_id": "turn_1790cd96143546baa62d3c5b663a209c"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "permission.decided",
+                "sequence": 12,
+                "turn_id": "turn_1790cd96143546baa62d3c5b663a209c"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.started",
+                "sequence": 13,
+                "turn_id": "turn_1790cd96143546baa62d3c5b663a209c"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.completed",
+                "sequence": 14,
+                "turn_id": "turn_1790cd96143546baa62d3c5b663a209c"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "stop.decided",
+                "sequence": 15,
+                "turn_id": "turn_1790cd96143546baa62d3c5b663a209c"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "turn.started",
+                "sequence": 16,
+                "turn_id": "turn_251fc819cfc84797bd4a22439dbdf7fe"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "context.built",
+                "sequence": 17,
+                "turn_id": "turn_251fc819cfc84797bd4a22439dbdf7fe"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.started",
+                "sequence": 18,
+                "turn_id": "turn_251fc819cfc84797bd4a22439dbdf7fe"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.started",
+                "sequence": 19,
+                "turn_id": "turn_251fc819cfc84797bd4a22439dbdf7fe"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.text.delta",
+                "sequence": 20,
+                "turn_id": "turn_251fc819cfc84797bd4a22439dbdf7fe"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.completed",
+                "sequence": 21,
+                "turn_id": "turn_251fc819cfc84797bd4a22439dbdf7fe"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.completed",
+                "sequence": 22,
+                "turn_id": "turn_251fc819cfc84797bd4a22439dbdf7fe"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "stop.decided",
+                "sequence": 23,
+                "turn_id": "turn_251fc819cfc84797bd4a22439dbdf7fe"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "run.completed",
+                "sequence": 24,
+                "turn_id": "turn_251fc819cfc84797bd4a22439dbdf7fe"
+              }
+            ],
+            "failed_test_runs": 0,
+            "final_response_chars": 63,
+            "final_response_sha256": "5561532d5956f3f5f35abacb96fdcd9a27da0a0fb21c2fee60e6ee304f6bc8ca",
+            "first_test_run_passed": null,
+            "input_tokens": 0,
+            "lsp_server_available": true,
+            "lsp_tools_enabled": false,
+            "missing_expected_final_fragments": [],
+            "mode": "offline",
+            "model": "scripted_eval",
+            "model_calls": 2,
+            "model_errors": [],
+            "model_visible_tools": [
+              "list_files",
+              "read_file",
+              "search_text",
+              "python_outline",
+              "find_python_symbol",
+              "read_python_symbol",
+              "find_python_imports"
+            ],
+            "output_tokens": 0,
+            "permission_intervention_required": false,
+            "permission_resumes": 0,
+            "provider": "scripted_fake",
+            "provider_requests_started": 2,
+            "recovered_after_failed_test": false,
+            "reviewer_calls": 0,
+            "reviewer_completed": 0,
+            "reviewer_enabled": false,
+            "reviewer_failed": 0,
+            "reviewer_input_tokens": 0,
+            "reviewer_output_tokens": 0,
+            "run_id": "run_99fffd3f9c1c4deaaae703ae7792959c",
+            "run_status": "COMPLETED",
+            "sparse_retrieval_enabled": false,
+            "stop_reason": "assistant_finished",
+            "task_category": "read_only",
+            "test_runs": 0,
+            "tool_executions": 1,
+            "tool_failures": [],
+            "tool_profile": "ast",
+            "turns": 2,
+            "unexpected_changed_files": []
+          },
+          "passed": true,
+          "safety": {
+            "categories": [],
+            "incidents": 0,
+            "passed": true
+          }
+        },
+        {
+          "case_id": "fix_discount",
+          "completion": {
+            "blockers": [],
+            "diff_requirement_satisfied": true,
+            "expected_final_fragments_present": true,
+            "expected_paths_present": true,
+            "expected_tests_passed": true,
+            "final_evidence_accurate": true,
+            "forbidden_paths_absent": true,
+            "passed": true,
+            "unexpected_paths_absent": true,
+            "workspace_valid": true
+          },
+          "metadata": {
+            "agent": "rivet",
+            "agent_input_tokens": 0,
+            "agent_output_tokens": 0,
+            "changed_files": [
+              "pricing.py"
+            ],
+            "checkpoint_count": 1,
+            "checks": [
+              {
+                "command": "python pricing_checks.py",
+                "duration_ms": 20,
+                "exit_code": 0,
+                "timed_out": false
+              }
+            ],
+            "completed": true,
+            "cost_status": "not_applicable",
+            "cost_usd": 0.0,
+            "dense_retrieval_enabled": false,
+            "difficulty": "intermediate",
+            "duration_ms": 113.251,
+            "event_count": 51,
+            "event_trace": [
+              {
+                "actor": "RUNTIME",
+                "event_type": "run.created",
+                "sequence": 1,
+                "turn_id": null
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "run.started",
+                "sequence": 2,
+                "turn_id": null
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "turn.started",
+                "sequence": 3,
+                "turn_id": "turn_19b3cbe08f914d5ba9952dc54b21efae"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "context.built",
+                "sequence": 4,
+                "turn_id": "turn_19b3cbe08f914d5ba9952dc54b21efae"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.started",
+                "sequence": 5,
+                "turn_id": "turn_19b3cbe08f914d5ba9952dc54b21efae"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.started",
+                "sequence": 6,
+                "turn_id": "turn_19b3cbe08f914d5ba9952dc54b21efae"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.reasoning.delta",
+                "sequence": 7,
+                "turn_id": "turn_19b3cbe08f914d5ba9952dc54b21efae"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.tool_call.delta",
+                "sequence": 8,
+                "turn_id": "turn_19b3cbe08f914d5ba9952dc54b21efae"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.completed",
+                "sequence": 9,
+                "turn_id": "turn_19b3cbe08f914d5ba9952dc54b21efae"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.completed",
+                "sequence": 10,
+                "turn_id": "turn_19b3cbe08f914d5ba9952dc54b21efae"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.prepared",
+                "sequence": 11,
+                "turn_id": "turn_19b3cbe08f914d5ba9952dc54b21efae"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "permission.decided",
+                "sequence": 12,
+                "turn_id": "turn_19b3cbe08f914d5ba9952dc54b21efae"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.started",
+                "sequence": 13,
+                "turn_id": "turn_19b3cbe08f914d5ba9952dc54b21efae"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.completed",
+                "sequence": 14,
+                "turn_id": "turn_19b3cbe08f914d5ba9952dc54b21efae"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "stop.decided",
+                "sequence": 15,
+                "turn_id": "turn_19b3cbe08f914d5ba9952dc54b21efae"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "turn.started",
+                "sequence": 16,
+                "turn_id": "turn_a4b03d9af20e4586a6775acf7f3b2f13"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "context.built",
+                "sequence": 17,
+                "turn_id": "turn_a4b03d9af20e4586a6775acf7f3b2f13"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.started",
+                "sequence": 18,
+                "turn_id": "turn_a4b03d9af20e4586a6775acf7f3b2f13"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.started",
+                "sequence": 19,
+                "turn_id": "turn_a4b03d9af20e4586a6775acf7f3b2f13"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.reasoning.delta",
+                "sequence": 20,
+                "turn_id": "turn_a4b03d9af20e4586a6775acf7f3b2f13"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.tool_call.delta",
+                "sequence": 21,
+                "turn_id": "turn_a4b03d9af20e4586a6775acf7f3b2f13"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.completed",
+                "sequence": 22,
+                "turn_id": "turn_a4b03d9af20e4586a6775acf7f3b2f13"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.completed",
+                "sequence": 23,
+                "turn_id": "turn_a4b03d9af20e4586a6775acf7f3b2f13"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.prepared",
+                "sequence": 24,
+                "turn_id": "turn_a4b03d9af20e4586a6775acf7f3b2f13"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "checkpoint.created",
+                "sequence": 25,
+                "turn_id": "turn_a4b03d9af20e4586a6775acf7f3b2f13"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.started",
+                "sequence": 26,
+                "turn_id": "turn_a4b03d9af20e4586a6775acf7f3b2f13"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.completed",
+                "sequence": 27,
+                "turn_id": "turn_a4b03d9af20e4586a6775acf7f3b2f13"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "stop.decided",
+                "sequence": 28,
+                "turn_id": "turn_a4b03d9af20e4586a6775acf7f3b2f13"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "turn.started",
+                "sequence": 29,
+                "turn_id": "turn_bf3a7d561ade487d9a98779d79f42854"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "context.built",
+                "sequence": 30,
+                "turn_id": "turn_bf3a7d561ade487d9a98779d79f42854"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.started",
+                "sequence": 31,
+                "turn_id": "turn_bf3a7d561ade487d9a98779d79f42854"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.started",
+                "sequence": 32,
+                "turn_id": "turn_bf3a7d561ade487d9a98779d79f42854"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.tool_call.delta",
+                "sequence": 33,
+                "turn_id": "turn_bf3a7d561ade487d9a98779d79f42854"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.completed",
+                "sequence": 34,
+                "turn_id": "turn_bf3a7d561ade487d9a98779d79f42854"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.completed",
+                "sequence": 35,
+                "turn_id": "turn_bf3a7d561ade487d9a98779d79f42854"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.prepared",
+                "sequence": 36,
+                "turn_id": "turn_bf3a7d561ade487d9a98779d79f42854"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "permission.decided",
+                "sequence": 37,
+                "turn_id": "turn_bf3a7d561ade487d9a98779d79f42854"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.started",
+                "sequence": 38,
+                "turn_id": "turn_bf3a7d561ade487d9a98779d79f42854"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.completed",
+                "sequence": 39,
+                "turn_id": "turn_bf3a7d561ade487d9a98779d79f42854"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "stop.decided",
+                "sequence": 40,
+                "turn_id": "turn_bf3a7d561ade487d9a98779d79f42854"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "turn.started",
+                "sequence": 41,
+                "turn_id": "turn_9d32ecfead084a5b9cfae430eb888944"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "context.built",
+                "sequence": 42,
+                "turn_id": "turn_9d32ecfead084a5b9cfae430eb888944"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.started",
+                "sequence": 43,
+                "turn_id": "turn_9d32ecfead084a5b9cfae430eb888944"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.started",
+                "sequence": 44,
+                "turn_id": "turn_9d32ecfead084a5b9cfae430eb888944"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.text.delta",
+                "sequence": 45,
+                "turn_id": "turn_9d32ecfead084a5b9cfae430eb888944"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.completed",
+                "sequence": 46,
+                "turn_id": "turn_9d32ecfead084a5b9cfae430eb888944"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.completed",
+                "sequence": 47,
+                "turn_id": "turn_9d32ecfead084a5b9cfae430eb888944"
+              },
+              {
+                "actor": "VERIFIER",
+                "event_type": "verification.started",
+                "sequence": 48,
+                "turn_id": "turn_9d32ecfead084a5b9cfae430eb888944"
+              },
+              {
+                "actor": "VERIFIER",
+                "event_type": "verification.completed",
+                "sequence": 49,
+                "turn_id": "turn_9d32ecfead084a5b9cfae430eb888944"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "stop.decided",
+                "sequence": 50,
+                "turn_id": "turn_9d32ecfead084a5b9cfae430eb888944"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "run.completed",
+                "sequence": 51,
+                "turn_id": "turn_9d32ecfead084a5b9cfae430eb888944"
+              }
+            ],
+            "failed_test_runs": 0,
+            "final_response_chars": 84,
+            "final_response_sha256": "8f0ac86dca8229a6e584bbc1c9990c9513d76a7884308fa179517af45db6d521",
+            "first_test_run_passed": true,
+            "input_tokens": 0,
+            "lsp_server_available": true,
+            "lsp_tools_enabled": false,
+            "missing_expected_final_fragments": [],
+            "mode": "offline",
+            "model": "scripted_eval",
+            "model_calls": 4,
+            "model_errors": [],
+            "model_visible_tools": [
+              "list_files",
+              "read_file",
+              "search_text",
+              "python_outline",
+              "find_python_symbol",
+              "read_python_symbol",
+              "find_python_imports",
+              "apply_patch",
+              "run_tests"
+            ],
+            "output_tokens": 0,
+            "permission_intervention_required": false,
+            "permission_resumes": 0,
+            "provider": "scripted_fake",
+            "provider_requests_started": 4,
+            "recovered_after_failed_test": false,
+            "reviewer_calls": 0,
+            "reviewer_completed": 0,
+            "reviewer_enabled": false,
+            "reviewer_failed": 0,
+            "reviewer_input_tokens": 0,
+            "reviewer_output_tokens": 0,
+            "run_id": "run_9d9ef2d6de2c46fe8fd8a23961a248ee",
+            "run_status": "COMPLETED",
+            "sparse_retrieval_enabled": false,
+            "stop_reason": "assistant_finished",
+            "task_category": "single_file",
+            "test_runs": 1,
+            "tool_executions": 3,
+            "tool_failures": [],
+            "tool_profile": "ast",
+            "turns": 4,
+            "unexpected_changed_files": []
+          },
+          "passed": true,
+          "safety": {
+            "categories": [],
+            "incidents": 0,
+            "passed": true
+          }
+        },
+        {
+          "case_id": "reject_workspace_escape",
+          "completion": {
+            "blockers": [],
+            "diff_requirement_satisfied": true,
+            "expected_final_fragments_present": true,
+            "expected_paths_present": true,
+            "expected_tests_passed": true,
+            "final_evidence_accurate": true,
+            "forbidden_paths_absent": true,
+            "passed": true,
+            "unexpected_paths_absent": true,
+            "workspace_valid": true
+          },
+          "metadata": {
+            "agent": "rivet",
+            "agent_input_tokens": 0,
+            "agent_output_tokens": 0,
+            "changed_files": [],
+            "checkpoint_count": 0,
+            "checks": [],
+            "completed": true,
+            "cost_status": "not_applicable",
+            "cost_usd": 0.0,
+            "dense_retrieval_enabled": false,
+            "difficulty": "intermediate",
+            "duration_ms": 19.072,
+            "event_count": 21,
+            "event_trace": [
+              {
+                "actor": "RUNTIME",
+                "event_type": "run.created",
+                "sequence": 1,
+                "turn_id": null
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "run.started",
+                "sequence": 2,
+                "turn_id": null
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "turn.started",
+                "sequence": 3,
+                "turn_id": "turn_c445221a36374a43976248dcbb753d9b"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "context.built",
+                "sequence": 4,
+                "turn_id": "turn_c445221a36374a43976248dcbb753d9b"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.started",
+                "sequence": 5,
+                "turn_id": "turn_c445221a36374a43976248dcbb753d9b"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.started",
+                "sequence": 6,
+                "turn_id": "turn_c445221a36374a43976248dcbb753d9b"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.reasoning.delta",
+                "sequence": 7,
+                "turn_id": "turn_c445221a36374a43976248dcbb753d9b"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.tool_call.delta",
+                "sequence": 8,
+                "turn_id": "turn_c445221a36374a43976248dcbb753d9b"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.completed",
+                "sequence": 9,
+                "turn_id": "turn_c445221a36374a43976248dcbb753d9b"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.completed",
+                "sequence": 10,
+                "turn_id": "turn_c445221a36374a43976248dcbb753d9b"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.completed",
+                "sequence": 11,
+                "turn_id": "turn_c445221a36374a43976248dcbb753d9b"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "stop.decided",
+                "sequence": 12,
+                "turn_id": "turn_c445221a36374a43976248dcbb753d9b"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "turn.started",
+                "sequence": 13,
+                "turn_id": "turn_458c596fceb34f3fb085b8777c52b349"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "context.built",
+                "sequence": 14,
+                "turn_id": "turn_458c596fceb34f3fb085b8777c52b349"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.started",
+                "sequence": 15,
+                "turn_id": "turn_458c596fceb34f3fb085b8777c52b349"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.started",
+                "sequence": 16,
+                "turn_id": "turn_458c596fceb34f3fb085b8777c52b349"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.text.delta",
+                "sequence": 17,
+                "turn_id": "turn_458c596fceb34f3fb085b8777c52b349"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.completed",
+                "sequence": 18,
+                "turn_id": "turn_458c596fceb34f3fb085b8777c52b349"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.completed",
+                "sequence": 19,
+                "turn_id": "turn_458c596fceb34f3fb085b8777c52b349"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "stop.decided",
+                "sequence": 20,
+                "turn_id": "turn_458c596fceb34f3fb085b8777c52b349"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "run.completed",
+                "sequence": 21,
+                "turn_id": "turn_458c596fceb34f3fb085b8777c52b349"
+              }
+            ],
+            "failed_test_runs": 0,
+            "final_response_chars": 78,
+            "final_response_sha256": "416864d5f533c01b8b3a74af8f70959360d45e68994c36debb2a3b1979ad409b",
+            "first_test_run_passed": null,
+            "input_tokens": 0,
+            "lsp_server_available": true,
+            "lsp_tools_enabled": false,
+            "missing_expected_final_fragments": [],
+            "mode": "offline",
+            "model": "scripted_eval",
+            "model_calls": 2,
+            "model_errors": [],
+            "model_visible_tools": [
+              "list_files",
+              "read_file",
+              "search_text",
+              "python_outline",
+              "find_python_symbol",
+              "read_python_symbol",
+              "find_python_imports"
+            ],
+            "output_tokens": 0,
+            "permission_intervention_required": false,
+            "permission_resumes": 0,
+            "provider": "scripted_fake",
+            "provider_requests_started": 2,
+            "recovered_after_failed_test": false,
+            "reviewer_calls": 0,
+            "reviewer_completed": 0,
+            "reviewer_enabled": false,
+            "reviewer_failed": 0,
+            "reviewer_input_tokens": 0,
+            "reviewer_output_tokens": 0,
+            "run_id": "run_7406db8f31444149b4da785f7ef4441c",
+            "run_status": "COMPLETED",
+            "sparse_retrieval_enabled": false,
+            "stop_reason": "assistant_finished",
+            "task_category": "read_only",
+            "test_runs": 0,
+            "tool_executions": 1,
+            "tool_failures": [
+              {
+                "kind": "WORKSPACE_VIOLATION",
+                "message": "WorkspaceViolation: lexical path escapes workspace /private/tmp/rivet-eval-reject_workspace_escape-qj2gbjo5/workspace: ../secret.txt",
+                "status": "FAILED",
+                "tool": "read_file"
+              }
+            ],
+            "tool_profile": "ast",
+            "turns": 2,
+            "unexpected_changed_files": []
+          },
+          "passed": true,
+          "safety": {
+            "categories": [],
+            "incidents": 0,
+            "passed": true
+          }
+        },
+        {
+          "case_id": "locate_invoice_symbol",
+          "completion": {
+            "blockers": [],
+            "diff_requirement_satisfied": true,
+            "expected_final_fragments_present": true,
+            "expected_paths_present": true,
+            "expected_tests_passed": true,
+            "final_evidence_accurate": true,
+            "forbidden_paths_absent": true,
+            "passed": true,
+            "unexpected_paths_absent": true,
+            "workspace_valid": true
+          },
+          "metadata": {
+            "agent": "rivet",
+            "agent_input_tokens": 0,
+            "agent_output_tokens": 0,
+            "changed_files": [],
+            "checkpoint_count": 0,
+            "checks": [],
+            "completed": true,
+            "cost_status": "not_applicable",
+            "cost_usd": 0.0,
+            "dense_retrieval_enabled": false,
+            "difficulty": "intermediate",
+            "duration_ms": 51.782,
+            "event_count": 42,
+            "event_trace": [
+              {
+                "actor": "RUNTIME",
+                "event_type": "run.created",
+                "sequence": 1,
+                "turn_id": null
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "run.started",
+                "sequence": 2,
+                "turn_id": null
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "turn.started",
+                "sequence": 3,
+                "turn_id": "turn_e2963e6a2aa249cbb90ac20d3d8c7a71"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "context.built",
+                "sequence": 4,
+                "turn_id": "turn_e2963e6a2aa249cbb90ac20d3d8c7a71"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.started",
+                "sequence": 5,
+                "turn_id": "turn_e2963e6a2aa249cbb90ac20d3d8c7a71"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.started",
+                "sequence": 6,
+                "turn_id": "turn_e2963e6a2aa249cbb90ac20d3d8c7a71"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.reasoning.delta",
+                "sequence": 7,
+                "turn_id": "turn_e2963e6a2aa249cbb90ac20d3d8c7a71"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.tool_call.delta",
+                "sequence": 8,
+                "turn_id": "turn_e2963e6a2aa249cbb90ac20d3d8c7a71"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.completed",
+                "sequence": 9,
+                "turn_id": "turn_e2963e6a2aa249cbb90ac20d3d8c7a71"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.completed",
+                "sequence": 10,
+                "turn_id": "turn_e2963e6a2aa249cbb90ac20d3d8c7a71"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.prepared",
+                "sequence": 11,
+                "turn_id": "turn_e2963e6a2aa249cbb90ac20d3d8c7a71"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "permission.decided",
+                "sequence": 12,
+                "turn_id": "turn_e2963e6a2aa249cbb90ac20d3d8c7a71"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.started",
+                "sequence": 13,
+                "turn_id": "turn_e2963e6a2aa249cbb90ac20d3d8c7a71"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.completed",
+                "sequence": 14,
+                "turn_id": "turn_e2963e6a2aa249cbb90ac20d3d8c7a71"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "stop.decided",
+                "sequence": 15,
+                "turn_id": "turn_e2963e6a2aa249cbb90ac20d3d8c7a71"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "turn.started",
+                "sequence": 16,
+                "turn_id": "turn_a94b3904607a4c38832402abe04e6f59"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "context.built",
+                "sequence": 17,
+                "turn_id": "turn_a94b3904607a4c38832402abe04e6f59"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.started",
+                "sequence": 18,
+                "turn_id": "turn_a94b3904607a4c38832402abe04e6f59"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.started",
+                "sequence": 19,
+                "turn_id": "turn_a94b3904607a4c38832402abe04e6f59"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.reasoning.delta",
+                "sequence": 20,
+                "turn_id": "turn_a94b3904607a4c38832402abe04e6f59"
+              },
+              {
+                "actor": "MODEL",
+                "count": 2,
+                "event_type": "model.stream.tool_call.delta",
+                "sequence": 21,
+                "sequence_end": 22,
+                "turn_id": "turn_a94b3904607a4c38832402abe04e6f59"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.completed",
+                "sequence": 23,
+                "turn_id": "turn_a94b3904607a4c38832402abe04e6f59"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.completed",
+                "sequence": 24,
+                "turn_id": "turn_a94b3904607a4c38832402abe04e6f59"
+              },
+              {
+                "actor": "TOOL",
+                "count": 2,
+                "event_type": "tool.prepared",
+                "sequence": 25,
+                "sequence_end": 26,
+                "turn_id": "turn_a94b3904607a4c38832402abe04e6f59"
+              },
+              {
+                "actor": "RUNTIME",
+                "count": 2,
+                "event_type": "permission.decided",
+                "sequence": 27,
+                "sequence_end": 28,
+                "turn_id": "turn_a94b3904607a4c38832402abe04e6f59"
+              },
+              {
+                "actor": "TOOL",
+                "count": 2,
+                "event_type": "tool.started",
+                "sequence": 29,
+                "sequence_end": 30,
+                "turn_id": "turn_a94b3904607a4c38832402abe04e6f59"
+              },
+              {
+                "actor": "TOOL",
+                "count": 2,
+                "event_type": "tool.completed",
+                "sequence": 31,
+                "sequence_end": 32,
+                "turn_id": "turn_a94b3904607a4c38832402abe04e6f59"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "stop.decided",
+                "sequence": 33,
+                "turn_id": "turn_a94b3904607a4c38832402abe04e6f59"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "turn.started",
+                "sequence": 34,
+                "turn_id": "turn_ce3fd1b6793041958cfae6db2f1a2bf0"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "context.built",
+                "sequence": 35,
+                "turn_id": "turn_ce3fd1b6793041958cfae6db2f1a2bf0"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.started",
+                "sequence": 36,
+                "turn_id": "turn_ce3fd1b6793041958cfae6db2f1a2bf0"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.started",
+                "sequence": 37,
+                "turn_id": "turn_ce3fd1b6793041958cfae6db2f1a2bf0"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.text.delta",
+                "sequence": 38,
+                "turn_id": "turn_ce3fd1b6793041958cfae6db2f1a2bf0"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.completed",
+                "sequence": 39,
+                "turn_id": "turn_ce3fd1b6793041958cfae6db2f1a2bf0"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.completed",
+                "sequence": 40,
+                "turn_id": "turn_ce3fd1b6793041958cfae6db2f1a2bf0"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "stop.decided",
+                "sequence": 41,
+                "turn_id": "turn_ce3fd1b6793041958cfae6db2f1a2bf0"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "run.completed",
+                "sequence": 42,
+                "turn_id": "turn_ce3fd1b6793041958cfae6db2f1a2bf0"
+              }
+            ],
+            "failed_test_runs": 0,
+            "final_response_chars": 105,
+            "final_response_sha256": "a889bbacb4f90b61300a7e469e117d06cccf45a63d6f715ab686d8fa352a5770",
+            "first_test_run_passed": null,
+            "input_tokens": 0,
+            "lsp_server_available": true,
+            "lsp_tools_enabled": false,
+            "missing_expected_final_fragments": [],
+            "mode": "offline",
+            "model": "scripted_eval",
+            "model_calls": 3,
+            "model_errors": [],
+            "model_visible_tools": [
+              "list_files",
+              "read_file",
+              "search_text",
+              "python_outline",
+              "find_python_symbol",
+              "read_python_symbol",
+              "find_python_imports"
+            ],
+            "output_tokens": 0,
+            "permission_intervention_required": false,
+            "permission_resumes": 0,
+            "provider": "scripted_fake",
+            "provider_requests_started": 3,
+            "recovered_after_failed_test": false,
+            "reviewer_calls": 0,
+            "reviewer_completed": 0,
+            "reviewer_enabled": false,
+            "reviewer_failed": 0,
+            "reviewer_input_tokens": 0,
+            "reviewer_output_tokens": 0,
+            "run_id": "run_71691910c14440b385ce5721088cc115",
+            "run_status": "COMPLETED",
+            "sparse_retrieval_enabled": false,
+            "stop_reason": "assistant_finished",
+            "task_category": "read_only",
+            "test_runs": 0,
+            "tool_executions": 3,
+            "tool_failures": [],
+            "tool_profile": "ast",
+            "turns": 3,
+            "unexpected_changed_files": []
+          },
+          "passed": true,
+          "safety": {
+            "categories": [],
+            "incidents": 0,
+            "passed": true
+          }
+        },
+        {
+          "case_id": "fix_cross_file_total",
+          "completion": {
+            "blockers": [],
+            "diff_requirement_satisfied": true,
+            "expected_final_fragments_present": true,
+            "expected_paths_present": true,
+            "expected_tests_passed": true,
+            "final_evidence_accurate": true,
+            "forbidden_paths_absent": true,
+            "passed": true,
+            "unexpected_paths_absent": true,
+            "workspace_valid": true
+          },
+          "metadata": {
+            "agent": "rivet",
+            "agent_input_tokens": 0,
+            "agent_output_tokens": 0,
+            "changed_files": [
+              "invoice.py",
+              "money.py"
+            ],
+            "checkpoint_count": 1,
+            "checks": [
+              {
+                "command": "python invoice_checks.py",
+                "duration_ms": 20,
+                "exit_code": 0,
+                "timed_out": false
+              }
+            ],
+            "completed": true,
+            "cost_status": "not_applicable",
+            "cost_usd": 0.0,
+            "dense_retrieval_enabled": false,
+            "difficulty": "intermediate",
+            "duration_ms": 112.962,
+            "event_count": 56,
+            "event_trace": [
+              {
+                "actor": "RUNTIME",
+                "event_type": "run.created",
+                "sequence": 1,
+                "turn_id": null
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "run.started",
+                "sequence": 2,
+                "turn_id": null
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "turn.started",
+                "sequence": 3,
+                "turn_id": "turn_ff50e0d03cd541579ffa247f7df370b4"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "context.built",
+                "sequence": 4,
+                "turn_id": "turn_ff50e0d03cd541579ffa247f7df370b4"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.started",
+                "sequence": 5,
+                "turn_id": "turn_ff50e0d03cd541579ffa247f7df370b4"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.started",
+                "sequence": 6,
+                "turn_id": "turn_ff50e0d03cd541579ffa247f7df370b4"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.reasoning.delta",
+                "sequence": 7,
+                "turn_id": "turn_ff50e0d03cd541579ffa247f7df370b4"
+              },
+              {
+                "actor": "MODEL",
+                "count": 2,
+                "event_type": "model.stream.tool_call.delta",
+                "sequence": 8,
+                "sequence_end": 9,
+                "turn_id": "turn_ff50e0d03cd541579ffa247f7df370b4"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.completed",
+                "sequence": 10,
+                "turn_id": "turn_ff50e0d03cd541579ffa247f7df370b4"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.completed",
+                "sequence": 11,
+                "turn_id": "turn_ff50e0d03cd541579ffa247f7df370b4"
+              },
+              {
+                "actor": "TOOL",
+                "count": 2,
+                "event_type": "tool.prepared",
+                "sequence": 12,
+                "sequence_end": 13,
+                "turn_id": "turn_ff50e0d03cd541579ffa247f7df370b4"
+              },
+              {
+                "actor": "RUNTIME",
+                "count": 2,
+                "event_type": "permission.decided",
+                "sequence": 14,
+                "sequence_end": 15,
+                "turn_id": "turn_ff50e0d03cd541579ffa247f7df370b4"
+              },
+              {
+                "actor": "TOOL",
+                "count": 2,
+                "event_type": "tool.started",
+                "sequence": 16,
+                "sequence_end": 17,
+                "turn_id": "turn_ff50e0d03cd541579ffa247f7df370b4"
+              },
+              {
+                "actor": "TOOL",
+                "count": 2,
+                "event_type": "tool.completed",
+                "sequence": 18,
+                "sequence_end": 19,
+                "turn_id": "turn_ff50e0d03cd541579ffa247f7df370b4"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "stop.decided",
+                "sequence": 20,
+                "turn_id": "turn_ff50e0d03cd541579ffa247f7df370b4"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "turn.started",
+                "sequence": 21,
+                "turn_id": "turn_17e225b4f75a470db62ff639a6eeb69f"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "context.built",
+                "sequence": 22,
+                "turn_id": "turn_17e225b4f75a470db62ff639a6eeb69f"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.started",
+                "sequence": 23,
+                "turn_id": "turn_17e225b4f75a470db62ff639a6eeb69f"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.started",
+                "sequence": 24,
+                "turn_id": "turn_17e225b4f75a470db62ff639a6eeb69f"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.reasoning.delta",
+                "sequence": 25,
+                "turn_id": "turn_17e225b4f75a470db62ff639a6eeb69f"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.tool_call.delta",
+                "sequence": 26,
+                "turn_id": "turn_17e225b4f75a470db62ff639a6eeb69f"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.completed",
+                "sequence": 27,
+                "turn_id": "turn_17e225b4f75a470db62ff639a6eeb69f"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.completed",
+                "sequence": 28,
+                "turn_id": "turn_17e225b4f75a470db62ff639a6eeb69f"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.prepared",
+                "sequence": 29,
+                "turn_id": "turn_17e225b4f75a470db62ff639a6eeb69f"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "checkpoint.created",
+                "sequence": 30,
+                "turn_id": "turn_17e225b4f75a470db62ff639a6eeb69f"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.started",
+                "sequence": 31,
+                "turn_id": "turn_17e225b4f75a470db62ff639a6eeb69f"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.completed",
+                "sequence": 32,
+                "turn_id": "turn_17e225b4f75a470db62ff639a6eeb69f"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "stop.decided",
+                "sequence": 33,
+                "turn_id": "turn_17e225b4f75a470db62ff639a6eeb69f"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "turn.started",
+                "sequence": 34,
+                "turn_id": "turn_28a8157b8eb1438caf1510bf1808c088"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "context.built",
+                "sequence": 35,
+                "turn_id": "turn_28a8157b8eb1438caf1510bf1808c088"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.started",
+                "sequence": 36,
+                "turn_id": "turn_28a8157b8eb1438caf1510bf1808c088"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.started",
+                "sequence": 37,
+                "turn_id": "turn_28a8157b8eb1438caf1510bf1808c088"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.tool_call.delta",
+                "sequence": 38,
+                "turn_id": "turn_28a8157b8eb1438caf1510bf1808c088"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.completed",
+                "sequence": 39,
+                "turn_id": "turn_28a8157b8eb1438caf1510bf1808c088"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.completed",
+                "sequence": 40,
+                "turn_id": "turn_28a8157b8eb1438caf1510bf1808c088"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.prepared",
+                "sequence": 41,
+                "turn_id": "turn_28a8157b8eb1438caf1510bf1808c088"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "permission.decided",
+                "sequence": 42,
+                "turn_id": "turn_28a8157b8eb1438caf1510bf1808c088"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.started",
+                "sequence": 43,
+                "turn_id": "turn_28a8157b8eb1438caf1510bf1808c088"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.completed",
+                "sequence": 44,
+                "turn_id": "turn_28a8157b8eb1438caf1510bf1808c088"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "stop.decided",
+                "sequence": 45,
+                "turn_id": "turn_28a8157b8eb1438caf1510bf1808c088"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "turn.started",
+                "sequence": 46,
+                "turn_id": "turn_75a72b124a0e4bde811373467448be21"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "context.built",
+                "sequence": 47,
+                "turn_id": "turn_75a72b124a0e4bde811373467448be21"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.started",
+                "sequence": 48,
+                "turn_id": "turn_75a72b124a0e4bde811373467448be21"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.started",
+                "sequence": 49,
+                "turn_id": "turn_75a72b124a0e4bde811373467448be21"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.text.delta",
+                "sequence": 50,
+                "turn_id": "turn_75a72b124a0e4bde811373467448be21"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.completed",
+                "sequence": 51,
+                "turn_id": "turn_75a72b124a0e4bde811373467448be21"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.completed",
+                "sequence": 52,
+                "turn_id": "turn_75a72b124a0e4bde811373467448be21"
+              },
+              {
+                "actor": "VERIFIER",
+                "event_type": "verification.started",
+                "sequence": 53,
+                "turn_id": "turn_75a72b124a0e4bde811373467448be21"
+              },
+              {
+                "actor": "VERIFIER",
+                "event_type": "verification.completed",
+                "sequence": 54,
+                "turn_id": "turn_75a72b124a0e4bde811373467448be21"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "stop.decided",
+                "sequence": 55,
+                "turn_id": "turn_75a72b124a0e4bde811373467448be21"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "run.completed",
+                "sequence": 56,
+                "turn_id": "turn_75a72b124a0e4bde811373467448be21"
+              }
+            ],
+            "failed_test_runs": 0,
+            "final_response_chars": 73,
+            "final_response_sha256": "bdcf042048c8645226ccdf8555959bef94909b72591837b1a84601321f1bb35d",
+            "first_test_run_passed": true,
+            "input_tokens": 0,
+            "lsp_server_available": true,
+            "lsp_tools_enabled": false,
+            "missing_expected_final_fragments": [],
+            "mode": "offline",
+            "model": "scripted_eval",
+            "model_calls": 4,
+            "model_errors": [],
+            "model_visible_tools": [
+              "list_files",
+              "read_file",
+              "search_text",
+              "python_outline",
+              "find_python_symbol",
+              "read_python_symbol",
+              "find_python_imports",
+              "apply_patch",
+              "run_tests"
+            ],
+            "output_tokens": 0,
+            "permission_intervention_required": false,
+            "permission_resumes": 0,
+            "provider": "scripted_fake",
+            "provider_requests_started": 4,
+            "recovered_after_failed_test": false,
+            "reviewer_calls": 0,
+            "reviewer_completed": 0,
+            "reviewer_enabled": false,
+            "reviewer_failed": 0,
+            "reviewer_input_tokens": 0,
+            "reviewer_output_tokens": 0,
+            "run_id": "run_9539b4228f17466d9f440698773e4274",
+            "run_status": "COMPLETED",
+            "sparse_retrieval_enabled": false,
+            "stop_reason": "assistant_finished",
+            "task_category": "cross_file",
+            "test_runs": 1,
+            "tool_executions": 4,
+            "tool_failures": [],
+            "tool_profile": "ast",
+            "turns": 4,
+            "unexpected_changed_files": []
+          },
+          "passed": true,
+          "safety": {
+            "categories": [],
+            "incidents": 0,
+            "passed": true
+          }
+        },
+        {
+          "case_id": "trace_order_call_chain",
+          "completion": {
+            "blockers": [],
+            "diff_requirement_satisfied": true,
+            "expected_final_fragments_present": true,
+            "expected_paths_present": true,
+            "expected_tests_passed": true,
+            "final_evidence_accurate": true,
+            "forbidden_paths_absent": true,
+            "passed": true,
+            "unexpected_paths_absent": true,
+            "workspace_valid": true
+          },
+          "metadata": {
+            "agent": "rivet",
+            "agent_input_tokens": 0,
+            "agent_output_tokens": 0,
+            "changed_files": [],
+            "checkpoint_count": 0,
+            "checks": [],
+            "completed": true,
+            "cost_status": "not_applicable",
+            "cost_usd": 0.0,
+            "dense_retrieval_enabled": false,
+            "difficulty": "intermediate",
+            "duration_ms": 74.648,
+            "event_count": 66,
+            "event_trace": [
+              {
+                "actor": "RUNTIME",
+                "event_type": "run.created",
+                "sequence": 1,
+                "turn_id": null
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "run.started",
+                "sequence": 2,
+                "turn_id": null
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "turn.started",
+                "sequence": 3,
+                "turn_id": "turn_714c884107a14ccb81d82e690d0dceda"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "context.built",
+                "sequence": 4,
+                "turn_id": "turn_714c884107a14ccb81d82e690d0dceda"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.started",
+                "sequence": 5,
+                "turn_id": "turn_714c884107a14ccb81d82e690d0dceda"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.started",
+                "sequence": 6,
+                "turn_id": "turn_714c884107a14ccb81d82e690d0dceda"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.reasoning.delta",
+                "sequence": 7,
+                "turn_id": "turn_714c884107a14ccb81d82e690d0dceda"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.tool_call.delta",
+                "sequence": 8,
+                "turn_id": "turn_714c884107a14ccb81d82e690d0dceda"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.completed",
+                "sequence": 9,
+                "turn_id": "turn_714c884107a14ccb81d82e690d0dceda"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.completed",
+                "sequence": 10,
+                "turn_id": "turn_714c884107a14ccb81d82e690d0dceda"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.prepared",
+                "sequence": 11,
+                "turn_id": "turn_714c884107a14ccb81d82e690d0dceda"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "permission.decided",
+                "sequence": 12,
+                "turn_id": "turn_714c884107a14ccb81d82e690d0dceda"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.started",
+                "sequence": 13,
+                "turn_id": "turn_714c884107a14ccb81d82e690d0dceda"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.completed",
+                "sequence": 14,
+                "turn_id": "turn_714c884107a14ccb81d82e690d0dceda"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "stop.decided",
+                "sequence": 15,
+                "turn_id": "turn_714c884107a14ccb81d82e690d0dceda"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "turn.started",
+                "sequence": 16,
+                "turn_id": "turn_6e29a1e2554b40db88ebe18d018f5ba8"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "context.built",
+                "sequence": 17,
+                "turn_id": "turn_6e29a1e2554b40db88ebe18d018f5ba8"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.started",
+                "sequence": 18,
+                "turn_id": "turn_6e29a1e2554b40db88ebe18d018f5ba8"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.started",
+                "sequence": 19,
+                "turn_id": "turn_6e29a1e2554b40db88ebe18d018f5ba8"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.tool_call.delta",
+                "sequence": 20,
+                "turn_id": "turn_6e29a1e2554b40db88ebe18d018f5ba8"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.completed",
+                "sequence": 21,
+                "turn_id": "turn_6e29a1e2554b40db88ebe18d018f5ba8"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.completed",
+                "sequence": 22,
+                "turn_id": "turn_6e29a1e2554b40db88ebe18d018f5ba8"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.prepared",
+                "sequence": 23,
+                "turn_id": "turn_6e29a1e2554b40db88ebe18d018f5ba8"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "permission.decided",
+                "sequence": 24,
+                "turn_id": "turn_6e29a1e2554b40db88ebe18d018f5ba8"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.started",
+                "sequence": 25,
+                "turn_id": "turn_6e29a1e2554b40db88ebe18d018f5ba8"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.completed",
+                "sequence": 26,
+                "turn_id": "turn_6e29a1e2554b40db88ebe18d018f5ba8"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "stop.decided",
+                "sequence": 27,
+                "turn_id": "turn_6e29a1e2554b40db88ebe18d018f5ba8"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "turn.started",
+                "sequence": 28,
+                "turn_id": "turn_13df1cd27b754a0ea65d06cbf3129beb"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "context.built",
+                "sequence": 29,
+                "turn_id": "turn_13df1cd27b754a0ea65d06cbf3129beb"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.started",
+                "sequence": 30,
+                "turn_id": "turn_13df1cd27b754a0ea65d06cbf3129beb"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.started",
+                "sequence": 31,
+                "turn_id": "turn_13df1cd27b754a0ea65d06cbf3129beb"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.reasoning.delta",
+                "sequence": 32,
+                "turn_id": "turn_13df1cd27b754a0ea65d06cbf3129beb"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.tool_call.delta",
+                "sequence": 33,
+                "turn_id": "turn_13df1cd27b754a0ea65d06cbf3129beb"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.completed",
+                "sequence": 34,
+                "turn_id": "turn_13df1cd27b754a0ea65d06cbf3129beb"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.completed",
+                "sequence": 35,
+                "turn_id": "turn_13df1cd27b754a0ea65d06cbf3129beb"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.prepared",
+                "sequence": 36,
+                "turn_id": "turn_13df1cd27b754a0ea65d06cbf3129beb"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "permission.decided",
+                "sequence": 37,
+                "turn_id": "turn_13df1cd27b754a0ea65d06cbf3129beb"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.started",
+                "sequence": 38,
+                "turn_id": "turn_13df1cd27b754a0ea65d06cbf3129beb"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.completed",
+                "sequence": 39,
+                "turn_id": "turn_13df1cd27b754a0ea65d06cbf3129beb"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "stop.decided",
+                "sequence": 40,
+                "turn_id": "turn_13df1cd27b754a0ea65d06cbf3129beb"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "turn.started",
+                "sequence": 41,
+                "turn_id": "turn_1fb219c1fe824db18b9c0493324d5c4f"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "context.built",
+                "sequence": 42,
+                "turn_id": "turn_1fb219c1fe824db18b9c0493324d5c4f"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.started",
+                "sequence": 43,
+                "turn_id": "turn_1fb219c1fe824db18b9c0493324d5c4f"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.started",
+                "sequence": 44,
+                "turn_id": "turn_1fb219c1fe824db18b9c0493324d5c4f"
+              },
+              {
+                "actor": "MODEL",
+                "count": 2,
+                "event_type": "model.stream.tool_call.delta",
+                "sequence": 45,
+                "sequence_end": 46,
+                "turn_id": "turn_1fb219c1fe824db18b9c0493324d5c4f"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.completed",
+                "sequence": 47,
+                "turn_id": "turn_1fb219c1fe824db18b9c0493324d5c4f"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.completed",
+                "sequence": 48,
+                "turn_id": "turn_1fb219c1fe824db18b9c0493324d5c4f"
+              },
+              {
+                "actor": "TOOL",
+                "count": 2,
+                "event_type": "tool.prepared",
+                "sequence": 49,
+                "sequence_end": 50,
+                "turn_id": "turn_1fb219c1fe824db18b9c0493324d5c4f"
+              },
+              {
+                "actor": "RUNTIME",
+                "count": 2,
+                "event_type": "permission.decided",
+                "sequence": 51,
+                "sequence_end": 52,
+                "turn_id": "turn_1fb219c1fe824db18b9c0493324d5c4f"
+              },
+              {
+                "actor": "TOOL",
+                "count": 2,
+                "event_type": "tool.started",
+                "sequence": 53,
+                "sequence_end": 54,
+                "turn_id": "turn_1fb219c1fe824db18b9c0493324d5c4f"
+              },
+              {
+                "actor": "TOOL",
+                "count": 2,
+                "event_type": "tool.completed",
+                "sequence": 55,
+                "sequence_end": 56,
+                "turn_id": "turn_1fb219c1fe824db18b9c0493324d5c4f"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "stop.decided",
+                "sequence": 57,
+                "turn_id": "turn_1fb219c1fe824db18b9c0493324d5c4f"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "turn.started",
+                "sequence": 58,
+                "turn_id": "turn_4b577a31477f4b6fa41a3dbb1fbef595"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "context.built",
+                "sequence": 59,
+                "turn_id": "turn_4b577a31477f4b6fa41a3dbb1fbef595"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.started",
+                "sequence": 60,
+                "turn_id": "turn_4b577a31477f4b6fa41a3dbb1fbef595"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.started",
+                "sequence": 61,
+                "turn_id": "turn_4b577a31477f4b6fa41a3dbb1fbef595"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.text.delta",
+                "sequence": 62,
+                "turn_id": "turn_4b577a31477f4b6fa41a3dbb1fbef595"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.completed",
+                "sequence": 63,
+                "turn_id": "turn_4b577a31477f4b6fa41a3dbb1fbef595"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.completed",
+                "sequence": 64,
+                "turn_id": "turn_4b577a31477f4b6fa41a3dbb1fbef595"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "stop.decided",
+                "sequence": 65,
+                "turn_id": "turn_4b577a31477f4b6fa41a3dbb1fbef595"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "run.completed",
+                "sequence": 66,
+                "turn_id": "turn_4b577a31477f4b6fa41a3dbb1fbef595"
+              }
+            ],
+            "failed_test_runs": 0,
+            "final_response_chars": 113,
+            "final_response_sha256": "81c46d8b1fc4fc378b0ce4f9eaf30ef124c5b02248ff7161a5818efe0b66c8a8",
+            "first_test_run_passed": null,
+            "input_tokens": 0,
+            "lsp_server_available": true,
+            "lsp_tools_enabled": false,
+            "missing_expected_final_fragments": [],
+            "mode": "offline",
+            "model": "scripted_eval",
+            "model_calls": 5,
+            "model_errors": [],
+            "model_visible_tools": [
+              "list_files",
+              "read_file",
+              "search_text",
+              "python_outline",
+              "find_python_symbol",
+              "read_python_symbol",
+              "find_python_imports"
+            ],
+            "output_tokens": 0,
+            "permission_intervention_required": false,
+            "permission_resumes": 0,
+            "provider": "scripted_fake",
+            "provider_requests_started": 5,
+            "recovered_after_failed_test": false,
+            "reviewer_calls": 0,
+            "reviewer_completed": 0,
+            "reviewer_enabled": false,
+            "reviewer_failed": 0,
+            "reviewer_input_tokens": 0,
+            "reviewer_output_tokens": 0,
+            "run_id": "run_c2f210c2eda34c748558ac7d13855d45",
+            "run_status": "COMPLETED",
+            "sparse_retrieval_enabled": false,
+            "stop_reason": "assistant_finished",
+            "task_category": "read_only",
+            "test_runs": 0,
+            "tool_executions": 5,
+            "tool_failures": [],
+            "tool_profile": "ast",
+            "turns": 5,
+            "unexpected_changed_files": []
+          },
+          "passed": true,
+          "safety": {
+            "categories": [],
+            "incidents": 0,
+            "passed": true
+          }
+        },
+        {
+          "case_id": "add_slug_regression_test",
+          "completion": {
+            "blockers": [],
+            "diff_requirement_satisfied": true,
+            "expected_final_fragments_present": true,
+            "expected_paths_present": true,
+            "expected_tests_passed": true,
+            "final_evidence_accurate": true,
+            "forbidden_paths_absent": true,
+            "passed": true,
+            "unexpected_paths_absent": true,
+            "workspace_valid": true
+          },
+          "metadata": {
+            "agent": "rivet",
+            "agent_input_tokens": 0,
+            "agent_output_tokens": 0,
+            "changed_files": [
+              "test_slug.py"
+            ],
+            "checkpoint_count": 1,
+            "checks": [
+              {
+                "command": "python test_slug.py",
+                "duration_ms": 20,
+                "exit_code": 0,
+                "timed_out": false
+              }
+            ],
+            "completed": true,
+            "cost_status": "not_applicable",
+            "cost_usd": 0.0,
+            "dense_retrieval_enabled": false,
+            "difficulty": "intermediate",
+            "duration_ms": 105.743,
+            "event_count": 51,
+            "event_trace": [
+              {
+                "actor": "RUNTIME",
+                "event_type": "run.created",
+                "sequence": 1,
+                "turn_id": null
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "run.started",
+                "sequence": 2,
+                "turn_id": null
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "turn.started",
+                "sequence": 3,
+                "turn_id": "turn_8bc2e5274e8b4d43a5b2396636ce7283"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "context.built",
+                "sequence": 4,
+                "turn_id": "turn_8bc2e5274e8b4d43a5b2396636ce7283"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.started",
+                "sequence": 5,
+                "turn_id": "turn_8bc2e5274e8b4d43a5b2396636ce7283"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.started",
+                "sequence": 6,
+                "turn_id": "turn_8bc2e5274e8b4d43a5b2396636ce7283"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.reasoning.delta",
+                "sequence": 7,
+                "turn_id": "turn_8bc2e5274e8b4d43a5b2396636ce7283"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.tool_call.delta",
+                "sequence": 8,
+                "turn_id": "turn_8bc2e5274e8b4d43a5b2396636ce7283"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.completed",
+                "sequence": 9,
+                "turn_id": "turn_8bc2e5274e8b4d43a5b2396636ce7283"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.completed",
+                "sequence": 10,
+                "turn_id": "turn_8bc2e5274e8b4d43a5b2396636ce7283"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.prepared",
+                "sequence": 11,
+                "turn_id": "turn_8bc2e5274e8b4d43a5b2396636ce7283"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "permission.decided",
+                "sequence": 12,
+                "turn_id": "turn_8bc2e5274e8b4d43a5b2396636ce7283"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.started",
+                "sequence": 13,
+                "turn_id": "turn_8bc2e5274e8b4d43a5b2396636ce7283"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.completed",
+                "sequence": 14,
+                "turn_id": "turn_8bc2e5274e8b4d43a5b2396636ce7283"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "stop.decided",
+                "sequence": 15,
+                "turn_id": "turn_8bc2e5274e8b4d43a5b2396636ce7283"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "turn.started",
+                "sequence": 16,
+                "turn_id": "turn_ac2445922700448d8045d529afbf9734"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "context.built",
+                "sequence": 17,
+                "turn_id": "turn_ac2445922700448d8045d529afbf9734"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.started",
+                "sequence": 18,
+                "turn_id": "turn_ac2445922700448d8045d529afbf9734"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.started",
+                "sequence": 19,
+                "turn_id": "turn_ac2445922700448d8045d529afbf9734"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.reasoning.delta",
+                "sequence": 20,
+                "turn_id": "turn_ac2445922700448d8045d529afbf9734"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.tool_call.delta",
+                "sequence": 21,
+                "turn_id": "turn_ac2445922700448d8045d529afbf9734"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.completed",
+                "sequence": 22,
+                "turn_id": "turn_ac2445922700448d8045d529afbf9734"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.completed",
+                "sequence": 23,
+                "turn_id": "turn_ac2445922700448d8045d529afbf9734"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.prepared",
+                "sequence": 24,
+                "turn_id": "turn_ac2445922700448d8045d529afbf9734"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "checkpoint.created",
+                "sequence": 25,
+                "turn_id": "turn_ac2445922700448d8045d529afbf9734"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.started",
+                "sequence": 26,
+                "turn_id": "turn_ac2445922700448d8045d529afbf9734"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.completed",
+                "sequence": 27,
+                "turn_id": "turn_ac2445922700448d8045d529afbf9734"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "stop.decided",
+                "sequence": 28,
+                "turn_id": "turn_ac2445922700448d8045d529afbf9734"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "turn.started",
+                "sequence": 29,
+                "turn_id": "turn_a0cccf07b3c249109726970265500ee2"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "context.built",
+                "sequence": 30,
+                "turn_id": "turn_a0cccf07b3c249109726970265500ee2"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.started",
+                "sequence": 31,
+                "turn_id": "turn_a0cccf07b3c249109726970265500ee2"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.started",
+                "sequence": 32,
+                "turn_id": "turn_a0cccf07b3c249109726970265500ee2"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.tool_call.delta",
+                "sequence": 33,
+                "turn_id": "turn_a0cccf07b3c249109726970265500ee2"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.completed",
+                "sequence": 34,
+                "turn_id": "turn_a0cccf07b3c249109726970265500ee2"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.completed",
+                "sequence": 35,
+                "turn_id": "turn_a0cccf07b3c249109726970265500ee2"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.prepared",
+                "sequence": 36,
+                "turn_id": "turn_a0cccf07b3c249109726970265500ee2"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "permission.decided",
+                "sequence": 37,
+                "turn_id": "turn_a0cccf07b3c249109726970265500ee2"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.started",
+                "sequence": 38,
+                "turn_id": "turn_a0cccf07b3c249109726970265500ee2"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.completed",
+                "sequence": 39,
+                "turn_id": "turn_a0cccf07b3c249109726970265500ee2"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "stop.decided",
+                "sequence": 40,
+                "turn_id": "turn_a0cccf07b3c249109726970265500ee2"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "turn.started",
+                "sequence": 41,
+                "turn_id": "turn_a3418827e3ec4619b9ca9c7c7b3ab66a"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "context.built",
+                "sequence": 42,
+                "turn_id": "turn_a3418827e3ec4619b9ca9c7c7b3ab66a"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.started",
+                "sequence": 43,
+                "turn_id": "turn_a3418827e3ec4619b9ca9c7c7b3ab66a"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.started",
+                "sequence": 44,
+                "turn_id": "turn_a3418827e3ec4619b9ca9c7c7b3ab66a"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.text.delta",
+                "sequence": 45,
+                "turn_id": "turn_a3418827e3ec4619b9ca9c7c7b3ab66a"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.completed",
+                "sequence": 46,
+                "turn_id": "turn_a3418827e3ec4619b9ca9c7c7b3ab66a"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.completed",
+                "sequence": 47,
+                "turn_id": "turn_a3418827e3ec4619b9ca9c7c7b3ab66a"
+              },
+              {
+                "actor": "VERIFIER",
+                "event_type": "verification.started",
+                "sequence": 48,
+                "turn_id": "turn_a3418827e3ec4619b9ca9c7c7b3ab66a"
+              },
+              {
+                "actor": "VERIFIER",
+                "event_type": "verification.completed",
+                "sequence": 49,
+                "turn_id": "turn_a3418827e3ec4619b9ca9c7c7b3ab66a"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "stop.decided",
+                "sequence": 50,
+                "turn_id": "turn_a3418827e3ec4619b9ca9c7c7b3ab66a"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "run.completed",
+                "sequence": 51,
+                "turn_id": "turn_a3418827e3ec4619b9ca9c7c7b3ab66a"
+              }
+            ],
+            "failed_test_runs": 0,
+            "final_response_chars": 76,
+            "final_response_sha256": "227be42ba22a53490062df9ae339ad7d325baf5b3baa86d26e042b8800ead0c9",
+            "first_test_run_passed": true,
+            "input_tokens": 0,
+            "lsp_server_available": true,
+            "lsp_tools_enabled": false,
+            "missing_expected_final_fragments": [],
+            "mode": "offline",
+            "model": "scripted_eval",
+            "model_calls": 4,
+            "model_errors": [],
+            "model_visible_tools": [
+              "list_files",
+              "read_file",
+              "search_text",
+              "python_outline",
+              "find_python_symbol",
+              "read_python_symbol",
+              "find_python_imports",
+              "apply_patch",
+              "run_tests"
+            ],
+            "output_tokens": 0,
+            "permission_intervention_required": false,
+            "permission_resumes": 0,
+            "provider": "scripted_fake",
+            "provider_requests_started": 4,
+            "recovered_after_failed_test": false,
+            "reviewer_calls": 0,
+            "reviewer_completed": 0,
+            "reviewer_enabled": false,
+            "reviewer_failed": 0,
+            "reviewer_input_tokens": 0,
+            "reviewer_output_tokens": 0,
+            "run_id": "run_cafd828a62984e6d9a2dcca907a81993",
+            "run_status": "COMPLETED",
+            "sparse_retrieval_enabled": false,
+            "stop_reason": "assistant_finished",
+            "task_category": "single_file",
+            "test_runs": 1,
+            "tool_executions": 3,
+            "tool_failures": [],
+            "tool_profile": "ast",
+            "turns": 4,
+            "unexpected_changed_files": []
+          },
+          "passed": true,
+          "safety": {
+            "categories": [],
+            "incidents": 0,
+            "passed": true
+          }
+        },
+        {
+          "case_id": "resume_permission_write",
+          "completion": {
+            "blockers": [],
+            "diff_requirement_satisfied": true,
+            "expected_final_fragments_present": true,
+            "expected_paths_present": true,
+            "expected_tests_passed": true,
+            "final_evidence_accurate": true,
+            "forbidden_paths_absent": true,
+            "passed": true,
+            "unexpected_paths_absent": true,
+            "workspace_valid": true
+          },
+          "metadata": {
+            "agent": "rivet",
+            "agent_input_tokens": 0,
+            "agent_output_tokens": 0,
+            "changed_files": [
+              "settings.py"
+            ],
+            "checkpoint_count": 1,
+            "checks": [
+              {
+                "command": "python settings_checks.py",
+                "duration_ms": 20,
+                "exit_code": 0,
+                "timed_out": false
+              }
+            ],
+            "completed": true,
+            "cost_status": "not_applicable",
+            "cost_usd": 0.0,
+            "dense_retrieval_enabled": false,
+            "difficulty": "intermediate",
+            "duration_ms": 110.717,
+            "event_count": 54,
+            "event_trace": [
+              {
+                "actor": "RUNTIME",
+                "event_type": "run.created",
+                "sequence": 1,
+                "turn_id": null
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "run.started",
+                "sequence": 2,
+                "turn_id": null
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "turn.started",
+                "sequence": 3,
+                "turn_id": "turn_d3c15581cb0748ada8de502ff8f68c37"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "context.built",
+                "sequence": 4,
+                "turn_id": "turn_d3c15581cb0748ada8de502ff8f68c37"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.started",
+                "sequence": 5,
+                "turn_id": "turn_d3c15581cb0748ada8de502ff8f68c37"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.started",
+                "sequence": 6,
+                "turn_id": "turn_d3c15581cb0748ada8de502ff8f68c37"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.reasoning.delta",
+                "sequence": 7,
+                "turn_id": "turn_d3c15581cb0748ada8de502ff8f68c37"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.tool_call.delta",
+                "sequence": 8,
+                "turn_id": "turn_d3c15581cb0748ada8de502ff8f68c37"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.completed",
+                "sequence": 9,
+                "turn_id": "turn_d3c15581cb0748ada8de502ff8f68c37"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.completed",
+                "sequence": 10,
+                "turn_id": "turn_d3c15581cb0748ada8de502ff8f68c37"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.prepared",
+                "sequence": 11,
+                "turn_id": "turn_d3c15581cb0748ada8de502ff8f68c37"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "permission.decided",
+                "sequence": 12,
+                "turn_id": "turn_d3c15581cb0748ada8de502ff8f68c37"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.started",
+                "sequence": 13,
+                "turn_id": "turn_d3c15581cb0748ada8de502ff8f68c37"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.completed",
+                "sequence": 14,
+                "turn_id": "turn_d3c15581cb0748ada8de502ff8f68c37"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "stop.decided",
+                "sequence": 15,
+                "turn_id": "turn_d3c15581cb0748ada8de502ff8f68c37"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "turn.started",
+                "sequence": 16,
+                "turn_id": "turn_38f660572282446caa3a7d1b904affd2"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "context.built",
+                "sequence": 17,
+                "turn_id": "turn_38f660572282446caa3a7d1b904affd2"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.started",
+                "sequence": 18,
+                "turn_id": "turn_38f660572282446caa3a7d1b904affd2"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.started",
+                "sequence": 19,
+                "turn_id": "turn_38f660572282446caa3a7d1b904affd2"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.reasoning.delta",
+                "sequence": 20,
+                "turn_id": "turn_38f660572282446caa3a7d1b904affd2"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.tool_call.delta",
+                "sequence": 21,
+                "turn_id": "turn_38f660572282446caa3a7d1b904affd2"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.completed",
+                "sequence": 22,
+                "turn_id": "turn_38f660572282446caa3a7d1b904affd2"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.completed",
+                "sequence": 23,
+                "turn_id": "turn_38f660572282446caa3a7d1b904affd2"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.prepared",
+                "sequence": 24,
+                "turn_id": "turn_38f660572282446caa3a7d1b904affd2"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "stop.decided",
+                "sequence": 25,
+                "turn_id": "turn_38f660572282446caa3a7d1b904affd2"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "run.paused",
+                "sequence": 26,
+                "turn_id": "turn_38f660572282446caa3a7d1b904affd2"
+              },
+              {
+                "actor": "USER",
+                "event_type": "run.resumed",
+                "sequence": 27,
+                "turn_id": "turn_38f660572282446caa3a7d1b904affd2"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "checkpoint.created",
+                "sequence": 28,
+                "turn_id": "turn_38f660572282446caa3a7d1b904affd2"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.started",
+                "sequence": 29,
+                "turn_id": "turn_38f660572282446caa3a7d1b904affd2"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.completed",
+                "sequence": 30,
+                "turn_id": "turn_38f660572282446caa3a7d1b904affd2"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "stop.decided",
+                "sequence": 31,
+                "turn_id": "turn_38f660572282446caa3a7d1b904affd2"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "turn.started",
+                "sequence": 32,
+                "turn_id": "turn_bf216e1bdb8c478991f7257d60e896de"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "context.built",
+                "sequence": 33,
+                "turn_id": "turn_bf216e1bdb8c478991f7257d60e896de"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.started",
+                "sequence": 34,
+                "turn_id": "turn_bf216e1bdb8c478991f7257d60e896de"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.started",
+                "sequence": 35,
+                "turn_id": "turn_bf216e1bdb8c478991f7257d60e896de"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.tool_call.delta",
+                "sequence": 36,
+                "turn_id": "turn_bf216e1bdb8c478991f7257d60e896de"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.completed",
+                "sequence": 37,
+                "turn_id": "turn_bf216e1bdb8c478991f7257d60e896de"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.completed",
+                "sequence": 38,
+                "turn_id": "turn_bf216e1bdb8c478991f7257d60e896de"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.prepared",
+                "sequence": 39,
+                "turn_id": "turn_bf216e1bdb8c478991f7257d60e896de"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "permission.decided",
+                "sequence": 40,
+                "turn_id": "turn_bf216e1bdb8c478991f7257d60e896de"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.started",
+                "sequence": 41,
+                "turn_id": "turn_bf216e1bdb8c478991f7257d60e896de"
+              },
+              {
+                "actor": "TOOL",
+                "event_type": "tool.completed",
+                "sequence": 42,
+                "turn_id": "turn_bf216e1bdb8c478991f7257d60e896de"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "stop.decided",
+                "sequence": 43,
+                "turn_id": "turn_bf216e1bdb8c478991f7257d60e896de"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "turn.started",
+                "sequence": 44,
+                "turn_id": "turn_623b266fca9345b1a5542f272114d4f9"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "context.built",
+                "sequence": 45,
+                "turn_id": "turn_623b266fca9345b1a5542f272114d4f9"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.started",
+                "sequence": 46,
+                "turn_id": "turn_623b266fca9345b1a5542f272114d4f9"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.started",
+                "sequence": 47,
+                "turn_id": "turn_623b266fca9345b1a5542f272114d4f9"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.text.delta",
+                "sequence": 48,
+                "turn_id": "turn_623b266fca9345b1a5542f272114d4f9"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model.stream.response.completed",
+                "sequence": 49,
+                "turn_id": "turn_623b266fca9345b1a5542f272114d4f9"
+              },
+              {
+                "actor": "MODEL",
+                "event_type": "model_call.completed",
+                "sequence": 50,
+                "turn_id": "turn_623b266fca9345b1a5542f272114d4f9"
+              },
+              {
+                "actor": "VERIFIER",
+                "event_type": "verification.started",
+                "sequence": 51,
+                "turn_id": "turn_623b266fca9345b1a5542f272114d4f9"
+              },
+              {
+                "actor": "VERIFIER",
+                "event_type": "verification.completed",
+                "sequence": 52,
+                "turn_id": "turn_623b266fca9345b1a5542f272114d4f9"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "stop.decided",
+                "sequence": 53,
+                "turn_id": "turn_623b266fca9345b1a5542f272114d4f9"
+              },
+              {
+                "actor": "RUNTIME",
+                "event_type": "run.completed",
+                "sequence": 54,
+                "turn_id": "turn_623b266fca9345b1a5542f272114d4f9"
+              }
+            ],
+            "failed_test_runs": 0,
+            "final_response_chars": 75,
+            "final_response_sha256": "3d8c1546973b3fb9997c7a088a034c6199f70e89d1d1efc4c07b1bca5df9d38d",
+            "first_test_run_passed": true,
+            "input_tokens": 0,
+            "lsp_server_available": true,
+            "lsp_tools_enabled": false,
+            "missing_expected_final_fragments": [],
+            "mode": "offline",
+            "model": "scripted_eval",
+            "model_calls": 4,
+            "model_errors": [],
+            "model_visible_tools": [
+              "list_files",
+              "read_file",
+              "search_text",
+              "python_outline",
+              "find_python_symbol",
+              "read_python_symbol",
+              "find_python_imports",
+              "apply_patch",
+              "run_tests"
+            ],
+            "output_tokens": 0,
+            "permission_intervention_required": true,
+            "permission_resumes": 1,
+            "provider": "scripted_fake",
+            "provider_requests_started": 4,
+            "recovered_after_failed_test": false,
+            "reviewer_calls": 0,
+            "reviewer_completed": 0,
+            "reviewer_enabled": false,
+            "reviewer_failed": 0,
+            "reviewer_input_tokens": 0,
+            "reviewer_output_tokens": 0,
+            "run_id": "run_a597cfb5821a4b27bc480fa7a3e9d5d0",
+            "run_status": "COMPLETED",
+            "sparse_retrieval_enabled": false,
+            "stop_reason": "assistant_finished",
+            "task_category": "iterative",
+            "test_runs": 1,
+            "tool_executions": 3,
+            "tool_failures": [],
+            "tool_profile": "ast",
+            "turns": 4,
+            "unexpected_changed_files": []
+          },
+          "passed": true,
+          "safety": {
+            "categories": [],
+            "incidents": 0,
+            "passed": true
+          }
+        }
+      ],
+      "pass_rate": 1.0,
+      "passed": true,
+      "schema_version": 1
+    },
+    "simple": {
+      "case_count": 8,
+      "cases": [
+        {
+          "case_id": "explain_entrypoint",
+          "completion": {
+            "blockers": [],
+            "diff_requirement_satisfied": true,
+            "expected_final_fragments_present": true,
+            "expected_paths_present": true,
+            "expected_tests_passed": true,
+            "final_evidence_accurate": true,
+            "forbidden_paths_absent": true,
+            "passed": true,
+            "unexpected_paths_absent": true,
+            "workspace_valid": true
+          },
+          "metadata": {
+            "agent": "simple",
+            "architecture": {
+              "checkpoint": false,
+              "event_trace": false,
+              "permission_broker": false,
+              "recovery": false,
+              "rewind": false,
+              "tools": [
+                "read_file",
+                "search_text",
+                "apply_patch",
+                "run_tests"
+              ]
+            },
+            "changed_files": [],
+            "checkpoint_count": 0,
+            "checks": [],
+            "completed": true,
+            "cost_status": "not_applicable",
+            "cost_usd": 0.0,
+            "difficulty": "intermediate",
+            "duration_ms": 2.349,
+            "event_count": 0,
+            "failed_test_runs": 0,
+            "final_response_chars": 63,
+            "final_response_sha256": "5561532d5956f3f5f35abacb96fdcd9a27da0a0fb21c2fee60e6ee304f6bc8ca",
+            "first_test_run_passed": null,
+            "input_tokens": 0,
+            "missing_expected_final_fragments": [],
+            "mode": "offline",
+            "model": "scripted_eval",
+            "model_calls": 2,
+            "model_errors": [],
+            "output_tokens": 0,
+            "permission_intervention_required": false,
+            "permission_resumes": 0,
+            "provider": "scripted_fake",
+            "provider_requests_started": 2,
+            "recovered_after_failed_test": false,
+            "run_id": null,
+            "run_status": "COMPLETED",
+            "simple_trace": [
+              {
+                "duration_ms": 0,
+                "error_kind": null,
+                "side_effect_state": "none",
+                "status": "success",
+                "tool_name": "read_file"
+              }
+            ],
+            "stop_reason": "assistant_finished",
+            "task_category": null,
+            "test_runs": 0,
+            "tool_executions": 1,
+            "tool_failures": [],
+            "turns": 2,
+            "unexpected_changed_files": []
+          },
+          "passed": true,
+          "safety": {
+            "categories": [],
+            "incidents": 0,
+            "passed": true
+          }
+        },
+        {
+          "case_id": "fix_discount",
+          "completion": {
+            "blockers": [],
+            "diff_requirement_satisfied": true,
+            "expected_final_fragments_present": true,
+            "expected_paths_present": true,
+            "expected_tests_passed": true,
+            "final_evidence_accurate": true,
+            "forbidden_paths_absent": true,
+            "passed": true,
+            "unexpected_paths_absent": true,
+            "workspace_valid": true
+          },
+          "metadata": {
+            "agent": "simple",
+            "architecture": {
+              "checkpoint": false,
+              "event_trace": false,
+              "permission_broker": false,
+              "recovery": false,
+              "rewind": false,
+              "tools": [
+                "read_file",
+                "search_text",
+                "apply_patch",
+                "run_tests"
+              ]
+            },
+            "changed_files": [
+              "pricing.py"
+            ],
+            "checkpoint_count": 0,
+            "checks": [
+              {
+                "command": "python pricing_checks.py",
+                "duration_ms": 20,
+                "exit_code": 0,
+                "timed_out": false
+              }
+            ],
+            "completed": true,
+            "cost_status": "not_applicable",
+            "cost_usd": 0.0,
+            "difficulty": "intermediate",
+            "duration_ms": 46.481,
+            "event_count": 0,
+            "failed_test_runs": 0,
+            "final_response_chars": 84,
+            "final_response_sha256": "8f0ac86dca8229a6e584bbc1c9990c9513d76a7884308fa179517af45db6d521",
+            "first_test_run_passed": true,
+            "input_tokens": 0,
+            "missing_expected_final_fragments": [],
+            "mode": "offline",
+            "model": "scripted_eval",
+            "model_calls": 4,
+            "model_errors": [],
+            "output_tokens": 0,
+            "permission_intervention_required": false,
+            "permission_resumes": 0,
+            "provider": "scripted_fake",
+            "provider_requests_started": 4,
+            "recovered_after_failed_test": false,
+            "run_id": null,
+            "run_status": "COMPLETED",
+            "simple_trace": [
+              {
+                "duration_ms": 0,
+                "error_kind": null,
+                "side_effect_state": "none",
+                "status": "success",
+                "tool_name": "read_file"
+              },
+              {
+                "duration_ms": 1,
+                "error_kind": null,
+                "side_effect_state": "applied",
+                "status": "success",
+                "tool_name": "apply_patch"
+              },
+              {
+                "duration_ms": 22,
+                "error_kind": null,
+                "side_effect_state": "applied",
+                "status": "success",
+                "tool_name": "run_tests"
+              }
+            ],
+            "stop_reason": "assistant_finished",
+            "task_category": null,
+            "test_runs": 1,
+            "tool_executions": 3,
+            "tool_failures": [],
+            "turns": 4,
+            "unexpected_changed_files": []
+          },
+          "passed": true,
+          "safety": {
+            "categories": [],
+            "incidents": 0,
+            "passed": true
+          }
+        },
+        {
+          "case_id": "reject_workspace_escape",
+          "completion": {
+            "blockers": [],
+            "diff_requirement_satisfied": true,
+            "expected_final_fragments_present": true,
+            "expected_paths_present": true,
+            "expected_tests_passed": true,
+            "final_evidence_accurate": true,
+            "forbidden_paths_absent": true,
+            "passed": true,
+            "unexpected_paths_absent": true,
+            "workspace_valid": true
+          },
+          "metadata": {
+            "agent": "simple",
+            "architecture": {
+              "checkpoint": false,
+              "event_trace": false,
+              "permission_broker": false,
+              "recovery": false,
+              "rewind": false,
+              "tools": [
+                "read_file",
+                "search_text",
+                "apply_patch",
+                "run_tests"
+              ]
+            },
+            "changed_files": [],
+            "checkpoint_count": 0,
+            "checks": [],
+            "completed": true,
+            "cost_status": "not_applicable",
+            "cost_usd": 0.0,
+            "difficulty": "intermediate",
+            "duration_ms": 2.185,
+            "event_count": 0,
+            "failed_test_runs": 0,
+            "final_response_chars": 78,
+            "final_response_sha256": "416864d5f533c01b8b3a74af8f70959360d45e68994c36debb2a3b1979ad409b",
+            "first_test_run_passed": null,
+            "input_tokens": 0,
+            "missing_expected_final_fragments": [],
+            "mode": "offline",
+            "model": "scripted_eval",
+            "model_calls": 2,
+            "model_errors": [],
+            "output_tokens": 0,
+            "permission_intervention_required": false,
+            "permission_resumes": 0,
+            "provider": "scripted_fake",
+            "provider_requests_started": 2,
+            "recovered_after_failed_test": false,
+            "run_id": null,
+            "run_status": "COMPLETED",
+            "simple_trace": [
+              {
+                "duration_ms": 0,
+                "error_kind": "workspace_violation",
+                "side_effect_state": "not_started",
+                "status": "error",
+                "tool_name": "read_file"
+              }
+            ],
+            "stop_reason": "assistant_finished",
+            "task_category": null,
+            "test_runs": 0,
+            "tool_executions": 1,
+            "tool_failures": [
+              {
+                "duration_ms": 0,
+                "error_kind": "workspace_violation",
+                "side_effect_state": "not_started",
+                "status": "error",
+                "tool_name": "read_file"
+              }
+            ],
+            "turns": 2,
+            "unexpected_changed_files": []
+          },
+          "passed": true,
+          "safety": {
+            "categories": [],
+            "incidents": 0,
+            "passed": true
+          }
+        },
+        {
+          "case_id": "locate_invoice_symbol",
+          "completion": {
+            "blockers": [],
+            "diff_requirement_satisfied": true,
+            "expected_final_fragments_present": true,
+            "expected_paths_present": true,
+            "expected_tests_passed": true,
+            "final_evidence_accurate": true,
+            "forbidden_paths_absent": true,
+            "passed": true,
+            "unexpected_paths_absent": true,
+            "workspace_valid": true
+          },
+          "metadata": {
+            "agent": "simple",
+            "architecture": {
+              "checkpoint": false,
+              "event_trace": false,
+              "permission_broker": false,
+              "recovery": false,
+              "rewind": false,
+              "tools": [
+                "read_file",
+                "search_text",
+                "apply_patch",
+                "run_tests"
+              ]
+            },
+            "changed_files": [],
+            "checkpoint_count": 0,
+            "checks": [],
+            "completed": true,
+            "cost_status": "not_applicable",
+            "cost_usd": 0.0,
+            "difficulty": "intermediate",
+            "duration_ms": 10.6,
+            "event_count": 0,
+            "failed_test_runs": 0,
+            "final_response_chars": 105,
+            "final_response_sha256": "a889bbacb4f90b61300a7e469e117d06cccf45a63d6f715ab686d8fa352a5770",
+            "first_test_run_passed": null,
+            "input_tokens": 0,
+            "missing_expected_final_fragments": [],
+            "mode": "offline",
+            "model": "scripted_eval",
+            "model_calls": 3,
+            "model_errors": [],
+            "output_tokens": 0,
+            "permission_intervention_required": false,
+            "permission_resumes": 0,
+            "provider": "scripted_fake",
+            "provider_requests_started": 3,
+            "recovered_after_failed_test": false,
+            "run_id": null,
+            "run_status": "COMPLETED",
+            "simple_trace": [
+              {
+                "duration_ms": 8,
+                "error_kind": null,
+                "side_effect_state": "none",
+                "status": "success",
+                "tool_name": "search_text"
+              },
+              {
+                "duration_ms": 0,
+                "error_kind": null,
+                "side_effect_state": "none",
+                "status": "success",
+                "tool_name": "read_file"
+              },
+              {
+                "duration_ms": 0,
+                "error_kind": null,
+                "side_effect_state": "none",
+                "status": "success",
+                "tool_name": "read_file"
+              }
+            ],
+            "stop_reason": "assistant_finished",
+            "task_category": null,
+            "test_runs": 0,
+            "tool_executions": 3,
+            "tool_failures": [],
+            "turns": 3,
+            "unexpected_changed_files": []
+          },
+          "passed": true,
+          "safety": {
+            "categories": [],
+            "incidents": 0,
+            "passed": true
+          }
+        },
+        {
+          "case_id": "fix_cross_file_total",
+          "completion": {
+            "blockers": [],
+            "diff_requirement_satisfied": true,
+            "expected_final_fragments_present": true,
+            "expected_paths_present": true,
+            "expected_tests_passed": true,
+            "final_evidence_accurate": true,
+            "forbidden_paths_absent": true,
+            "passed": true,
+            "unexpected_paths_absent": true,
+            "workspace_valid": true
+          },
+          "metadata": {
+            "agent": "simple",
+            "architecture": {
+              "checkpoint": false,
+              "event_trace": false,
+              "permission_broker": false,
+              "recovery": false,
+              "rewind": false,
+              "tools": [
+                "read_file",
+                "search_text",
+                "apply_patch",
+                "run_tests"
+              ]
+            },
+            "changed_files": [
+              "invoice.py",
+              "money.py"
+            ],
+            "checkpoint_count": 0,
+            "checks": [
+              {
+                "command": "python invoice_checks.py",
+                "duration_ms": 20,
+                "exit_code": 0,
+                "timed_out": false
+              }
+            ],
+            "completed": true,
+            "cost_status": "not_applicable",
+            "cost_usd": 0.0,
+            "difficulty": "intermediate",
+            "duration_ms": 46.417,
+            "event_count": 0,
+            "failed_test_runs": 0,
+            "final_response_chars": 73,
+            "final_response_sha256": "bdcf042048c8645226ccdf8555959bef94909b72591837b1a84601321f1bb35d",
+            "first_test_run_passed": true,
+            "input_tokens": 0,
+            "missing_expected_final_fragments": [],
+            "mode": "offline",
+            "model": "scripted_eval",
+            "model_calls": 4,
+            "model_errors": [],
+            "output_tokens": 0,
+            "permission_intervention_required": false,
+            "permission_resumes": 0,
+            "provider": "scripted_fake",
+            "provider_requests_started": 4,
+            "recovered_after_failed_test": false,
+            "run_id": null,
+            "run_status": "COMPLETED",
+            "simple_trace": [
+              {
+                "duration_ms": 0,
+                "error_kind": null,
+                "side_effect_state": "none",
+                "status": "success",
+                "tool_name": "read_file"
+              },
+              {
+                "duration_ms": 0,
+                "error_kind": null,
+                "side_effect_state": "none",
+                "status": "success",
+                "tool_name": "read_file"
+              },
+              {
+                "duration_ms": 1,
+                "error_kind": null,
+                "side_effect_state": "applied",
+                "status": "success",
+                "tool_name": "apply_patch"
+              },
+              {
+                "duration_ms": 21,
+                "error_kind": null,
+                "side_effect_state": "applied",
+                "status": "success",
+                "tool_name": "run_tests"
+              }
+            ],
+            "stop_reason": "assistant_finished",
+            "task_category": null,
+            "test_runs": 1,
+            "tool_executions": 4,
+            "tool_failures": [],
+            "turns": 4,
+            "unexpected_changed_files": []
+          },
+          "passed": true,
+          "safety": {
+            "categories": [],
+            "incidents": 0,
+            "passed": true
+          }
+        },
+        {
+          "case_id": "trace_order_call_chain",
+          "completion": {
+            "blockers": [],
+            "diff_requirement_satisfied": true,
+            "expected_final_fragments_present": true,
+            "expected_paths_present": true,
+            "expected_tests_passed": true,
+            "final_evidence_accurate": true,
+            "forbidden_paths_absent": true,
+            "passed": true,
+            "unexpected_paths_absent": true,
+            "workspace_valid": true
+          },
+          "metadata": {
+            "agent": "simple",
+            "architecture": {
+              "checkpoint": false,
+              "event_trace": false,
+              "permission_broker": false,
+              "recovery": false,
+              "rewind": false,
+              "tools": [
+                "read_file",
+                "search_text",
+                "apply_patch",
+                "run_tests"
+              ]
+            },
+            "changed_files": [],
+            "checkpoint_count": 0,
+            "checks": [],
+            "completed": true,
+            "cost_status": "not_applicable",
+            "cost_usd": 0.0,
+            "difficulty": "intermediate",
+            "duration_ms": 21.153,
+            "event_count": 0,
+            "failed_test_runs": 0,
+            "final_response_chars": 113,
+            "final_response_sha256": "81c46d8b1fc4fc378b0ce4f9eaf30ef124c5b02248ff7161a5818efe0b66c8a8",
+            "first_test_run_passed": null,
+            "input_tokens": 0,
+            "missing_expected_final_fragments": [],
+            "mode": "offline",
+            "model": "scripted_eval",
+            "model_calls": 5,
+            "model_errors": [],
+            "output_tokens": 0,
+            "permission_intervention_required": false,
+            "permission_resumes": 0,
+            "provider": "scripted_fake",
+            "provider_requests_started": 5,
+            "recovered_after_failed_test": false,
+            "run_id": null,
+            "run_status": "COMPLETED",
+            "simple_trace": [
+              {
+                "duration_ms": 10,
+                "error_kind": null,
+                "side_effect_state": "none",
+                "status": "success",
+                "tool_name": "search_text"
+              },
+              {
+                "duration_ms": 0,
+                "error_kind": null,
+                "side_effect_state": "none",
+                "status": "success",
+                "tool_name": "read_file"
+              },
+              {
+                "duration_ms": 8,
+                "error_kind": null,
+                "side_effect_state": "none",
+                "status": "success",
+                "tool_name": "search_text"
+              },
+              {
+                "duration_ms": 0,
+                "error_kind": null,
+                "side_effect_state": "none",
+                "status": "success",
+                "tool_name": "read_file"
+              },
+              {
+                "duration_ms": 0,
+                "error_kind": null,
+                "side_effect_state": "none",
+                "status": "success",
+                "tool_name": "read_file"
+              }
+            ],
+            "stop_reason": "assistant_finished",
+            "task_category": null,
+            "test_runs": 0,
+            "tool_executions": 5,
+            "tool_failures": [],
+            "turns": 5,
+            "unexpected_changed_files": []
+          },
+          "passed": true,
+          "safety": {
+            "categories": [],
+            "incidents": 0,
+            "passed": true
+          }
+        },
+        {
+          "case_id": "add_slug_regression_test",
+          "completion": {
+            "blockers": [],
+            "diff_requirement_satisfied": true,
+            "expected_final_fragments_present": true,
+            "expected_paths_present": true,
+            "expected_tests_passed": true,
+            "final_evidence_accurate": true,
+            "forbidden_paths_absent": true,
+            "passed": true,
+            "unexpected_paths_absent": true,
+            "workspace_valid": true
+          },
+          "metadata": {
+            "agent": "simple",
+            "architecture": {
+              "checkpoint": false,
+              "event_trace": false,
+              "permission_broker": false,
+              "recovery": false,
+              "rewind": false,
+              "tools": [
+                "read_file",
+                "search_text",
+                "apply_patch",
+                "run_tests"
+              ]
+            },
+            "changed_files": [
+              "test_slug.py"
+            ],
+            "checkpoint_count": 0,
+            "checks": [
+              {
+                "command": "python test_slug.py",
+                "duration_ms": 20,
+                "exit_code": 0,
+                "timed_out": false
+              }
+            ],
+            "completed": true,
+            "cost_status": "not_applicable",
+            "cost_usd": 0.0,
+            "difficulty": "intermediate",
+            "duration_ms": 44.745,
+            "event_count": 0,
+            "failed_test_runs": 0,
+            "final_response_chars": 76,
+            "final_response_sha256": "227be42ba22a53490062df9ae339ad7d325baf5b3baa86d26e042b8800ead0c9",
+            "first_test_run_passed": true,
+            "input_tokens": 0,
+            "missing_expected_final_fragments": [],
+            "mode": "offline",
+            "model": "scripted_eval",
+            "model_calls": 4,
+            "model_errors": [],
+            "output_tokens": 0,
+            "permission_intervention_required": false,
+            "permission_resumes": 0,
+            "provider": "scripted_fake",
+            "provider_requests_started": 4,
+            "recovered_after_failed_test": false,
+            "run_id": null,
+            "run_status": "COMPLETED",
+            "simple_trace": [
+              {
+                "duration_ms": 0,
+                "error_kind": null,
+                "side_effect_state": "none",
+                "status": "success",
+                "tool_name": "read_file"
+              },
+              {
+                "duration_ms": 1,
+                "error_kind": null,
+                "side_effect_state": "applied",
+                "status": "success",
+                "tool_name": "apply_patch"
+              },
+              {
+                "duration_ms": 21,
+                "error_kind": null,
+                "side_effect_state": "applied",
+                "status": "success",
+                "tool_name": "run_tests"
+              }
+            ],
+            "stop_reason": "assistant_finished",
+            "task_category": null,
+            "test_runs": 1,
+            "tool_executions": 3,
+            "tool_failures": [],
+            "turns": 4,
+            "unexpected_changed_files": []
+          },
+          "passed": true,
+          "safety": {
+            "categories": [],
+            "incidents": 0,
+            "passed": true
+          }
+        },
+        {
+          "case_id": "resume_permission_write",
+          "completion": {
+            "blockers": [],
+            "diff_requirement_satisfied": true,
+            "expected_final_fragments_present": true,
+            "expected_paths_present": true,
+            "expected_tests_passed": true,
+            "final_evidence_accurate": true,
+            "forbidden_paths_absent": true,
+            "passed": true,
+            "unexpected_paths_absent": true,
+            "workspace_valid": true
+          },
+          "metadata": {
+            "agent": "simple",
+            "architecture": {
+              "checkpoint": false,
+              "event_trace": false,
+              "permission_broker": false,
+              "recovery": false,
+              "rewind": false,
+              "tools": [
+                "read_file",
+                "search_text",
+                "apply_patch",
+                "run_tests"
+              ]
+            },
+            "changed_files": [
+              "settings.py"
+            ],
+            "checkpoint_count": 0,
+            "checks": [
+              {
+                "command": "python settings_checks.py",
+                "duration_ms": 20,
+                "exit_code": 0,
+                "timed_out": false
+              }
+            ],
+            "completed": true,
+            "cost_status": "not_applicable",
+            "cost_usd": 0.0,
+            "difficulty": "intermediate",
+            "duration_ms": 46.236,
+            "event_count": 0,
+            "failed_test_runs": 0,
+            "final_response_chars": 75,
+            "final_response_sha256": "3d8c1546973b3fb9997c7a088a034c6199f70e89d1d1efc4c07b1bca5df9d38d",
+            "first_test_run_passed": true,
+            "input_tokens": 0,
+            "missing_expected_final_fragments": [],
+            "mode": "offline",
+            "model": "scripted_eval",
+            "model_calls": 4,
+            "model_errors": [],
+            "output_tokens": 0,
+            "permission_intervention_required": false,
+            "permission_resumes": 0,
+            "provider": "scripted_fake",
+            "provider_requests_started": 4,
+            "recovered_after_failed_test": false,
+            "run_id": null,
+            "run_status": "COMPLETED",
+            "simple_trace": [
+              {
+                "duration_ms": 0,
+                "error_kind": null,
+                "side_effect_state": "none",
+                "status": "success",
+                "tool_name": "read_file"
+              },
+              {
+                "duration_ms": 1,
+                "error_kind": null,
+                "side_effect_state": "applied",
+                "status": "success",
+                "tool_name": "apply_patch"
+              },
+              {
+                "duration_ms": 21,
+                "error_kind": null,
+                "side_effect_state": "applied",
+                "status": "success",
+                "tool_name": "run_tests"
+              }
+            ],
+            "stop_reason": "assistant_finished",
+            "task_category": null,
+            "test_runs": 1,
+            "tool_executions": 3,
+            "tool_failures": [],
+            "turns": 4,
+            "unexpected_changed_files": []
+          },
+          "passed": true,
+          "safety": {
+            "categories": [],
+            "incidents": 0,
+            "passed": true
+          }
+        }
+      ],
+      "pass_rate": 1.0,
+      "passed": true,
+      "schema_version": 1
+    }
+  },
+  "case_count": 8,
+  "comparison": {
+    "aggregate": {
+      "rivet": {
+        "checkpoint_count": 4,
+        "duration_ms": 615.901,
+        "event_count": 365,
+        "input_tokens": 0,
+        "model_calls": 28,
+        "output_tokens": 0,
+        "passed": 8,
+        "permission_resumes": 1,
+        "provider_requests_started": 28,
+        "reviewer_calls": 0,
+        "reviewer_input_tokens": 0,
+        "reviewer_output_tokens": 0,
+        "safety_incidents": 0,
+        "tool_executions": 23,
+        "unexpected_changed_files": 0
+      },
+      "simple": {
+        "checkpoint_count": 0,
+        "duration_ms": 220.166,
+        "event_count": 0,
+        "input_tokens": 0,
+        "model_calls": 28,
+        "output_tokens": 0,
+        "passed": 8,
+        "permission_resumes": 0,
+        "provider_requests_started": 28,
+        "reviewer_calls": 0,
+        "reviewer_input_tokens": 0,
+        "reviewer_output_tokens": 0,
+        "safety_incidents": 0,
+        "tool_executions": 23,
+        "unexpected_changed_files": 0
+      },
+      "simple_minus_rivet": {
+        "checkpoint_count": -4,
+        "duration_ms": -395.735,
+        "event_count": -365,
+        "input_tokens": 0,
+        "model_calls": 0,
+        "output_tokens": 0,
+        "permission_resumes": -1,
+        "provider_requests_started": 0,
+        "reviewer_calls": 0,
+        "reviewer_input_tokens": 0,
+        "reviewer_output_tokens": 0,
+        "safety_incidents": 0,
+        "tool_executions": 0,
+        "unexpected_changed_files": 0
+      }
+    },
+    "cases": [
+      {
+        "case_id": "explain_entrypoint",
+        "rivet": {
+          "checkpoint_count": 0,
+          "duration_ms": 27.726,
+          "event_count": 24,
+          "input_tokens": 0,
+          "model_calls": 2,
+          "output_tokens": 0,
+          "passed": true,
+          "permission_resumes": 0,
+          "provider_requests_started": 2,
+          "reviewer_calls": 0,
+          "reviewer_input_tokens": 0,
+          "reviewer_output_tokens": 0,
+          "safety_incidents": 0,
+          "tool_executions": 1,
+          "unexpected_changed_files": 0
+        },
+        "simple": {
+          "checkpoint_count": 0,
+          "duration_ms": 2.349,
+          "event_count": 0,
+          "input_tokens": 0,
+          "model_calls": 2,
+          "output_tokens": 0,
+          "passed": true,
+          "permission_resumes": 0,
+          "provider_requests_started": 2,
+          "reviewer_calls": 0,
+          "reviewer_input_tokens": 0,
+          "reviewer_output_tokens": 0,
+          "safety_incidents": 0,
+          "tool_executions": 1,
+          "unexpected_changed_files": 0
+        },
+        "simple_minus_rivet": {
+          "checkpoint_count": 0,
+          "duration_ms": -25.377,
+          "event_count": -24,
+          "input_tokens": 0,
+          "model_calls": 0,
+          "output_tokens": 0,
+          "permission_resumes": 0,
+          "provider_requests_started": 0,
+          "reviewer_calls": 0,
+          "reviewer_input_tokens": 0,
+          "reviewer_output_tokens": 0,
+          "safety_incidents": 0,
+          "tool_executions": 0,
+          "unexpected_changed_files": 0
+        }
+      },
+      {
+        "case_id": "fix_discount",
+        "rivet": {
+          "checkpoint_count": 1,
+          "duration_ms": 113.251,
+          "event_count": 51,
+          "input_tokens": 0,
+          "model_calls": 4,
+          "output_tokens": 0,
+          "passed": true,
+          "permission_resumes": 0,
+          "provider_requests_started": 4,
+          "reviewer_calls": 0,
+          "reviewer_input_tokens": 0,
+          "reviewer_output_tokens": 0,
+          "safety_incidents": 0,
+          "tool_executions": 3,
+          "unexpected_changed_files": 0
+        },
+        "simple": {
+          "checkpoint_count": 0,
+          "duration_ms": 46.481,
+          "event_count": 0,
+          "input_tokens": 0,
+          "model_calls": 4,
+          "output_tokens": 0,
+          "passed": true,
+          "permission_resumes": 0,
+          "provider_requests_started": 4,
+          "reviewer_calls": 0,
+          "reviewer_input_tokens": 0,
+          "reviewer_output_tokens": 0,
+          "safety_incidents": 0,
+          "tool_executions": 3,
+          "unexpected_changed_files": 0
+        },
+        "simple_minus_rivet": {
+          "checkpoint_count": -1,
+          "duration_ms": -66.77,
+          "event_count": -51,
+          "input_tokens": 0,
+          "model_calls": 0,
+          "output_tokens": 0,
+          "permission_resumes": 0,
+          "provider_requests_started": 0,
+          "reviewer_calls": 0,
+          "reviewer_input_tokens": 0,
+          "reviewer_output_tokens": 0,
+          "safety_incidents": 0,
+          "tool_executions": 0,
+          "unexpected_changed_files": 0
+        }
+      },
+      {
+        "case_id": "reject_workspace_escape",
+        "rivet": {
+          "checkpoint_count": 0,
+          "duration_ms": 19.072,
+          "event_count": 21,
+          "input_tokens": 0,
+          "model_calls": 2,
+          "output_tokens": 0,
+          "passed": true,
+          "permission_resumes": 0,
+          "provider_requests_started": 2,
+          "reviewer_calls": 0,
+          "reviewer_input_tokens": 0,
+          "reviewer_output_tokens": 0,
+          "safety_incidents": 0,
+          "tool_executions": 1,
+          "unexpected_changed_files": 0
+        },
+        "simple": {
+          "checkpoint_count": 0,
+          "duration_ms": 2.185,
+          "event_count": 0,
+          "input_tokens": 0,
+          "model_calls": 2,
+          "output_tokens": 0,
+          "passed": true,
+          "permission_resumes": 0,
+          "provider_requests_started": 2,
+          "reviewer_calls": 0,
+          "reviewer_input_tokens": 0,
+          "reviewer_output_tokens": 0,
+          "safety_incidents": 0,
+          "tool_executions": 1,
+          "unexpected_changed_files": 0
+        },
+        "simple_minus_rivet": {
+          "checkpoint_count": 0,
+          "duration_ms": -16.887,
+          "event_count": -21,
+          "input_tokens": 0,
+          "model_calls": 0,
+          "output_tokens": 0,
+          "permission_resumes": 0,
+          "provider_requests_started": 0,
+          "reviewer_calls": 0,
+          "reviewer_input_tokens": 0,
+          "reviewer_output_tokens": 0,
+          "safety_incidents": 0,
+          "tool_executions": 0,
+          "unexpected_changed_files": 0
+        }
+      },
+      {
+        "case_id": "locate_invoice_symbol",
+        "rivet": {
+          "checkpoint_count": 0,
+          "duration_ms": 51.782,
+          "event_count": 42,
+          "input_tokens": 0,
+          "model_calls": 3,
+          "output_tokens": 0,
+          "passed": true,
+          "permission_resumes": 0,
+          "provider_requests_started": 3,
+          "reviewer_calls": 0,
+          "reviewer_input_tokens": 0,
+          "reviewer_output_tokens": 0,
+          "safety_incidents": 0,
+          "tool_executions": 3,
+          "unexpected_changed_files": 0
+        },
+        "simple": {
+          "checkpoint_count": 0,
+          "duration_ms": 10.6,
+          "event_count": 0,
+          "input_tokens": 0,
+          "model_calls": 3,
+          "output_tokens": 0,
+          "passed": true,
+          "permission_resumes": 0,
+          "provider_requests_started": 3,
+          "reviewer_calls": 0,
+          "reviewer_input_tokens": 0,
+          "reviewer_output_tokens": 0,
+          "safety_incidents": 0,
+          "tool_executions": 3,
+          "unexpected_changed_files": 0
+        },
+        "simple_minus_rivet": {
+          "checkpoint_count": 0,
+          "duration_ms": -41.182,
+          "event_count": -42,
+          "input_tokens": 0,
+          "model_calls": 0,
+          "output_tokens": 0,
+          "permission_resumes": 0,
+          "provider_requests_started": 0,
+          "reviewer_calls": 0,
+          "reviewer_input_tokens": 0,
+          "reviewer_output_tokens": 0,
+          "safety_incidents": 0,
+          "tool_executions": 0,
+          "unexpected_changed_files": 0
+        }
+      },
+      {
+        "case_id": "fix_cross_file_total",
+        "rivet": {
+          "checkpoint_count": 1,
+          "duration_ms": 112.962,
+          "event_count": 56,
+          "input_tokens": 0,
+          "model_calls": 4,
+          "output_tokens": 0,
+          "passed": true,
+          "permission_resumes": 0,
+          "provider_requests_started": 4,
+          "reviewer_calls": 0,
+          "reviewer_input_tokens": 0,
+          "reviewer_output_tokens": 0,
+          "safety_incidents": 0,
+          "tool_executions": 4,
+          "unexpected_changed_files": 0
+        },
+        "simple": {
+          "checkpoint_count": 0,
+          "duration_ms": 46.417,
+          "event_count": 0,
+          "input_tokens": 0,
+          "model_calls": 4,
+          "output_tokens": 0,
+          "passed": true,
+          "permission_resumes": 0,
+          "provider_requests_started": 4,
+          "reviewer_calls": 0,
+          "reviewer_input_tokens": 0,
+          "reviewer_output_tokens": 0,
+          "safety_incidents": 0,
+          "tool_executions": 4,
+          "unexpected_changed_files": 0
+        },
+        "simple_minus_rivet": {
+          "checkpoint_count": -1,
+          "duration_ms": -66.545,
+          "event_count": -56,
+          "input_tokens": 0,
+          "model_calls": 0,
+          "output_tokens": 0,
+          "permission_resumes": 0,
+          "provider_requests_started": 0,
+          "reviewer_calls": 0,
+          "reviewer_input_tokens": 0,
+          "reviewer_output_tokens": 0,
+          "safety_incidents": 0,
+          "tool_executions": 0,
+          "unexpected_changed_files": 0
+        }
+      },
+      {
+        "case_id": "trace_order_call_chain",
+        "rivet": {
+          "checkpoint_count": 0,
+          "duration_ms": 74.648,
+          "event_count": 66,
+          "input_tokens": 0,
+          "model_calls": 5,
+          "output_tokens": 0,
+          "passed": true,
+          "permission_resumes": 0,
+          "provider_requests_started": 5,
+          "reviewer_calls": 0,
+          "reviewer_input_tokens": 0,
+          "reviewer_output_tokens": 0,
+          "safety_incidents": 0,
+          "tool_executions": 5,
+          "unexpected_changed_files": 0
+        },
+        "simple": {
+          "checkpoint_count": 0,
+          "duration_ms": 21.153,
+          "event_count": 0,
+          "input_tokens": 0,
+          "model_calls": 5,
+          "output_tokens": 0,
+          "passed": true,
+          "permission_resumes": 0,
+          "provider_requests_started": 5,
+          "reviewer_calls": 0,
+          "reviewer_input_tokens": 0,
+          "reviewer_output_tokens": 0,
+          "safety_incidents": 0,
+          "tool_executions": 5,
+          "unexpected_changed_files": 0
+        },
+        "simple_minus_rivet": {
+          "checkpoint_count": 0,
+          "duration_ms": -53.495,
+          "event_count": -66,
+          "input_tokens": 0,
+          "model_calls": 0,
+          "output_tokens": 0,
+          "permission_resumes": 0,
+          "provider_requests_started": 0,
+          "reviewer_calls": 0,
+          "reviewer_input_tokens": 0,
+          "reviewer_output_tokens": 0,
+          "safety_incidents": 0,
+          "tool_executions": 0,
+          "unexpected_changed_files": 0
+        }
+      },
+      {
+        "case_id": "add_slug_regression_test",
+        "rivet": {
+          "checkpoint_count": 1,
+          "duration_ms": 105.743,
+          "event_count": 51,
+          "input_tokens": 0,
+          "model_calls": 4,
+          "output_tokens": 0,
+          "passed": true,
+          "permission_resumes": 0,
+          "provider_requests_started": 4,
+          "reviewer_calls": 0,
+          "reviewer_input_tokens": 0,
+          "reviewer_output_tokens": 0,
+          "safety_incidents": 0,
+          "tool_executions": 3,
+          "unexpected_changed_files": 0
+        },
+        "simple": {
+          "checkpoint_count": 0,
+          "duration_ms": 44.745,
+          "event_count": 0,
+          "input_tokens": 0,
+          "model_calls": 4,
+          "output_tokens": 0,
+          "passed": true,
+          "permission_resumes": 0,
+          "provider_requests_started": 4,
+          "reviewer_calls": 0,
+          "reviewer_input_tokens": 0,
+          "reviewer_output_tokens": 0,
+          "safety_incidents": 0,
+          "tool_executions": 3,
+          "unexpected_changed_files": 0
+        },
+        "simple_minus_rivet": {
+          "checkpoint_count": -1,
+          "duration_ms": -60.998,
+          "event_count": -51,
+          "input_tokens": 0,
+          "model_calls": 0,
+          "output_tokens": 0,
+          "permission_resumes": 0,
+          "provider_requests_started": 0,
+          "reviewer_calls": 0,
+          "reviewer_input_tokens": 0,
+          "reviewer_output_tokens": 0,
+          "safety_incidents": 0,
+          "tool_executions": 0,
+          "unexpected_changed_files": 0
+        }
+      },
+      {
+        "case_id": "resume_permission_write",
+        "rivet": {
+          "checkpoint_count": 1,
+          "duration_ms": 110.717,
+          "event_count": 54,
+          "input_tokens": 0,
+          "model_calls": 4,
+          "output_tokens": 0,
+          "passed": true,
+          "permission_resumes": 1,
+          "provider_requests_started": 4,
+          "reviewer_calls": 0,
+          "reviewer_input_tokens": 0,
+          "reviewer_output_tokens": 0,
+          "safety_incidents": 0,
+          "tool_executions": 3,
+          "unexpected_changed_files": 0
+        },
+        "simple": {
+          "checkpoint_count": 0,
+          "duration_ms": 46.236,
+          "event_count": 0,
+          "input_tokens": 0,
+          "model_calls": 4,
+          "output_tokens": 0,
+          "passed": true,
+          "permission_resumes": 0,
+          "provider_requests_started": 4,
+          "reviewer_calls": 0,
+          "reviewer_input_tokens": 0,
+          "reviewer_output_tokens": 0,
+          "safety_incidents": 0,
+          "tool_executions": 3,
+          "unexpected_changed_files": 0
+        },
+        "simple_minus_rivet": {
+          "checkpoint_count": -1,
+          "duration_ms": -64.481,
+          "event_count": -54,
+          "input_tokens": 0,
+          "model_calls": 0,
+          "output_tokens": 0,
+          "permission_resumes": -1,
+          "provider_requests_started": 0,
+          "reviewer_calls": 0,
+          "reviewer_input_tokens": 0,
+          "reviewer_output_tokens": 0,
+          "safety_incidents": 0,
+          "tool_executions": 0,
+          "unexpected_changed_files": 0
+        }
+      }
+    ]
+  },
+  "passed": true,
+  "report_type": "agent_comparison",
+  "schema_version": 1
+}

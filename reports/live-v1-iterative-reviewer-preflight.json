@@ -1,0 +1,407 @@
+{
+  "agent": "rivet",
+  "external_request_started": false,
+  "limits": {
+    "cost_status": "unavailable_before_provider_response",
+    "cost_usd": null,
+    "max_external_requests_for_batch": 110,
+    "max_input_tokens_for_batch": 880000,
+    "max_input_tokens_per_call": 8000,
+    "max_model_calls_for_batch": 100,
+    "max_model_calls_per_case": 10,
+    "max_output_tokens_for_batch": 112640,
+    "max_output_tokens_per_call": 1024,
+    "max_reviewer_calls_for_batch": 10,
+    "max_reviewer_calls_per_case": 2
+  },
+  "local_capabilities": {
+    "lsp_server_available": true,
+    "sparse_retrieval": "sqlite_local"
+  },
+  "provider": {
+    "adapter": "openai_chat_completions",
+    "api_key_configured": true,
+    "api_key_env": "RIVET_API_KEY",
+    "base_url": "https://api.deepseek.com",
+    "base_url_host": "api.deepseek.com",
+    "model": "deepseek-v4-flash",
+    "name": "deepseek"
+  },
+  "report_type": "live_eval_preflight",
+  "reviewer": "both",
+  "runtime_modules": {
+    "dense_retrieval_enabled": false,
+    "reviewer_budget_included": true,
+    "reviewer_modes": [
+      "off",
+      "on"
+    ]
+  },
+  "schema_version": 1,
+  "selection": {
+    "case_count": 5,
+    "case_ids": [
+      "live_resume_settings_write",
+      "live_fix_csv_import_recovery",
+      "live_fix_retry_execution_flow",
+      "live_fix_profile_validation_order",
+      "live_fix_ledger_commit_order"
+    ],
+    "categories": [
+      "iterative"
+    ],
+    "profile_case_executions": 5,
+    "repeat": 1,
+    "reviewer_modes": [
+      "off",
+      "on"
+    ],
+    "tool_profiles": [
+      "ast"
+    ],
+    "variant_case_executions": 10
+  },
+  "tool_profile": "ast",
+  "transmission": {
+    "cases": [
+      {
+        "automatic_resume_permissions": [
+          "workspace_write"
+        ],
+        "category": "iterative",
+        "difficulty": "intermediate",
+        "expected_files": [
+          "settings.py"
+        ],
+        "expected_tests": [
+          "python test_settings.py"
+        ],
+        "fixture_bytes": 776,
+        "fixture_file_count": 2,
+        "fixture_files": [
+          {
+            "bytes": 169,
+            "path": "settings.py",
+            "sha256": "80b9f02acb98e17c7a0e423f63d48f2879aca7da49880fbcb3ff9ee89a8caf04"
+          },
+          {
+            "bytes": 607,
+            "path": "test_settings.py",
+            "sha256": "ede87dc31179b4c0fba712be87321cdcd334d7a860d9c6ffc52900a3129c19e0"
+          }
+        ],
+        "forbidden_files": [
+          "test_settings.py"
+        ],
+        "id": "live_resume_settings_write",
+        "model_visible_tools": [
+          "list_files",
+          "read_file",
+          "search_text",
+          "python_outline",
+          "find_python_symbol",
+          "read_python_symbol",
+          "find_python_imports",
+          "apply_patch",
+          "run_tests"
+        ],
+        "model_visible_tools_by_profile": {
+          "ast": [
+            "list_files",
+            "read_file",
+            "search_text",
+            "python_outline",
+            "find_python_symbol",
+            "read_python_symbol",
+            "find_python_imports",
+            "apply_patch",
+            "run_tests"
+          ]
+        },
+        "objective": "修复 settings.py，使 parse_retries 接受 0 到 10（含边界）的十进制整数，拒绝负数、超过 10 和非整数。运行 test_settings.py 并说明结果。",
+        "objective_bytes": 172,
+        "objective_sha256": "9f6d641b063f74b89e7e92dd32b09bb80e602553d760e6e3949feef626d601bc",
+        "process_execute_mode": "allow",
+        "workspace_write_mode": "ask"
+      },
+      {
+        "automatic_resume_permissions": [],
+        "category": "iterative",
+        "difficulty": "advanced",
+        "expected_files": [
+          "importer.py"
+        ],
+        "expected_tests": [
+          "python test_importer.py"
+        ],
+        "fixture_bytes": 694,
+        "fixture_file_count": 2,
+        "fixture_files": [
+          {
+            "bytes": 206,
+            "path": "importer.py",
+            "sha256": "aee738632c1eba3d2fcdf25e96946318657877ad62b36adbc975913cec9ffd2f"
+          },
+          {
+            "bytes": 488,
+            "path": "test_importer.py",
+            "sha256": "3c69d588cb5fd9a8f1c3ce8a0826d0ab09640297d4cee43bf7ee5cabcef7d4bd"
+          }
+        ],
+        "forbidden_files": [
+          "test_importer.py"
+        ],
+        "id": "live_fix_csv_import_recovery",
+        "model_visible_tools": [
+          "list_files",
+          "read_file",
+          "search_text",
+          "python_outline",
+          "find_python_symbol",
+          "read_python_symbol",
+          "find_python_imports",
+          "apply_patch",
+          "run_tests"
+        ],
+        "model_visible_tools_by_profile": {
+          "ast": [
+            "list_files",
+            "read_file",
+            "search_text",
+            "python_outline",
+            "find_python_symbol",
+            "read_python_symbol",
+            "find_python_imports",
+            "apply_patch",
+            "run_tests"
+          ]
+        },
+        "objective": "修复 CSV 导入器。必须正确处理带引号的逗号、跳过空行，并在非空数据行列数不是 2 时抛出 ValueError。不要修改测试，运行 test_importer.py；若首次测试失败，继续定位并修复。",
+        "objective_bytes": 231,
+        "objective_sha256": "aa71004962c97fcc97525dc35827e7ac485634523e1ad4b299522c3be67c72f1",
+        "process_execute_mode": "allow",
+        "workspace_write_mode": "allow"
+      },
+      {
+        "automatic_resume_permissions": [],
+        "category": "iterative",
+        "difficulty": "advanced",
+        "expected_files": [
+          "policy.py",
+          "runner.py"
+        ],
+        "expected_tests": [
+          "python test_retry.py"
+        ],
+        "fixture_bytes": 1282,
+        "fixture_file_count": 3,
+        "fixture_files": [
+          {
+            "bytes": 137,
+            "path": "policy.py",
+            "sha256": "729ab9c1eb05dff8bc98994f666fd3c4668e03e17205fd5acc6c46222269df76"
+          },
+          {
+            "bytes": 301,
+            "path": "runner.py",
+            "sha256": "70ea76828962ece2b1e5a770b77620c961e17437fa99ca483b05637acbf5e003"
+          },
+          {
+            "bytes": 844,
+            "path": "test_retry.py",
+            "sha256": "0bc1a339e40cba8f258cdd3b689136c68a97603b7c5161ad628d3668244b2ea6"
+          }
+        ],
+        "forbidden_files": [
+          "test_retry.py"
+        ],
+        "id": "live_fix_retry_execution_flow",
+        "model_visible_tools": [
+          "list_files",
+          "read_file",
+          "search_text",
+          "python_outline",
+          "find_python_symbol",
+          "read_python_symbol",
+          "find_python_imports",
+          "apply_patch",
+          "run_tests"
+        ],
+        "model_visible_tools_by_profile": {
+          "ast": [
+            "list_files",
+            "read_file",
+            "search_text",
+            "python_outline",
+            "find_python_symbol",
+            "read_python_symbol",
+            "find_python_imports",
+            "apply_patch",
+            "run_tests"
+          ]
+        },
+        "objective": "修复重试执行流程。policy.py 计算总尝试次数，runner.py 对返回 False 和抛出异常都应按策略重试，成功后立即停止，耗尽后返回 False。禁止修改测试，运行 test_retry.py；根据失败结果继续修复。",
+        "objective_bytes": 251,
+        "objective_sha256": "eec907c5f1f5657d5ed5c9b161199b9e2d305934bbc3d2b5319dd8489eb10067",
+        "process_execute_mode": "allow",
+        "workspace_write_mode": "allow"
+      },
+      {
+        "automatic_resume_permissions": [],
+        "category": "iterative",
+        "difficulty": "advanced",
+        "expected_files": [
+          "validation.py",
+          "profile.py"
+        ],
+        "expected_tests": [
+          "python test_profile.py"
+        ],
+        "fixture_bytes": 1129,
+        "fixture_file_count": 4,
+        "fixture_files": [
+          {
+            "bytes": 227,
+            "path": "profile.py",
+            "sha256": "58b839509274cadb1d649725a60fb62a890cc968b8a3e2e812d3b7358b1b7c21"
+          },
+          {
+            "bytes": 169,
+            "path": "store.py",
+            "sha256": "11cb8e481e2090cc9e6f6f0f08374beebd496f28a0ae172b9da127ac9d026803"
+          },
+          {
+            "bytes": 614,
+            "path": "test_profile.py",
+            "sha256": "6d755f29cfdd3806c4e68be8f4cb1a7fe6f5474cd454576ef53a1b125b8e6a46"
+          },
+          {
+            "bytes": 119,
+            "path": "validation.py",
+            "sha256": "10af71fcab4abd0d2e8dc06adbb8140e1aaa73917eb98b2d6c948b58622c5243"
+          }
+        ],
+        "forbidden_files": [
+          "store.py",
+          "test_profile.py"
+        ],
+        "id": "live_fix_profile_validation_order",
+        "model_visible_tools": [
+          "list_files",
+          "read_file",
+          "search_text",
+          "python_outline",
+          "find_python_symbol",
+          "read_python_symbol",
+          "find_python_imports",
+          "apply_patch",
+          "run_tests"
+        ],
+        "model_visible_tools_by_profile": {
+          "ast": [
+            "list_files",
+            "read_file",
+            "search_text",
+            "python_outline",
+            "find_python_symbol",
+            "read_python_symbol",
+            "find_python_imports",
+            "apply_patch",
+            "run_tests"
+          ]
+        },
+        "objective": "修复资料更新流程。validation.py 必须规范化并验证名称，profile.py 只能在验证成功后写入 store，非法更新不得覆盖旧值。禁止修改测试，运行 test_profile.py；根据失败结果继续修复。",
+        "objective_bytes": 236,
+        "objective_sha256": "e97b873c95c22e4380d94140d333c02b23efafa079438bf7fc20e47ad8b83ecb",
+        "process_execute_mode": "allow",
+        "workspace_write_mode": "allow"
+      },
+      {
+        "automatic_resume_permissions": [],
+        "category": "iterative",
+        "difficulty": "advanced",
+        "expected_files": [
+          "ledger.py"
+        ],
+        "expected_tests": [
+          "python test_ledger.py"
+        ],
+        "fixture_bytes": 909,
+        "fixture_file_count": 3,
+        "fixture_files": [
+          {
+            "bytes": 170,
+            "path": "account.py",
+            "sha256": "1ba068c2c095ddd09704cc67625fa50b53350b243d9027b87045b05e100ca5f7"
+          },
+          {
+            "bytes": 246,
+            "path": "ledger.py",
+            "sha256": "df15d42c37f0550a70721a857c28fe7449344d916e3eeb750456992cdb797437"
+          },
+          {
+            "bytes": 493,
+            "path": "test_ledger.py",
+            "sha256": "b771dfd0130a57010819c4d122a4d31660179134a0645f6280e7d9d835a36c39"
+          }
+        ],
+        "forbidden_files": [
+          "account.py",
+          "test_ledger.py"
+        ],
+        "id": "live_fix_ledger_commit_order",
+        "model_visible_tools": [
+          "list_files",
+          "read_file",
+          "search_text",
+          "python_outline",
+          "find_python_symbol",
+          "read_python_symbol",
+          "find_python_imports",
+          "apply_patch",
+          "run_tests"
+        ],
+        "model_visible_tools_by_profile": {
+          "ast": [
+            "list_files",
+            "read_file",
+            "search_text",
+            "python_outline",
+            "find_python_symbol",
+            "read_python_symbol",
+            "find_python_imports",
+            "apply_patch",
+            "run_tests"
+          ]
+        },
+        "objective": "修复账本提交顺序。ledger.py 必须先验证整批金额，再一次性写入账户；任何负数都应使整批失败且余额保持不变。禁止修改账户模型和测试，运行 test_ledger.py；若首次修改仍失败，继续修复。",
+        "objective_bytes": 253,
+        "objective_sha256": "c5bdf17782cc4f570c962407f80ce3850cbd40fb026002498a93b3074fe9f380",
+        "process_execute_mode": "allow",
+        "workspace_write_mode": "allow"
+      }
+    ],
+    "fixture_bytes": 4790,
+    "fixture_bytes_for_all_profiles": 4790,
+    "fixture_bytes_for_all_variants": 9580,
+    "includes_config_workspace_source": false,
+    "includes_fixture_files": true,
+    "includes_objectives": true,
+    "objective_bytes": 1143,
+    "objective_bytes_for_all_profiles": 1143,
+    "objective_bytes_for_all_variants": 2286,
+    "reviewer_includes_changed_paths": true,
+    "reviewer_includes_diff": true,
+    "reviewer_includes_objective": true,
+    "reviewer_includes_proposed_answer": true,
+    "reviewer_includes_verification": true
+  },
+  "warnings": [
+    "Model-call and output-token limits are hard runtime/request ceilings, not usage estimates.",
+    "The input-token context limit uses Rivet's estimator and may differ from provider-reported token usage.",
+    "Payload byte counts exclude the runtime system prompt, tool schemas, and later tool results.",
+    "Provider price is not inferred; the report cannot guarantee a USD ceiling.",
+    "Dense retrieval is disabled for Eval ablation profiles.",
+    "Reviewer payload bytes after tool execution cannot be known at preflight time."
+  ]
+}

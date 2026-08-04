@@ -107,11 +107,27 @@ class DomainInvariantTests(unittest.TestCase):
     def test_budget_limits_are_positive_and_usage_reports_exhaustion(self) -> None:
         with self.assertRaisesRegex(ValueError, "max_turns"):
             RunBudget(max_turns=0)
+        with self.assertRaisesRegex(ValueError, "max_reviewer_calls"):
+            RunBudget(max_reviewer_calls=0)
         usage = RunUsage(turns=64, model_calls=2, artifact_bytes=1_000_000_000)
         exceeded = usage.exceeded(RunBudget())
         self.assertIn("turns", exceeded)
         self.assertIn("artifact_bytes", exceeded)
         self.assertNotIn("model_calls", exceeded)
+
+        budget = RunBudget(max_reviewer_calls=3)
+        self.assertEqual(RunBudget.from_dict(budget.to_dict()), budget)
+        reviewer_usage = RunUsage(
+            reviewer_calls=2,
+            input_tokens=12,
+            output_tokens=4,
+            reviewer_input_tokens=12,
+            reviewer_output_tokens=4,
+        )
+        self.assertEqual(
+            RunUsage.from_dict(reviewer_usage.to_dict()),
+            reviewer_usage,
+        )
 
     def test_event_sequence_is_strictly_positive(self) -> None:
         with self.assertRaisesRegex(ValueError, "sequence"):

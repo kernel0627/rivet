@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import inspect
-import os
 import shutil
 import sys
 from collections.abc import Collection
@@ -24,8 +23,7 @@ from rivet.code_intelligence.retrieval import (
 from rivet.configuration import RivetConfig, load_config
 from rivet.context import DefaultContextEngine
 from rivet.domain import RunBudget
-from rivet.model.adapters.openai import OpenAIChatGateway, OpenAIProviderConfig
-from rivet.model.providers import resolve_provider
+from rivet.model.factory import build_model_gateway
 from rivet.observability import EventStream, JsonlEventSink
 from rivet.reviewer import ModelReviewer
 from rivet.runtime import RuntimeEngine, RuntimeSettings
@@ -101,9 +99,7 @@ def build_application(
     )
     artifacts.initialize()
     process_runner = ProcessRunner(boundary)
-    checkpoint_service = FileCheckpointService(
-        layout.workspace_state_root / "checkpoints"
-    )
+    checkpoint_service = FileCheckpointService(layout.workspace_state_root / "checkpoints")
     permission_broker = ConfigPermissionBroker(config.permissions)
     catalog = ToolCatalog(
         [
@@ -175,18 +171,14 @@ def build_application(
         resources.append(lsp_manager)
         services["lsp_manager"] = lsp_manager
 
-    gateway = model_gateway or _build_model_gateway(config)
+    gateway = model_gateway or build_model_gateway(config)
     if model_gateway is None:
         resources.append(gateway)
     event_stream = EventStream()
     trace_sink = JsonlEventSink(layout.logs_root / "events.jsonl")
     event_stream.subscribe(trace_sink)
     verifier = DefaultVerifier(process_runner)
-    reviewer = (
-        ModelReviewer(gateway, model=config.model.model)
-        if config.reviewer.enabled
-        else None
-    )
+    reviewer = ModelReviewer(gateway, model=config.model.model) if config.reviewer.enabled else None
     runtime = RuntimeEngine(
         state_store=state,
         context_engine=DefaultContextEngine(),
@@ -218,6 +210,7 @@ def build_application(
     budget = RunBudget(
         max_turns=config.runtime.max_turns,
         max_model_calls=config.runtime.max_model_calls,
+        max_reviewer_calls=config.reviewer.max_calls,
         max_tool_executions=config.runtime.max_tool_executions,
         max_wall_time_seconds=config.runtime.max_wall_time_seconds,
         max_command_time_seconds=config.runtime.max_command_time_seconds,
@@ -241,26 +234,6 @@ def build_application(
         layout=layout,
         event_stream=event_stream,
         _resources=resources,
-    )
-
-
-def _build_model_gateway(config: RivetConfig) -> OpenAIChatGateway:
-    model_name = config.model.model
-    if not model_name:
-        raise ValueError("model is not configured; set RIVET_MODEL or model.model")
-    api_key = os.environ.get(config.model.api_key_env)
-    provider = resolve_provider(
-        config.model.provider,
-        base_url=config.model.base_url,
-    )
-    return OpenAIChatGateway(
-        OpenAIProviderConfig(
-            model=model_name,
-            api_key=api_key,
-            base_url=provider.base_url,
-            timeout_seconds=config.model.timeout_seconds,
-            max_output_tokens_parameter=provider.max_output_tokens_parameter,
-        )
     )
 
 
