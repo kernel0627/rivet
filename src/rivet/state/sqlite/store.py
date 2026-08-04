@@ -1013,11 +1013,11 @@ class SQLiteStateStore:
     ) -> RunLease:
         if not isfinite(ttl_seconds) or ttl_seconds <= 0:
             raise ValueError("ttl_seconds must be positive")
-        current = now or utc_now()
-        require_aware(current, "now")
-        current = current.astimezone(timezone.utc)
-        expires = current + timedelta(seconds=ttl_seconds)
         with self._lock:
+            current = now or utc_now()
+            require_aware(current, "now")
+            current = current.astimezone(timezone.utc)
+            expires = current + timedelta(seconds=ttl_seconds)
             self._connection.execute("BEGIN IMMEDIATE")
             try:
                 row = self._connection.execute(

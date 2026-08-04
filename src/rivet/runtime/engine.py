@@ -564,11 +564,19 @@ class RuntimeEngine:
         interval = max(min(self.settings.lease_ttl_seconds / 3, 30.0), 0.01)
         while True:
             await asyncio.sleep(interval)
-            self.state.renew_run_lease(
-                run_id,
-                lease_token,
-                ttl_seconds=self.settings.lease_ttl_seconds,
+            renewal = asyncio.create_task(
+                asyncio.to_thread(
+                    self.state.renew_run_lease,
+                    run_id,
+                    lease_token,
+                    ttl_seconds=self.settings.lease_ttl_seconds,
+                )
             )
+            try:
+                await asyncio.shield(renewal)
+            except asyncio.CancelledError:
+                await renewal
+                raise
 
     async def _run_new_turn(self, run: Run, lease_token: str) -> Run:
         now = self.clock.now()
@@ -916,14 +924,14 @@ class RuntimeEngine:
                 if model_event.type is ModelEventType.RESPONSE_COMPLETED:
                     completed = model_event
                 previous = current
-                current = replace(
-                    current,
-                    revision=current.revision + 1,
+                candidate = replace(
+                    previous,
+                    revision=previous.revision + 1,
                     updated_at=self.clock.now(),
                 )
                 current = await self._commit(
                     previous=previous,
-                    current=current,
+                    current=candidate,
                     lease_token=lease_token,
                     events=(
                         (
